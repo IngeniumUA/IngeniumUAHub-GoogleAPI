@@ -7,7 +7,7 @@ setup(
     author="Yorben Joosen",
     author_email="webmaster@ingeniumua.be",
     url="https://github.com/IngeniumUA/IngeniumUAHub-GoogleAPI",
-    packages=["IngeniumUAHub-GoogleAPI", "IngeniumUAHub-GoogleAPI/CalendarAPI", "IngeniumUAHub-GoogleAPI/DriveAPI", "IngeniumUAHub-GoogleAPI/GmailAPI", "IngeniumUAHub-GoogleAPI/WorkspaceAPI"],
+    packages=find_packages(where='.'),
     install_requires=[
         "aiogoogle"
     ],  # external packages as dependencies
