@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="IngeniumUAHub-GoogleAPI",
-    version="2.0",
+    version="3.0",
     description="A package to integrate Google API functionalities for Calendar, Drive, Gmail, and Workspace",
     author="Yorben Joosen",
     author_email="webmaster@ingeniumua.be",
