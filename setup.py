@@ -8,6 +8,7 @@ setup(
     url="https://github.com/IngeniumUA/IngeniumUAHub-GoogleAPI",
     packages=find_packages(),
     install_requires=[
-        "aiogoogle"
+        "aiogoogle",
+        "passlib"
     ],  # external packages as dependencies
 )

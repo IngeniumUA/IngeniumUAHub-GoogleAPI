@@ -1,15 +1,16 @@
+import json
 from base64 import urlsafe_b64encode as base64_urlsafe_encode
 from string import ascii_letters as string_ascii_letters
 from string import digits as string_digits
-from googleapiclient.errors import HttpError as GoogleHttpError
+import aiogoogle.excs
+from aiogoogle import Aiogoogle
+from aiogoogle.auth.creds import ServiceAccountCreds
 from random import choice as random_choice
 from os import path as os_path
 from passlib.hash import sha256_crypt
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
 
 
-class WorkspaceClass:
+class Workspace:
     """
     Implements the Google Workspace API to edit users and groups
     """
@@ -30,55 +31,56 @@ class WorkspaceClass:
             raise Exception("Service account json path does not exist")
 
         self.serviceFilePath = service_file_path
-        self.service = self._build_service()
+        self.service_account_credentials = self._build_service_account_credentials()
 
-    def _build_service(self):
-        # Create credentials from the service account file
-        credentials = service_account.Credentials.from_service_account_file(
-            filename=self.serviceFilePath, scopes=self.scopes, subject=self.subject
-        )
-        # Build the service
-        service = build("admin", "directory_v1", credentials=credentials)
-        return service
+    def _build_service_account_credentials(self):
+        service_account_key = json.load(open(self.serviceFilePath))
+        credentials = ServiceAccountCreds(scopes=self.scopes, **service_account_key, subject=self.subject)
+        return credentials
 
-    def get_users(self) -> list[dict]:
+    async def get_users(self) -> list[dict]:
         """
         :return: Returns a list of dictionaries of all users
         """
-        usersList = (
-            self.service.users()
-            .list(domain=self.domain, orderBy="email")
-            .execute()
-            .get("users", [])
-        )
-        return usersList
+        try:
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                workspace = await google.discover("admin", "directory_v1")
+                users = await google.as_service_account(workspace.users()
+                                                        .list(domain=self.domain, orderBy="email")
+                                                        .execute()
+                                                        .get("users", []))
+                return users
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def get_user(self, user_id: str) -> dict:
+    async def get_user(self, user_id: str) -> dict:
         """
-        :param user_id: Id of the user
+        :param user_id: ID of the user
         :return: Returns a dictionary of the user
         """
         try:
-            user = (
-                self.service.users()
-                .get(userKey=user_id, viewType="admin_view", projection="full")
-                .execute()
-            )
-            return user
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                workspace = await google.discover("admin", "directory_v1")
+                user = await google.as_service_account(workspace.users()
+                                                       .get(userKey=user_id, viewType="admin_view", projection="full")
+                                                       .execute())
+                return user
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def delete_user(self, user_id: str):
+    async def delete_user(self, user_id: str):
         """
         :param user_id: The id of the user
         :return: Nothing
         """
         try:
-            self.service.users().delete(userKey=user_id).execute()
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                workspace = await google.discover("admin", "directory_v1")
+                await google.as_service_account(workspace.users().delete(userKey=user_id).execute())
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def create_user(self, email: str, password: str, first_name: str, last_name: str):
+    async def create_user(self, email: str, password: str, first_name: str, last_name: str):
         """
         :param email: Email of the user
         :param password: Password of the user
@@ -118,13 +120,15 @@ class WorkspaceClass:
         }
 
         try:
-            self.service.users().insert(body=body).execute()
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                workspace = await google.discover("admin", "directory_v1")
+                await google.as_service_account(workspace.users().insert(body=body).execute())
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def update_user(self, user_id: str, first_name: str = None, last_name: str = None):
+    async def update_user(self, user_id: str, first_name: str = None, last_name: str = None):
         """
-        :param user_id: Id of the user
+        :param user_id: ID of the user
         :param first_name: Optional first name to be updated
         :param last_name: Optional last name to be updated
         :return: Nothing
@@ -134,7 +138,7 @@ class WorkspaceClass:
             raise Exception("Update arguments don't have a value")
 
         # Get the original user
-        user = self.get_user(user_id)
+        user = await self.get_user(user_id)
         currentFirstName = user["name"]["givenName"]
         currentLastName = user["name"]["familyName"]
 
@@ -144,20 +148,22 @@ class WorkspaceClass:
         if last_name is None:
             last_name = currentLastName
 
-        # Check that its not a needless update
+        # Check that it's not a needless update
         if first_name == currentFirstName and last_name == currentLastName:
             raise Exception("User already has these values")
 
         body = {"name": {"givenName": first_name, "familyName": last_name}}
 
         try:
-            self.service.users().update(body=body, userKey=user_id).execute()
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                workspace = await google.discover("admin", "directory_v1")
+                await google.as_service_account(workspace.users().update(body=body, userKey=user_id).execute())
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def update_user_password(self, password: str, user_id: int):
+    async def update_user_password(self, password: str, user_id: int):
         """
-        :param user_id: Id of the user
+        :param user_id: ID of the user
         :param password: New password
         :return: Nothing
         """
@@ -176,13 +182,15 @@ class WorkspaceClass:
         }
 
         try:
-            self.service.users().update(body=body, userKey=user_id).execute()
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                workspace = await google.discover("admin", "directory_v1")
+                await google.as_service_account(workspace.users().update(body=body, userKey=user_id).execute())
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def update_user_photo(self, user_id: int, photo_path: str):
+    async def update_user_photo(self, user_id: int, photo_path: str):
         """
-        :param user_id: Id of the user
+        :param user_id: ID of the user
         :param photo_path: The path or url of the photo
         :return: Nothing
         """
@@ -200,63 +208,72 @@ class WorkspaceClass:
         photoDataBase64 = base64_urlsafe_encode(photoData).decode("utf-8")
 
         body = {"photoData": photoDataBase64, "mimeType": fileType}
-
         try:
-            self.service.users().photos().update(body=body, userKey=user_id).execute()
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                workspace = await google.discover("admin", "directory_v1")
+                await google.as_service_account(workspace.users().photos().update(body=body, userKey=user_id).execute())
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def get_user_photo(self, user_id: int):
+    async def get_user_photo(self, user_id: int):
         try:
-            photo = self.service.users().photos().get(userKey=user_id).execute()
-            return photo
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                workspace = await google.discover("admin", "directory_v1")
+                photo = await google.as_service_account(workspace.users().photos().get(userKey=user_id).execute())
+                return photo
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def delete_user_photo(self, user_id: int):
+    async def delete_user_photo(self, user_id: int):
         try:
-            self.service.users().photos().delete(userKey=user_id).execute()
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                workspace = await google.discover("admin", "directory_v1")
+                await google.as_service_account(workspace.users().photos().delete(userKey=user_id).execute())
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def get_groups(self) -> list[dict]:
+    async def get_groups(self) -> list[dict]:
         """
         :return: Returns a list of dictionaries of all groups
         """
         try:
-            groupsList = (
-                self.service.groups()
-                .list(domain=self.domain, orderBy="email")
-                .execute()
-                .get("groups", [])
-            )
-            return groupsList
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                workspace = await google.discover("admin", "directory_v1")
+                groups = await google.as_service_account(workspace.groups()
+                                                         .list(domain=self.domain, orderBy="email")
+                                                         .execute()
+                                                         .get("groups", [])
+                                                         )
+            return groups
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def get_group(self, group_id: str) -> dict:
+    async def get_group(self, group_id: str) -> dict:
         """
-        :param group_id: Id of the group
+        :param group_id: ID of the group
         :return: Returns a dictionary of the user
         """
         try:
-            group = self.service.groups().get(groupKey=group_id).execute()
-            return group
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                workspace = await google.discover("admin", "directory_v1")
+                group = await google.as_service_account(workspace.groups().get(groupKey=group_id).execute())
+                return group
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def delete_group(self, group_id: str):
+    async def delete_group(self, group_id: str):
         """
-        :param group_id: Id of the group
+        :param group_id: ID of the group
         :return: Nothing
         """
         try:
-            group = self.service.groups().delete(groupKey=group_id).execute()
-            return group
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                workspace = await google.discover("admin", "directory_v1")
+                await google.as_service_account(workspace.groups().delete(groupKey=group_id).execute())
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def create_group(self, email: str, name: str, description: str = None):
+    async def create_group(self, email: str, name: str, description: str = None):
         """
         :param email: Email of the group
         :param name: Name of the group
@@ -271,11 +288,13 @@ class WorkspaceClass:
         body = {"email": email, "name": name, "description": description}
 
         try:
-            self.service.groups().insert(body=body).execute()
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                workspace = await google.discover("admin", "directory_v1")
+                await google.as_service_account(workspace.groups().insert(body=body).execute())
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def update_group(
+    async def update_group(
             self,
             group_id: str,
             email: str = None,
@@ -287,7 +306,7 @@ class WorkspaceClass:
             raise Exception("Update arguments don't have a value")
 
         # Get the original user
-        group = self.get_group(group_id)
+        group = await self.get_group(group_id)
         currentEmail = group["email"]
         currentName = group["name"]
         currentDescription = group["description"]
@@ -303,7 +322,7 @@ class WorkspaceClass:
         if description is None:
             description = currentDescription
 
-        # Check that its not a needless update
+        # Check that it's not a needless update
         if (
                 email == currentEmail
                 and name == currentName
@@ -314,57 +333,67 @@ class WorkspaceClass:
         body = {"email": email, "name": name, "description": description}
 
         try:
-            self.service.groups().update(groupKey=group_id, body=body).execute()
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                workspace = await google.discover("admin", "directory_v1")
+                await google.as_service_account(workspace.groups().update(groupKey=group_id, body=body).execute())
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def get_group_members(self, group_id: str) -> list[dict]:
+    async def get_group_members(self, group_id: str) -> list[dict]:
         """
-        :param group_id: Id of the group
+        :param group_id: ID of the group
         :return: Returns a list of dictionaries of all members
         """
         try:
-            members = (
-                self.service.members()
-                .list(groupKey=group_id)
-                .execute()
-                .get("members", [])
-            )
-            return members
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                workspace = await google.discover("admin", "directory_v1")
+                members = await google.as_service_account(workspace.members()
+                                                          .list(groupKey=group_id)
+                                                          .execute()
+                                                          .get("members", []))
+                return members
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def add_group_member(self, user_id: str, group_id: str):
+    async def add_group_member(self, user_id: str, group_id: str):
         """
-        :param user_id: Id of the user
-        :param group_id: Id of the group
+        :param user_id: ID of the user
+        :param group_id: ID of the group
         :return: Nothing
         """
-        user = self.get_user(user_id)
+        user = await self.get_user(user_id)
         try:
-            self.service.members().insert(groupKey=group_id, body=user).execute()
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                workspace = await google.discover("admin", "directory_v1")
+                await google.as_service_account(workspace.members().insert(groupKey=group_id, body=user).execute())
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def delete_group_member(self, user_id: int, group_id: str):
+    async def delete_group_member(self, user_id: int, group_id: str):
         """
-        :param user_id: Id of the user
-        :param group_id: Id of the group
+        :param user_id: ID of the user
+        :param group_id: ID of the group
         :return: Nothing
         """
         try:
-            self.service.members().delete(
-                groupKey=group_id, memberKey=user_id
-            ).execute()
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                workspace = await google.discover("admin", "directory_v1")
+                await google.as_service_account(
+                    workspace.members().delete(groupKey=group_id, memberKey=user_id).execute())
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def remove_all_sessions(self) -> None:
+    async def remove_all_sessions(self) -> None:
         """
         Logs all the users out of all sessions. To be used when starting a new year and changing account holders.
 
         :return: Nothing
         """
-        users = self.get_users()
+        users = await self.get_users()
         for user in users:
-            self.service.users().signOut(userKey=user["id"]).execute()
+            try:
+                async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                    workspace = await google.discover("admin", "directory_v1")
+                    await google.as_service_account(workspace.users().signOut(userKey=user["id"]).execute())
+            except aiogoogle.excs.HTTPError as error:
+                raise Exception("Aiogoogle error") from error
