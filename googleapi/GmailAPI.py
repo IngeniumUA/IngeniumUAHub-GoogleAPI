@@ -29,7 +29,7 @@ class AttachmentsDictionary(TypedDict):
     mime_subtype: str | None
 
 
-class MailingClass:
+class Mailing:
     """
     Implements the Gmail API to send mails
     """
