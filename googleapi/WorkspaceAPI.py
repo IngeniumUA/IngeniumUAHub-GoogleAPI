@@ -52,7 +52,7 @@ class Workspace:
 
     async def get_user(self, user_id: str) -> dict:
         """
-        :param user_id: ID of the user
+        :param user_id: User's primary email address, alias email address, or unique user ID.
         :return: Returns a dictionary of the user
         """
         try:
@@ -65,7 +65,7 @@ class Workspace:
 
     async def delete_user(self, user_id: str):
         """
-        :param user_id: The ID of the user
+        :param user_id: User's primary email address, alias email address, or unique user ID.
         :return: Nothing
         """
         try:
@@ -123,7 +123,7 @@ class Workspace:
 
     async def update_user(self, user_id: str, first_name: str = None, last_name: str = None):
         """
-        :param user_id: ID of the user
+        :param user_id: User's primary email address, alias email address, or unique user ID.
         :param first_name: Optional first name to be updated
         :param last_name: Optional last name to be updated
         :return: Nothing
@@ -158,14 +158,12 @@ class Workspace:
 
     async def update_user_password(self, password: str, user_id: int):
         """
-        :param user_id: ID of the user
+        :param user_id: User's primary email address, alias email address, or unique user ID.
         :param password: New password
         :return: Nothing
         """
         characters = string_ascii_letters + string_digits
-        salt = "".join(
-            random_choice(characters) for _ in range(15)
-        )  # Salt must be between 0-16 characters
+        salt = "".join(random_choice(characters) for _ in range(15))  # Salt must be between 0-16 characters
         # Hash the password with the random salt, 5000 rounds because then they don't need to be specified in the hash
         # format and Google only accepts it when not specified
         hashedPassword = sha256_crypt.hash(password, salt=salt, rounds=5000)
@@ -185,7 +183,7 @@ class Workspace:
 
     async def update_user_photo(self, user_id: int, photo_path: str):
         """
-        :param user_id: ID of the user
+        :param user_id: User's primary email address, alias email address, or unique user ID.
         :param photo_path: The path or url of the photo
         :return: Nothing
         """
@@ -211,6 +209,10 @@ class Workspace:
             raise Exception("Aiogoogle error") from error
 
     async def get_user_photo(self, user_id: int):
+        """
+        :param user_id: User's primary email address, alias email address, or unique user ID.
+        :return: Nothing
+        """
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
                 workspace = await google.discover("admin", "directory_v1")
@@ -220,6 +222,10 @@ class Workspace:
             raise Exception("Aiogoogle error") from error
 
     async def delete_user_photo(self, user_id: int):
+        """
+        :param user_id: User's primary email address, alias email address, or unique user ID.
+        :return: Nothing
+        """
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
                 workspace = await google.discover("admin", "directory_v1")
@@ -241,7 +247,7 @@ class Workspace:
 
     async def get_group(self, group_id: str) -> dict:
         """
-        :param group_id: ID of the group
+        :param group_id: Group's email address, group alias, or the unique group ID.
         :return: Returns a dictionary of the user
         """
         try:
@@ -254,7 +260,7 @@ class Workspace:
 
     async def delete_group(self, group_id: str):
         """
-        :param group_id: ID of the group
+        :param group_id: Group's email address, group alias, or the unique group ID.
         :return: Nothing
         """
         try:
@@ -285,13 +291,14 @@ class Workspace:
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
-    async def update_group(
-            self,
-            group_id: str,
-            email: str = None,
-            name: str = None,
-            description: str = None,
-    ):
+    async def update_group(self, group_id: str, email: str = None, name: str = None, description: str = None,):
+        """
+        :param group_id: Group's email address, group alias, or the unique group ID.
+        :param email: Email of the group
+        :param name: Name of the group, optional
+        :param description: Description of the group, optional
+        :return: Nothing
+        """
         # Check if at least one parameter is updated
         if all(x is None for x in [email, name, description]):
             raise Exception("Update arguments don't have a value")
@@ -332,7 +339,7 @@ class Workspace:
 
     async def get_group_members(self, group_id: str) -> list[dict]:
         """
-        :param group_id: ID of the group
+        :param group_id: Group's email address, group alias, or the unique group ID.
         :return: Returns a list of dictionaries of all members
         """
         try:
@@ -345,8 +352,8 @@ class Workspace:
 
     async def add_group_member(self, user_id: str, group_id: str):
         """
-        :param user_id: ID of the user
-        :param group_id: ID of the group
+        :param user_id: User's primary email address, alias email address, or unique user ID.
+        :param group_id: Group's email address, group alias, or the unique group ID.
         :return: Nothing
         """
         user = await self.get_user(user_id)
@@ -359,8 +366,8 @@ class Workspace:
 
     async def delete_group_member(self, user_id: int, group_id: str):
         """
-        :param user_id: ID of the user
-        :param group_id: ID of the group
+        :param user_id: User's primary email address, alias email address, or unique user ID.
+        :param group_id: Group's email address, group alias, or the unique group ID.
         :return: Nothing
         """
         try:
@@ -373,7 +380,6 @@ class Workspace:
     async def remove_all_sessions(self) -> None:
         """
         Logs all the users out of all sessions. To be used when starting a new year and changing account holders.
-
         :return: Nothing
         """
         users = await self.get_users()
