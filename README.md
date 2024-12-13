@@ -1,5 +1,7 @@
 # IngeniumUAHub-GoogleAPI
 
+```git+https://github.com/IngeniumUA/IngeniumUAHub-GoogleAPI.git```
+
 # Workspace API links
 1. [Workspace API documentation](https://developers.google.com/admin-sdk/directory/v1/guides)
 2. [Workspace API Rest documentation](https://developers.google.com/admin-sdk/directory/reference/rest)
