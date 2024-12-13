@@ -1,8 +1,9 @@
+import json
+import aiogoogle.excs
 from os import path as os_path
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError as GoogleHttpError
-from datetime import datetime as datetime_datetime
+from aiogoogle import Aiogoogle
+from aiogoogle.auth.creds import ServiceAccountCreds
+from datetime import datetime as datetime_datetime, timezone
 
 
 class CalendarClass:
@@ -22,23 +23,20 @@ class CalendarClass:
             raise Exception("Service account json path does not exist")
 
         self.serviceFilePath = service_file_path
-        self.service = self._build_service()
+        self.service_account_credentials = self._build_service_account_credentials()
 
-    def _build_service(self):
-        credentials = service_account.Credentials.from_service_account_file(
-            filename=self.serviceFilePath, scopes=self.scopes
-        )
-        credentials = credentials.with_subject(self.account)
-        service = build("calendar", "v3", credentials=credentials)
-        return service
+    def _build_service_account_credentials(self):
+        service_account_key = json.load(open(self.serviceFilePath))
+        credentials = ServiceAccountCreds(scopes=self.scopes, **service_account_key)
+        return credentials
 
     def _build_event_body(
-        self,
-        title: str,
-        description: str,
-        location: str,
-        start_time: datetime_datetime,
-        end_time: datetime_datetime,
+            self,
+            title: str,
+            description: str,
+            location: str,
+            start_time: datetime_datetime,
+            end_time: datetime_datetime,
     ) -> dict:
         eventBody = {
             "summary": title,
@@ -62,14 +60,14 @@ class CalendarClass:
         rule = {"scope": {"type": scope_type, "value": scope_value}, "role": role}
         return rule
 
-    def add_event(
-        self,
-        calendar_id: str,
-        title: str,
-        start_time: datetime_datetime,
-        end_time: datetime_datetime,
-        description: str = "",
-        location: str = "",
+    async def add_event(
+            self,
+            calendar_id: str,
+            title: str,
+            start_time: datetime_datetime,
+            end_time: datetime_datetime,
+            description: str = "",
+            location: str = "",
     ) -> None:
         """
         :param calendar_id: Id of the calendar that the event needs to be added to
@@ -80,89 +78,72 @@ class CalendarClass:
         :param location: Location of the event, optional
         :return: Nothing
         """
-        eventBody = self._build_event_body(
-            title, description, location, start_time, end_time
-        )
-        try:
-            self.service.events().insert(
-                calendarId=calendar_id, body=eventBody
-            ).execute()
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+        eventBody = self._build_event_body(title, description, location, start_time, end_time)
 
-    def get_events(self, calendar_id: str, get_all_events: bool = False) -> list[dict]:
+        try:
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                calendar = await google.discover("calendar", "v3")
+                await google.as_service_account(calendar.events.insert(calendarId=calendar_id, body=eventBody))
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
+
+    async def get_events(self, calendar_id: str, get_all_events: bool = False) -> list[dict]:
         """
-        :param get_all_events: Wether to return all events or only after the current date
+        :param get_all_events: Whether to return all events or only after the current date
         :param calendar_id: Id of the calendar
         :return: Returns all the events in the calendar
         """
         try:
-            if get_all_events:
-                events = (
-                    self.service.events()
-                    .list(
-                        calendarId=calendar_id, orderBy="startTime", singleEvents=True
-                    )
-                    .execute()
-                    .get("items", [])
-                )
-            else:
-                currentTime = datetime_datetime.utcnow()
-                # Build the isoformat string, "Z" means that the date is in UTC timezone
-                currentTime = currentTime.isoformat() + "Z"
-                events = (
-                    self.service.events()
-                    .list(
-                        calendarId=calendar_id,
-                        orderBy="startTime",
-                        singleEvents=True,
-                        timeMin=currentTime,
-                    )
-                    .execute()
-                    .get("items", [])
-                )
-            return events
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                calendar = await google.discover("calendar", "v3")
+                if get_all_events:
+                    events = await google.as_service_account(
+                        calendar.events.list(calendarId=calendar_id, orderBy="startTime", singleEvents=True))
+                else:
+                    currentTime = datetime_datetime.now(timezone.utc)
+                    events = await google.as_service_account(
+                        calendar.events.list(calendarId=calendar_id, orderBy="startTime", singleEvents=True,
+                                             timeMin=currentTime, ))
+                return events.get("items", [])
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def get_event(self, calendar_id: str, event_id: str) -> dict:
+    async def get_event(self, calendar_id: str, event_id: str) -> dict:
         """
         :param calendar_id: Id of the calendar
         :param event_id: Id of the event
         :return: Returns a dictionary of the event
         """
         try:
-            event = (
-                self.service.events()
-                .get(calendarId=calendar_id, eventId=event_id)
-                .execute()
-            )
-            return event
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                calendar = await google.discover("calendar", "v3")
+                event = await google.as_service_account(calendar.events.get(calendarId=calendar_id, eventId=event_id))
+                return event
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def remove_event(self, event_id: str, calendar_id: str) -> None:
+    async def remove_event(self, event_id: str, calendar_id: str) -> None:
         """
         :param calendar_id: Id of the calendar the event is in
         :param calendar_id: Id of the calendar the event is in
         :param event_id: Id of the event that needs to be removed
         """
         try:
-            self.service.events().delete(
-                calendarId=calendar_id, eventId=event_id
-            ).execute()
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                calendar = await google.discover("calendar", "v3")
+                await google.as_service_account(calendar.events.delete(calendarId=calendar_id, eventId=event_id))
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def update_event(
-        self,
-        event_id: str,
-        calendar_id: str,
-        title: str = None,
-        start_time: datetime_datetime = None,
-        end_time: datetime_datetime = None,
-        description: str = None,
-        location: str = None,
+    async def update_event(
+            self,
+            event_id: str,
+            calendar_id: str,
+            title: str = None,
+            start_time: datetime_datetime = None,
+            end_time: datetime_datetime = None,
+            description: str = None,
+            location: str = None,
     ) -> None:
         """
         :param calendar_id: If of the calendar the event is in
@@ -177,14 +158,7 @@ class CalendarClass:
         if all(x is None for x in [title, start_time, end_time, description, location]):
             raise Exception("Update arguments don't have a value")
 
-        try:
-            oldEvent = (
-                self.service.events()
-                .get(calendarId=calendar_id, eventId=event_id)
-                .execute()
-            )
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+        oldEvent = await self.get_event(calendar_id=calendar_id, event_id=event_id)
 
         currentTitle = oldEvent["summary"]
         currentStartTime = oldEvent["start"]["dateTime"]
@@ -204,28 +178,20 @@ class CalendarClass:
             location = currentLocation
 
         if (
-            title == currentTitle
-            and start_time == currentStartTime
-            and end_time == currentEndTime
-            and description == currentDescription
-            and location == currentLocation
-        ):
+                title == currentTitle and start_time == currentStartTime and end_time == currentEndTime and description == currentDescription and location == currentLocation):
             raise Exception("Not a single parameter gets a new value")
 
-        newEventBody = self._build_event_body(
-            title, description, location, start_time, end_time
-        )
+        newEventBody = self._build_event_body(title, description, location, start_time, end_time)
 
         try:
-            self.service.events().update(
-                calendarId=calendar_id, eventId=event_id, body=newEventBody
-            ).execute()
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                calendar = await google.discover("calendar", "v3")
+                await google.as_service_account(
+                    calendar.events.update(calendarId=calendar_id, eventId=event_id, body=newEventBody))
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def move_event(
-        self, event_id: str, old_calendar_id: str, new_calendar_id: str
-    ) -> None:
+    async def move_event(self, event_id: str, old_calendar_id: str, new_calendar_id: str) -> None:
         """
         :param old_calendar_id: Id of the calendar is currently in
         :param event_id: Id of the event that needs to be moved
@@ -233,17 +199,14 @@ class CalendarClass:
         :return: Nothing
         """
         try:
-            self.service.events().move(
-                calendarId=old_calendar_id,
-                eventId=event_id,
-                destination=new_calendar_id,
-            ).execute()
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                calendar = await google.discover("calendar", "v3")
+                await google.as_service_account(
+                    calendar.events.move(calendarId=old_calendar_id, eventId=event_id, destination=new_calendar_id))
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def add_calendar(
-        self, title: str, location: str = "", description: str = ""
-    ) -> None:
+    async def add_calendar(self, title: str, location: str = "", description: str = "") -> None:
         """
         :param title: Title of the calendar
         :param location: Geographical location of the calendar, optional
@@ -251,39 +214,39 @@ class CalendarClass:
         :return: Nothing
         """
         try:
-            calendarBody = self._build_calendar_body(title, location, description)
-            self.service.calendars().insert(body=calendarBody).execute()
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                calendar = await google.discover("calendar", "v3")
+                calendarBody = self._build_calendar_body(title, location, description)
+                await google.as_service_account(calendar.calendars.insert(body=calendarBody))
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def get_calendars(self) -> list[dict]:
+    async def get_calendars(self) -> list[dict]:
         """
         :return: Returns all the calendars
         """
         try:
-            calendars = self.service.calendarList().list().execute().get("items", [])
-            return calendars
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                calendar = await google.discover("calendar", "v3")
+                calendars = await google.as_service_account(calendar.calendarList().list())
+                return calendars.get("items", [])
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def get_calendar(self, calendar_id: str) -> dict:
+    async def get_calendar(self, calendar_id: str) -> dict:
         """
         :param calendar_id: Id of the calendar
         :return: Returns the calendar
         """
         try:
-            calendar = self.service.calendars().get(calendarId=calendar_id).execute()
-            return calendar
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                calendar = await google.discover("calendar", "v3")
+                receivedCalendar = await google.as_service_account(calendar.calendars.get(calendarId=calendar_id))
+                return receivedCalendar
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def update_calendar(
-        self,
-        calendar_id: str,
-        title: str = None,
-        location: str = None,
-        description: str = None,
-    ):
+    async def update_calendar(self, calendar_id: str, title: str = None, location: str = None, description: str = None):
         """
         :param calendar_id: Id of the calendar that needs to be updated
         :param title: Title of the calendar
@@ -293,10 +256,8 @@ class CalendarClass:
         """
         if all(x is None for x in [title, description, location]):
             raise Exception("Not a single argument is updated")
-        try:
-            oldCalendar = self.service.calendars().get(calendarId=calendar_id).execute()
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+
+        oldCalendar = await self.get_calendar(calendar_id=calendar_id)
 
         currentTitle = oldCalendar["summary"]
         currentDescription = oldCalendar["description"]
@@ -309,43 +270,41 @@ class CalendarClass:
         if location is None:
             location = currentLocation
 
-        if (
-            title == currentTitle
-            and description == currentDescription
-            and location == currentLocation
-        ):
+        if title == currentTitle and description == currentDescription and location == currentLocation:
             raise Exception("Not a single parameter gets a new value")
 
         newCalendarBody = self._build_calendar_body(title, location, description)
 
         try:
-            self.service.calendars().update(
-                calendarId=calendar_id, body=newCalendarBody
-            ).execute()
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                calendar = await google.discover("calendar", "v3")
+                await google.as_service_account(calendar.calendars.update(calendarId=calendar_id, body=newCalendarBody))
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def remove_calendar(self, calendar_id: str):
+    async def remove_calendar(self, calendar_id: str):
         """
         Removes the calendar itself
         """
         try:
-            self.service.calendars().delete(calendarId=calendar_id).execute()
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                calendar = await google.discover("calendar", "v3")
+                await google.as_service_account(calendar.calendars.delete(calendarId=calendar_id))
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def clear_calendar(self, calendar_id: str):
+    async def clear_calendar(self, calendar_id: str):
         """
         Removes all the events in the calendar
         """
         try:
-            self.service.calendars().clear(calendarId=calendar_id).execute()
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                calendar = await google.discover("calendar", "v3")
+                await google.as_service_account(calendar.calendars.clear(calendarId=calendar_id))
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def add_share_rule(
-        self, calendar_id: str, scope_type: str, user: str, role: str
-    ) -> None:
+    async def add_share_rule(self, calendar_id: str, scope_type: str, user: str, role: str) -> None:
         """
         :param calendar_id: Id of the calendar you want to add a rule to
         :param scope_type: Scope type, options: user, group and domain
@@ -361,48 +320,41 @@ class CalendarClass:
         rule = self._build_scope_body(scope_type, user, role)
 
         try:
-            self.service.acl().insert(calendarId=calendar_id, body=rule).execute()
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                calendar = await google.discover("calendar", "v3")
+                await google.as_service_account(calendar.acl.insert(calendarId=calendar_id, body=rule))
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def get_share_rules(self, calendar_id: str) -> list[dict]:
+    async def get_share_rules(self, calendar_id: str) -> list[dict]:
         """
         :param calendar_id: Id of the calendar
         :return: Returns all the share rules
         """
         try:
-            shareRules = (
-                self.service.acl()
-                .list(calendarId=calendar_id)
-                .execute()
-                .get("items", [])
-            )
-            return shareRules
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                calendar = await google.discover("calendar", "v3")
+                shareRules = await google.as_service_account(calendar.acl.list(calendarId=calendar_id))
+                return shareRules.get("items", [])
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def get_share_rule(self, calendar_id: str, rule_id: str) -> dict:
+    async def get_share_rule(self, calendar_id: str, rule_id: str) -> dict:
         """
         :param calendar_id: Id of the calendar
         :param rule_id: Id of the rule
         :return: Dictionary of the rule
         """
         try:
-            shareRule = (
-                self.service.acl().get(calendarId=calendar_id, ruleId=rule_id).execute()
-            )
-            return shareRule
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                calendar = await google.discover("calendar", "v3")
+                shareRule = await google.as_service_account(calendar.acl.get(calendarId=calendar_id, ruleId=rule_id))
+                return shareRule
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def update_share_rule(
-        self,
-        calendar_id: str,
-        rule_id: str,
-        scope_type: str = None,
-        user: str = None,
-        role: str = None,
-    ) -> None:
+    async def update_share_rule(self, calendar_id: str, rule_id: str, scope_type: str = None, user: str = None,
+                                role: str = None, ) -> None:
         """
         :param calendar_id: Id of the calendar you want to update the rule of
         :param rule_id: Id of the rule you want to update
@@ -414,12 +366,7 @@ class CalendarClass:
         if all(x is None for x in [scope_type, user, role]):
             raise Exception("Not a single argument is updated")
 
-        try:
-            oldRule = (
-                self.service.acl().get(calendarId=calendar_id, ruleId=rule_id).execute()
-            )
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+        oldRule = await self.get_share_rule(calendar_id=calendar_id, rule_id=rule_id)
 
         currentScopeType = oldRule["scope"]["type"]
         currentUser = oldRule["scope"]["value"]
@@ -442,19 +389,22 @@ class CalendarClass:
         newRule = self._build_scope_body(scope_type, user, role)
 
         try:
-            self.service.acl().update(
-                calendarId=calendar_id, ruleId=rule_id, body=newRule
-            ).execute()
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                calendar = await google.discover("calendar", "v3")
+                await google.as_service_account(
+                    calendar.acl.update(calendarId=calendar_id, ruleId=rule_id, body=newRule))
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
 
-    def remove_share_rule(self, calendar_id: str, rule_id: str) -> None:
+    async def remove_share_rule(self, calendar_id: str, rule_id: str) -> None:
         """
         :param calendar_id: Id of the calendar that the rule needs to be removed from
         :param rule_id: Id of the rule that needs to be removed
         :return: Nothing
         """
         try:
-            self.service.acl().delete(calendarId=calendar_id, ruleId=rule_id).execute()
-        except GoogleHttpError as error:
-            raise Exception(error.reason)
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                calendar = await google.discover("calendar", "v3")
+                await google.as_service_account(calendar.acl.delete(calendarId=calendar_id, ruleId=rule_id))
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
