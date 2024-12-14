@@ -1,12 +1,17 @@
 import json
+from typing import cast, List
+
 import aiogoogle.excs
 from os import path as os_path
 from aiogoogle import Aiogoogle
 from aiogoogle.auth.creds import ServiceAccountCreds
 from datetime import datetime as datetime_datetime, timezone
 
+from googleapi.TypedDicts.Calendar import CalendarListModel, CalendarListEntryModel, CalendarModel, EventsModel, \
+    EventModel, AclRuleModel, AclModel
 
-class CalendarClass:
+
+class Calendar:
     """
     Implements the Google Calendar API to add events to our calendars
     """
@@ -87,7 +92,7 @@ class CalendarClass:
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
-    async def get_events(self, calendar_id: str, get_all_events: bool = False) -> list[dict]:
+    async def get_events(self, calendar_id: str, get_all_events: bool = False) -> List[EventsModel]:
         """
         :param get_all_events: Whether to return all events or only after the current date
         :param calendar_id: Id of the calendar
@@ -97,18 +102,14 @@ class CalendarClass:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
                 calendar = await google.discover("calendar", "v3")
                 if get_all_events:
-                    events = await google.as_service_account(
-                        calendar.events.list(calendarId=calendar_id, orderBy="startTime", singleEvents=True))
+                    return cast(EventsModel, await google.as_service_account(calendar.events.list(calendarId=calendar_id, orderBy="startTime", singleEvents=True))).get("items", [])
                 else:
-                    currentTime = datetime_datetime.now(timezone.utc)
-                    events = await google.as_service_account(
-                        calendar.events.list(calendarId=calendar_id, orderBy="startTime", singleEvents=True,
-                                             timeMin=currentTime, ))
-                return events.get("items", [])
+                    currentTime = datetime_datetime.now(timezone.utc).isoformat()
+                    return cast(EventsModel, await google.as_service_account(calendar.events.list(calendarId=calendar_id, orderBy="startTime", singleEvents=True, timeMin=currentTime))).get("items", [])
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
-    async def get_event(self, calendar_id: str, event_id: str) -> dict:
+    async def get_event(self, calendar_id: str, event_id: str) -> EventModel:
         """
         :param calendar_id: Id of the calendar
         :param event_id: Id of the event
@@ -117,8 +118,7 @@ class CalendarClass:
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
                 calendar = await google.discover("calendar", "v3")
-                event = await google.as_service_account(calendar.events.get(calendarId=calendar_id, eventId=event_id))
-                return event
+                return cast(EventModel, await google.as_service_account(calendar.events.get(calendarId=calendar_id, eventId=event_id)))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -149,8 +149,8 @@ class CalendarClass:
         :param calendar_id: If of the calendar the event is in
         :param event_id: Id of the event that needs to be updated
         :param title: Title of the event, optional
-        :param start_time: Start time of the event, optional
-        :param end_time: End time of the event, optional
+        :param start_time: Start time of the event in isoformat, optional
+        :param end_time: End time of the event in isoformat, optional
         :param description: Description of the event, optional
         :param location: Location of the event, optional
         :return: Nothing
@@ -221,19 +221,18 @@ class CalendarClass:
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
-    async def get_calendars(self) -> list[dict]:
+    async def get_calendars(self) -> List[CalendarListEntryModel]:
         """
         :return: Returns all the calendars
         """
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
                 calendar = await google.discover("calendar", "v3")
-                calendars = await google.as_service_account(calendar.calendarList().list())
-                return calendars.get("items", [])
+                return cast(CalendarListModel, await google.as_service_account(calendar.calendarList.list())).get("items", [])
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
-    async def get_calendar(self, calendar_id: str) -> dict:
+    async def get_calendar(self, calendar_id: str) -> CalendarModel:
         """
         :param calendar_id: Id of the calendar
         :return: Returns the calendar
@@ -241,8 +240,7 @@ class CalendarClass:
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
                 calendar = await google.discover("calendar", "v3")
-                receivedCalendar = await google.as_service_account(calendar.calendars.get(calendarId=calendar_id))
-                return receivedCalendar
+                return cast(CalendarModel, await google.as_service_account(calendar.calendars.insert(id=calendar_id)))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -326,7 +324,7 @@ class CalendarClass:
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
-    async def get_share_rules(self, calendar_id: str) -> list[dict]:
+    async def get_share_rules(self, calendar_id: str) -> List[AclRuleModel]:
         """
         :param calendar_id: Id of the calendar
         :return: Returns all the share rules
@@ -334,12 +332,11 @@ class CalendarClass:
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
                 calendar = await google.discover("calendar", "v3")
-                shareRules = await google.as_service_account(calendar.acl.list(calendarId=calendar_id))
-                return shareRules.get("items", [])
+                return cast(AclModel, await google.as_service_account(calendar.acl.list(calendarId=calendar_id))).get("items", [])
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
-    async def get_share_rule(self, calendar_id: str, rule_id: str) -> dict:
+    async def get_share_rule(self, calendar_id: str, rule_id: str) -> AclRuleModel:
         """
         :param calendar_id: Id of the calendar
         :param rule_id: Id of the rule
@@ -348,8 +345,7 @@ class CalendarClass:
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
                 calendar = await google.discover("calendar", "v3")
-                shareRule = await google.as_service_account(calendar.acl.get(calendarId=calendar_id, ruleId=rule_id))
-                return shareRule
+                return cast(AclRuleModel, await google.as_service_account(calendar.acl.get(calendarId=calendar_id, ruleId=rule_id)))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 

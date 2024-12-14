@@ -1,4 +1,6 @@
 import json
+from typing import List, cast
+
 import aiogoogle.excs
 from base64 import urlsafe_b64encode as base64_urlsafe_encode
 from string import ascii_letters as string_ascii_letters
@@ -9,10 +11,13 @@ from random import choice as random_choice
 from os import path as os_path
 from passlib.hash import sha256_crypt
 
+from googleapi.TypedDicts.Directory import UserModel, UserListModel, GroupModel, GroupListModel, MemberModel, \
+    MemberListModel
 
-class Workspace:
+
+class Directory:
     """
-    Implements the Google Workspace API to edit users and groups
+    Implements the Google directory API to edit users and groups
     """
 
     def __init__(self, service_file_path: str):
@@ -25,7 +30,7 @@ class Workspace:
             "https://www.googleapis.com/auth/admin.directory.user.security",
         ]
         self.domain = "ingeniumua.be"
-        self.subject = "workspace@ingeniumua.be"
+        self.subject = "directory@ingeniumua.be"
 
         if not os_path.exists(service_file_path):
             raise Exception("Service account json path does not exist")
@@ -38,28 +43,26 @@ class Workspace:
         credentials = ServiceAccountCreds(scopes=self.scopes, **service_account_key, subject=self.subject)
         return credentials
 
-    async def get_users(self) -> list[dict]:
+    async def get_users(self) -> List[UserModel]:
         """
         :return: Returns a list of dictionaries of all users
         """
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
-                workspace = await google.discover("admin", "directory_v1")
-                users = await google.as_service_account(workspace.users.list(domain=self.domain, orderBy="email"))
-                return users.get('users', [])
+                directory = await google.discover("admin", "directory_v1")
+                return cast(UserListModel, await google.as_service_account(directory.users.list(domain=self.domain, orderBy="email"))).get('users', [])
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
-    async def get_user(self, user_id: str) -> dict:
+    async def get_user(self, user_id: str) -> UserModel:
         """
         :param user_id: User's primary email address, alias email address, or unique user ID.
         :return: Returns a dictionary of the user
         """
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
-                workspace = await google.discover("admin", "directory_v1")
-                user = await google.as_service_account(workspace.users.get(userKey=user_id, viewType="admin_view", projection="full"))
-                return user
+                directory = await google.discover("admin", "directory_v1")
+                return cast(UserModel, await google.as_service_account(directory.users.get(userKey=user_id, viewType="admin_view", projection="full")))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -70,8 +73,8 @@ class Workspace:
         """
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
-                workspace = await google.discover("admin", "directory_v1")
-                await google.as_service_account(workspace.users.delete(userKey=user_id))
+                directory = await google.discover("admin", "directory_v1")
+                await google.as_service_account(directory.users.delete(userKey=user_id))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -116,8 +119,8 @@ class Workspace:
 
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
-                workspace = await google.discover("admin", "directory_v1")
-                await google.as_service_account(workspace.users.insert(body=body))
+                directory = await google.discover("admin", "directory_v1")
+                await google.as_service_account(directory.users.insert(body=body))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -151,8 +154,8 @@ class Workspace:
 
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
-                workspace = await google.discover("admin", "directory_v1")
-                await google.as_service_account(workspace.users.update(body=body, userKey=user_id))
+                directory = await google.discover("admin", "directory_v1")
+                await google.as_service_account(directory.users.update(body=body, userKey=user_id))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -176,8 +179,8 @@ class Workspace:
 
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
-                workspace = await google.discover("admin", "directory_v1")
-                await google.as_service_account(workspace.users.update(body=body, userKey=user_id))
+                directory = await google.discover("admin", "directory_v1")
+                await google.as_service_account(directory.users.update(body=body, userKey=user_id))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -203,8 +206,8 @@ class Workspace:
         body = {"photoData": photoDataBase64, "mimeType": fileType}
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
-                workspace = await google.discover("admin", "directory_v1")
-                await google.as_service_account(workspace.users.photos.update(body=body, userKey=user_id))
+                directory = await google.discover("admin", "directory_v1")
+                await google.as_service_account(directory.users.photos.update(body=body, userKey=user_id))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -215,8 +218,8 @@ class Workspace:
         """
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
-                workspace = await google.discover("admin", "directory_v1")
-                photo = await google.as_service_account(workspace.users.photos.get(userKey=user_id))
+                directory = await google.discover("admin", "directory_v1")
+                photo = await google.as_service_account(directory.users.photos.get(userKey=user_id))
                 return photo
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
@@ -228,33 +231,31 @@ class Workspace:
         """
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
-                workspace = await google.discover("admin", "directory_v1")
-                await google.as_service_account(workspace.users.photos.delete(userKey=user_id))
+                directory = await google.discover("admin", "directory_v1")
+                await google.as_service_account(directory.users.photos.delete(userKey=user_id))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
-    async def get_groups(self) -> list[dict]:
+    async def get_groups(self) -> List[GroupModel]:
         """
         :return: Returns a list of dictionaries of all groups
         """
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
-                workspace = await google.discover("admin", "directory_v1")
-                groups = await google.as_service_account(workspace.groups.list(domain=self.domain, orderBy="email"))
-            return groups.get("groups", [])
+                directory = await google.discover("admin", "directory_v1")
+                return cast(GroupListModel, await google.as_service_account(directory.groups.list(domain=self.domain, orderBy="email"))).get("groups", [])
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
-    async def get_group(self, group_id: str) -> dict:
+    async def get_group(self, group_id: str) -> GroupModel:
         """
         :param group_id: Group's email address, group alias, or the unique group ID.
         :return: Returns a dictionary of the user
         """
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
-                workspace = await google.discover("admin", "directory_v1")
-                group = await google.as_service_account(workspace.groups.get(groupKey=group_id))
-                return group
+                directory = await google.discover("admin", "directory_v1")
+                return cast(GroupModel, await google.as_service_account(directory.groups.get(groupKey=group_id)))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -265,8 +266,8 @@ class Workspace:
         """
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
-                workspace = await google.discover("admin", "directory_v1")
-                await google.as_service_account(workspace.groups.delete(groupKey=group_id))
+                directory = await google.discover("admin", "directory_v1")
+                await google.as_service_account(directory.groups.delete(groupKey=group_id))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -286,8 +287,8 @@ class Workspace:
 
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
-                workspace = await google.discover("admin", "directory_v1")
-                await google.as_service_account(workspace.groups.insert(body=body))
+                directory = await google.discover("admin", "directory_v1")
+                await google.as_service_account(directory.groups.insert(body=body))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -332,21 +333,20 @@ class Workspace:
 
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
-                workspace = await google.discover("admin", "directory_v1")
-                await google.as_service_account(workspace.groups.update(groupKey=group_id, body=body))
+                directory = await google.discover("admin", "directory_v1")
+                await google.as_service_account(directory.groups.update(groupKey=group_id, body=body))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
-    async def get_group_members(self, group_id: str) -> list[dict]:
+    async def get_group_members(self, group_id: str) -> List[MemberModel]:
         """
         :param group_id: Group's email address, group alias, or the unique group ID.
         :return: Returns a list of dictionaries of all members
         """
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
-                workspace = await google.discover("admin", "directory_v1")
-                members = await google.as_service_account(workspace.members.list(groupKey=group_id))
-                return members.get("members", [])
+                directory = await google.discover("admin", "directory_v1")
+                return cast(MemberListModel, await google.as_service_account(directory.members.list(groupKey=group_id))).get("members", [])
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -359,8 +359,8 @@ class Workspace:
         user = await self.get_user(user_id)
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
-                workspace = await google.discover("admin", "directory_v1")
-                await google.as_service_account(workspace.members.insert(groupKey=group_id, body=user))
+                directory = await google.discover("admin", "directory_v1")
+                await google.as_service_account(directory.members.insert(groupKey=group_id, body=user))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -372,8 +372,8 @@ class Workspace:
         """
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
-                workspace = await google.discover("admin", "directory_v1")
-                await google.as_service_account(workspace.members.delete(groupKey=group_id, memberKey=user_id))
+                directory = await google.discover("admin", "directory_v1")
+                await google.as_service_account(directory.members.delete(groupKey=group_id, memberKey=user_id))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -386,7 +386,7 @@ class Workspace:
         for user in users:
             try:
                 async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
-                    workspace = await google.discover("admin", "directory_v1")
-                    await google.as_service_account(workspace.users.signOut(userKey=user["id"]))
+                    directory = await google.discover("admin", "directory_v1")
+                    await google.as_service_account(directory.users.signOut(userKey=user["id"]))
             except aiogoogle.excs.HTTPError as error:
                 raise Exception("Aiogoogle error") from error

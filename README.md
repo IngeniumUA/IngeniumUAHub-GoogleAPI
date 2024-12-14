@@ -2,9 +2,9 @@
 
 ```git+https://github.com/IngeniumUA/IngeniumUAHub-GoogleAPI.git```
 
-# Workspace API links
-1. [Workspace API documentation](https://developers.google.com/admin-sdk/directory/v1/guides)
-2. [Workspace API Rest documentation](https://developers.google.com/admin-sdk/directory/reference/rest)
+# Directory API links
+1. [Directory API documentation](https://developers.google.com/admin-sdk/directory/v1/guides)
+2. [Directory API Rest documentation](https://developers.google.com/admin-sdk/directory/reference/rest)
 3. [Hashing library](https://passlib.readthedocs.io/en/stable/lib/passlib.hash.sha256_crypt.html)
 4. [Group Settings API](https://developers.google.com/admin-sdk/groups-settings/v1/reference/groups#json)
 
