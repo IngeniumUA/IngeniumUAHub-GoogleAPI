@@ -11,6 +11,7 @@ class AttachmentsDictionary(TypedDict):
     :param mime_maintype: The MIME main type
     :param mime_subtype: The MIME subtype
     """
+
     attachment: str | bytes
     filename: str
     mime_maintype: str | None
