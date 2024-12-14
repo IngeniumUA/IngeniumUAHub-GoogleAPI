@@ -19,3 +19,8 @@
 # General links
 1. [OAuthScopes](https://developers.google.com/identity/protocols/oauth2/scopes)
 2. [Connect to service account](https://developers.google.com/analytics/devguides/config/mgmt/v3/quickstart/service-py)
+
+# Library/commands used for auto creating TypedDicts
+1. [GitHub link](https://github.com/koxudaxi/datamodel-code-generator)
+
+```datamodel-codegen --input input_file --output output_file --input-file-type json --output-model-type typing.TypedDict```

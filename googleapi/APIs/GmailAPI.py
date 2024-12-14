@@ -26,9 +26,9 @@ class Mailing:
             mail_reply_address: str | None = None,
     ) -> None:
         """
-        :param mail_sender: Sender of the mail
-        :param service_file_path: Path to the service account json
-        :param mail_reply_address: Address the replies to the mail will be sent to
+        @param mail_sender: Sender of the mail
+        @param service_file_path: Path to the service account credentials file
+        @param mail_reply_address: Address the replies to the mail will be sent to
         """
         self.mail_reply_address = mail_reply_address
         self.scopes = ["https://www.googleapis.com/auth/gmail.send"]
@@ -41,14 +41,21 @@ class Mailing:
         self.service_account_credentials = self._build_service_account_credentials()
 
     def _build_service_account_credentials(self):
+        """
+        @return: Returns ServiceAccountCreds from aiogoogle
+        """
         service_account_key = json.load(open(self.serviceFilePath))
         credentials = ServiceAccountCreds(scopes=self.scopes, **service_account_key, subject=self.mail_sender)
         return credentials
 
     async def _build_message(self, mail_receiver: str, mail_subject: str, mail_content: str, attachments: list[AttachmentsDictionary] = None) -> dict:
         """
-        :param mail_receiver: Receiver of the mail
-        :return: Returns the body
+        Builds the body of the mail message
+        @param mail_receiver: Receiver of the mail
+        @param mail_subject: Subject of the mail
+        @param mail_content: Content of the mail
+        @param attachments: List of attachments
+        @return: The body of the mail
         """
         # MIME stands for Multipurpose Internet Mail Extensions and is an internet standard that is used to support the transfer of single or multiple text
         # and non-text attachments
@@ -99,7 +106,14 @@ class Mailing:
             mail_subject: str,
             mail_content: str,
             attachments: list[AttachmentsDictionary] = None) -> None:
-
+        """
+        Sends the mail
+        @param mail_receivers: List of receivers of the mail
+        @param mail_subject: Subject of the mail
+        @param mail_content: Content of the mail
+        @param attachments: List of attachments
+        @return: Nothing
+        """
         if attachments is None:
             attachments = []
 

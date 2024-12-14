@@ -22,7 +22,7 @@ class Directory:
 
     def __init__(self, service_file_path: str):
         """
-        :param service_file_path: The path to the service account credentials file
+        @param service_file_path: Path to the service account credentials file
         """
         self.scopes = [
             "https://www.googleapis.com/auth/admin.directory.user",
@@ -39,37 +39,45 @@ class Directory:
         self.service_account_credentials = self._build_service_account_credentials()
 
     def _build_service_account_credentials(self):
+        """
+        @return: Returns ServiceAccountCreds from aiogoogle
+        """
         service_account_key = json.load(open(self.serviceFilePath))
         credentials = ServiceAccountCreds(scopes=self.scopes, **service_account_key, subject=self.subject)
         return credentials
 
     async def get_users(self) -> List[UserModel]:
         """
-        :return: Returns a list of dictionaries of all users
+        Returns all users of the directory
+        @return: Returns all users
         """
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
                 directory = await google.discover("admin", "directory_v1")
-                return cast(UserListModel, await google.as_service_account(directory.users.list(domain=self.domain, orderBy="email"))).get('users', [])
+                return cast(UserListModel, await google.as_service_account(
+                    directory.users.list(domain=self.domain, orderBy="email"))).get('users', [])
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
     async def get_user(self, user_id: str) -> UserModel:
         """
-        :param user_id: User's primary email address, alias email address, or unique user ID.
-        :return: Returns a dictionary of the user
+        Gets the user of the directory
+        @param user_id: User's primary email address, alias email address, or unique user ID.
+        @return: The user
         """
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
                 directory = await google.discover("admin", "directory_v1")
-                return cast(UserModel, await google.as_service_account(directory.users.get(userKey=user_id, viewType="admin_view", projection="full")))
+                return cast(UserModel, await google.as_service_account(
+                    directory.users.get(userKey=user_id, viewType="admin_view", projection="full")))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
     async def delete_user(self, user_id: str):
         """
-        :param user_id: User's primary email address, alias email address, or unique user ID.
-        :return: Nothing
+        Deletes the user of the directory
+        @param user_id: User's primary email address, alias email address, or unique user ID.
+        @return: None
         """
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
@@ -80,11 +88,12 @@ class Directory:
 
     async def create_user(self, email: str, password: str, first_name: str, last_name: str):
         """
-        :param email: Email of the user
-        :param password: Password of the user
-        :param first_name: First name of the user
-        :param last_name: Last name of the user
-        :return: Nothing
+        Creates a new user
+        @param email: Email of the user
+        @param password: Password of the user
+        @param first_name: First name of the user
+        @param last_name: Last name of the user
+        @return: None
         """
         # Google only allows passwords between 8-100 in length
         if 100 < len(password) or len(password) < 8:
@@ -126,10 +135,11 @@ class Directory:
 
     async def update_user(self, user_id: str, first_name: str = None, last_name: str = None):
         """
-        :param user_id: User's primary email address, alias email address, or unique user ID.
-        :param first_name: Optional first name to be updated
-        :param last_name: Optional last name to be updated
-        :return: Nothing
+        Updates the user of the directory
+        @param user_id: User's primary email address, alias email address, or unique user ID.
+        @param first_name: Optional first name to be updated
+        @param last_name: Optional last name to be updated
+        @return: Nothing
         """
         # Check if at least one parameter is updated
         if all(x is None for x in [first_name, last_name]):
@@ -161,9 +171,10 @@ class Directory:
 
     async def update_user_password(self, password: str, user_id: int):
         """
-        :param user_id: User's primary email address, alias email address, or unique user ID.
-        :param password: New password
-        :return: Nothing
+        Updates the password of the user of the directory
+        @param password: New password
+        @param user_id: User's primary email address, alias email address, or unique user ID.
+        @return: Nothing
         """
         characters = string_ascii_letters + string_digits
         salt = "".join(random_choice(characters) for _ in range(15))  # Salt must be between 0-16 characters
@@ -186,9 +197,10 @@ class Directory:
 
     async def update_user_photo(self, user_id: int, photo_path: str):
         """
-        :param user_id: User's primary email address, alias email address, or unique user ID.
-        :param photo_path: The path or url of the photo
-        :return: Nothing
+        Updates the photo of the user of the directory
+        @param user_id: User's primary email address, alias email address, or unique user ID.
+        @param photo_path: The path or url to the photo
+        @return: Nothing
         """
         if os_path.getsize(photo_path) >= 10 ** 7:
             raise Exception("File size is max 10Mb")
@@ -213,21 +225,22 @@ class Directory:
 
     async def get_user_photo(self, user_id: int):
         """
-        :param user_id: User's primary email address, alias email address, or unique user ID.
-        :return: Nothing
+        Gets the photo of the user of the directory
+        @param user_id: User's primary email address, alias email address, or unique user ID.
+        @return: Photo
         """
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
                 directory = await google.discover("admin", "directory_v1")
-                photo = await google.as_service_account(directory.users.photos.get(userKey=user_id))
-                return photo
+                return await google.as_service_account(directory.users.photos.get(userKey=user_id))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
     async def delete_user_photo(self, user_id: int):
         """
-        :param user_id: User's primary email address, alias email address, or unique user ID.
-        :return: Nothing
+        Deletes the photo of the user of the directory
+        @param user_id: User's primary email address, alias email address, or unique user ID.
+        @return: Nothing
         """
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
@@ -238,19 +251,22 @@ class Directory:
 
     async def get_groups(self) -> List[GroupModel]:
         """
-        :return: Returns a list of dictionaries of all groups
+        Returns the groups of the directory
+        @return: All the groups
         """
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
                 directory = await google.discover("admin", "directory_v1")
-                return cast(GroupListModel, await google.as_service_account(directory.groups.list(domain=self.domain, orderBy="email"))).get("groups", [])
+                return cast(GroupListModel, await google.as_service_account(
+                    directory.groups.list(domain=self.domain, orderBy="email"))).get("groups", [])
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
     async def get_group(self, group_id: str) -> GroupModel:
         """
-        :param group_id: Group's email address, group alias, or the unique group ID.
-        :return: Returns a dictionary of the user
+        Gets the group of the directory
+        @param group_id: Group's email address, group alias, or the unique group ID.
+        @return: The group
         """
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
@@ -261,8 +277,9 @@ class Directory:
 
     async def delete_group(self, group_id: str):
         """
-        :param group_id: Group's email address, group alias, or the unique group ID.
-        :return: Nothing
+        Deletes the group of the directory
+        @param group_id: Group's email address, group alias, or the unique group ID.
+        @return: Nothing
         """
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
@@ -273,10 +290,11 @@ class Directory:
 
     async def create_group(self, email: str, name: str, description: str = None):
         """
-        :param email: Email of the group
-        :param name: Name of the group
-        :param description: Description of the group, optional
-        :return: Nothing
+        Creates the group in the directory
+        @param email: Email of the group
+        @param name: Name of the group
+        @param description: Optional description of the group
+        @return: Nothing
         """
 
         # Check if the email domain is correct
@@ -292,13 +310,14 @@ class Directory:
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
-    async def update_group(self, group_id: str, email: str = None, name: str = None, description: str = None,):
+    async def update_group(self, group_id: str, email: str = None, name: str = None, description: str = None):
         """
-        :param group_id: Group's email address, group alias, or the unique group ID.
-        :param email: Email of the group
-        :param name: Name of the group, optional
-        :param description: Description of the group, optional
-        :return: Nothing
+        Updates the group in the directory
+        @param group_id: Group's email address, group alias, or the unique group ID.
+        @param email: Email of the group
+        @param name: Optional name of the group
+        @param description: Optional description of the group
+        @return: Nothing
         """
         # Check if at least one parameter is updated
         if all(x is None for x in [email, name, description]):
@@ -340,21 +359,25 @@ class Directory:
 
     async def get_group_members(self, group_id: str) -> List[MemberModel]:
         """
-        :param group_id: Group's email address, group alias, or the unique group ID.
-        :return: Returns a list of dictionaries of all members
+        Gets all the members of the group
+        @param group_id: Group's email address, group alias, or the unique group ID.
+        @return: The members of the group
         """
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
                 directory = await google.discover("admin", "directory_v1")
-                return cast(MemberListModel, await google.as_service_account(directory.members.list(groupKey=group_id))).get("members", [])
+                return cast(MemberListModel,
+                            await google.as_service_account(directory.members.list(groupKey=group_id))).get("members",
+                                                                                                            [])
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
     async def add_group_member(self, user_id: str, group_id: str):
         """
-        :param user_id: User's primary email address, alias email address, or unique user ID.
-        :param group_id: Group's email address, group alias, or the unique group ID.
-        :return: Nothing
+        Adds the user to the group
+        @param user_id: User's primary email address, alias email address, or unique user ID.
+        @param group_id: Group's email address, group alias, or the unique group ID.
+        @return: Nothing
         """
         user = await self.get_user(user_id)
         try:
@@ -366,9 +389,10 @@ class Directory:
 
     async def delete_group_member(self, user_id: int, group_id: str):
         """
-        :param user_id: User's primary email address, alias email address, or unique user ID.
-        :param group_id: Group's email address, group alias, or the unique group ID.
-        :return: Nothing
+        Deletes the member from the group
+        @param user_id: User's primary email address, alias email address, or unique user ID.
+        @param group_id: Group's email address, group alias, or the unique group ID.
+        @return: Nothing
         """
         try:
             async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
@@ -379,8 +403,8 @@ class Directory:
 
     async def remove_all_sessions(self) -> None:
         """
-        Logs all the users out of all sessions. To be used when starting a new year and changing account holders.
-        :return: Nothing
+        Logs all the users out of all sessions.
+        @return: Nothing
         """
         users = await self.get_users()
         for user in users:
