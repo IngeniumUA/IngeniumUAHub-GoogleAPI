@@ -3,10 +3,9 @@
 ```git+https://github.com/IngeniumUA/IngeniumUAHub-GoogleAPI.git```
 
 # Directory API links
-1. [Directory API documentation](https://developers.google.com/admin-sdk/directory/v1/guides)
-2. [Directory API Rest documentation](https://developers.google.com/admin-sdk/directory/reference/rest)
-3. [Hashing library](https://passlib.readthedocs.io/en/stable/lib/passlib.hash.sha256_crypt.html)
-4. [Group Settings API](https://developers.google.com/admin-sdk/groups-settings/v1/reference/groups#json)
+1. [Directory API documentation](https://developers.google.com/admin-sdk/directory/reference/rest)
+2. [Hashing library](https://passlib.readthedocs.io/en/stable/lib/passlib.hash.sha256_crypt.html)
+3. [Group Settings API](https://developers.google.com/admin-sdk/groups-settings/v1/reference/groups#json)
 
 # Calendar API links
 1. [Calendar API documentation](https://developers.google.com/calendar/api/v3/reference)
@@ -15,6 +14,9 @@
 # Gmail API links
 1. [Gmail API documentation](https://developers.google.com/gmail/api/guides)
 2. [MIME documentation](https://docs.python.org/3/library/email.mime.html)
+
+# Drive API links
+1. [Drive API documentation](https://developers.google.com/drive/api/reference/rest/v3)
 
 # General links
 1. [OAuthScopes](https://developers.google.com/identity/protocols/oauth2/scopes)
