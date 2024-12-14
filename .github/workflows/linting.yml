@@ -12,9 +12,9 @@ jobs:
             python-version: 3.11
         - run: pip install ruff
         - run: | 
-            ruff format core/app/base --config core/pyproject.toml
-            ruff check --config core/pyproject.toml
-            ruff check --fix --config core/pyproject.toml
+            ruff format googleapi --config pyproject.toml
+            ruff check googleapi --config pyproject.toml
+            ruff check --fix googleapi --config pyproject.toml
         - uses: stefanzweifel/git-auto-commit-action@v5
           with:
             commit_message: 'Automated style fixes by ruff'
