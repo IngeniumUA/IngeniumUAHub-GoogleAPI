@@ -1,14 +1,14 @@
 import json
+from base64 import urlsafe_b64encode as base64_urlsafe_encode
+from os import path as os_path
+from random import choice as random_choice
+from string import ascii_letters as string_ascii_letters
+from string import digits as string_digits
 from typing import List, cast
 
 import aiogoogle.excs
-from base64 import urlsafe_b64encode as base64_urlsafe_encode
-from string import ascii_letters as string_ascii_letters
-from string import digits as string_digits
 from aiogoogle import Aiogoogle
 from aiogoogle.auth.creds import ServiceAccountCreds
-from random import choice as random_choice
-from os import path as os_path
 from passlib.hash import sha256_crypt
 
 from googleapi.TypedDicts.Directory import UserModel, UserListModel, GroupModel, GroupListModel, MemberModel, \

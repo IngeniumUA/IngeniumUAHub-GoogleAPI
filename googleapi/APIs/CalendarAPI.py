@@ -1,11 +1,11 @@
 import json
+from datetime import datetime as datetime_datetime, timezone
+from os import path as os_path
 from typing import cast, List
 
 import aiogoogle.excs
-from os import path as os_path
 from aiogoogle import Aiogoogle
 from aiogoogle.auth.creds import ServiceAccountCreds
-from datetime import datetime as datetime_datetime, timezone
 
 from googleapi.TypedDicts.Calendar import CalendarListModel, CalendarListEntryModel, CalendarModel, EventsModel, \
     EventModel, AclRuleModel, AclModel
