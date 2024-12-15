@@ -45,11 +45,13 @@ class Drive:
         @return: Drives of the user
         """
         try:
-            async with (Aiogoogle(
-                    service_account_creds=self.service_account_credentials
-            ) as google):
+            async with Aiogoogle(
+                service_account_creds=self.service_account_credentials
+            ) as google:
                 drive = await google.discover("drive", "v3")
-                return cast(DrivesModel, await google.as_service_account(drive.drives.list())).get("drives", [])
+                return cast(
+                    DrivesModel, await google.as_service_account(drive.drives.list())
+                ).get("drives", [])
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -60,11 +62,14 @@ class Drive:
         @return: Drive of the user
         """
         try:
-            async with (Aiogoogle(
-                    service_account_creds=self.service_account_credentials
-            ) as google):
+            async with Aiogoogle(
+                service_account_creds=self.service_account_credentials
+            ) as google:
                 drive = await google.discover("drive", "v3")
-                return cast(DriveModel, await google.as_service_account(drive.drives.get(driveId=drive_id)))
+                return cast(
+                    DriveModel,
+                    await google.as_service_account(drive.drives.get(driveId=drive_id)),
+                )
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -75,9 +80,9 @@ class Drive:
         @return: Nothing
         """
         try:
-            async with (Aiogoogle(
-                    service_account_creds=self.service_account_credentials
-            ) as google):
+            async with Aiogoogle(
+                service_account_creds=self.service_account_credentials
+            ) as google:
                 drive = await google.discover("drive", "v3")
                 await google.as_service_account(drive.drives.delete(driveId=drive_id))
         except aiogoogle.excs.HTTPError as error:
