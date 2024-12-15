@@ -16,12 +16,13 @@ class Calendar:
     Implements the Google Calendar API to add events to calendars
     """
 
-    def __init__(self, service_file_path: str) -> None:
+    def __init__(self, service_file_path: str, subject: str) -> None:
         """
         @param service_file_path: Path to the service account credentials file
         """
         self.scopes = ["https://www.googleapis.com/auth/calendar"]
         self.timeZone = "Europe/Brussels"
+        self.subject = subject
 
         if not os_path.exists(service_file_path):
             raise Exception("Service account json path does not exist")
@@ -34,7 +35,7 @@ class Calendar:
         @return: Returns ServiceAccountCreds from aiogoogle
         """
         service_account_key = json.load(open(self.serviceFilePath))
-        credentials = ServiceAccountCreds(scopes=self.scopes, **service_account_key)
+        credentials = ServiceAccountCreds(scopes=self.scopes, **service_account_key, subject=self.subject)
         return credentials
 
     def _build_event_body(
