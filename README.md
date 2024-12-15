@@ -26,3 +26,7 @@
 1. [GitHub link](https://github.com/koxudaxi/datamodel-code-generator)
 
 ```datamodel-codegen --input input_file --output output_file --input-file-type json --output-model-type typing.TypedDict```
+# Setting up service accounts
+Note: The service accounts don't need roles, you just need to create them and give them the right permissions in the workspace admin panel using the second link.
+1. [Creating service accounts](https://console.cloud.google.com/iam-admin/serviceaccounts?inv=1&invt=AbkM9Q&project=ingeniumuahub)
+2. [Domain wide delegation acces](https://developers.google.com/identity/protocols/oauth2/service-account#delegatingauthority)
