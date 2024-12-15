@@ -26,9 +26,10 @@ class Directory:
     Implements the Google directory API to edit users and groups
     """
 
-    def __init__(self, service_file_path: str):
+    def __init__(self, service_file_path: str, subject: str):
         """
         @param service_file_path: Path to the service account credentials file
+        @param subject: Subject who owns the directory
         """
         self.scopes = [
             "https://www.googleapis.com/auth/admin.directory.user",
@@ -36,7 +37,7 @@ class Directory:
             "https://www.googleapis.com/auth/admin.directory.user.security",
         ]
         self.domain = "ingeniumua.be"
-        self.subject = "directory@ingeniumua.be"
+        self.subject = subject
 
         if not os_path.exists(service_file_path):
             raise Exception("Service account json path does not exist")
@@ -49,9 +50,7 @@ class Directory:
         @return: Returns ServiceAccountCreds from aiogoogle
         """
         service_account_key = json.load(open(self.serviceFilePath))
-        credentials = ServiceAccountCreds(
-            scopes=self.scopes, **service_account_key, subject=self.subject
-        )
+        credentials = ServiceAccountCreds(scopes=self.scopes, **service_account_key, subject=self.subject)
         return credentials
 
     async def get_users(self) -> List[UserModel]:
@@ -61,7 +60,7 @@ class Directory:
         """
         try:
             async with Aiogoogle(
-                service_account_creds=self.service_account_credentials
+                    service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
                 return cast(
@@ -81,7 +80,7 @@ class Directory:
         """
         try:
             async with Aiogoogle(
-                service_account_creds=self.service_account_credentials
+                    service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
                 return cast(
@@ -103,7 +102,7 @@ class Directory:
         """
         try:
             async with Aiogoogle(
-                service_account_creds=self.service_account_credentials
+                    service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
                 await google.as_service_account(directory.users.delete(userKey=user_id))
@@ -111,7 +110,7 @@ class Directory:
             raise Exception("Aiogoogle error") from error
 
     async def create_user(
-        self, email: str, password: str, first_name: str, last_name: str
+            self, email: str, password: str, first_name: str, last_name: str
     ):
         """
         Creates a new user
@@ -154,7 +153,7 @@ class Directory:
 
         try:
             async with Aiogoogle(
-                service_account_creds=self.service_account_credentials
+                    service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
                 await google.as_service_account(directory.users.insert(body=body))
@@ -162,7 +161,7 @@ class Directory:
             raise Exception("Aiogoogle error") from error
 
     async def update_user(
-        self, user_id: str, first_name: str = None, last_name: str = None
+            self, user_id: str, first_name: str = None, last_name: str = None
     ):
         """
         Updates the user of the directory
@@ -194,7 +193,7 @@ class Directory:
 
         try:
             async with Aiogoogle(
-                service_account_creds=self.service_account_credentials
+                    service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
                 await google.as_service_account(
@@ -226,7 +225,7 @@ class Directory:
 
         try:
             async with Aiogoogle(
-                service_account_creds=self.service_account_credentials
+                    service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
                 await google.as_service_account(
@@ -242,7 +241,7 @@ class Directory:
         @param photo_path: The path or url to the photo
         @return: Nothing
         """
-        if os_path.getsize(photo_path) >= 10**7:
+        if os_path.getsize(photo_path) >= 10 ** 7:
             raise Exception("File size is max 10Mb")
 
         photoName = os_path.basename(photo_path)
@@ -258,7 +257,7 @@ class Directory:
         body = {"photoData": photoDataBase64, "mimeType": fileType}
         try:
             async with Aiogoogle(
-                service_account_creds=self.service_account_credentials
+                    service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
                 await google.as_service_account(
@@ -275,7 +274,7 @@ class Directory:
         """
         try:
             async with Aiogoogle(
-                service_account_creds=self.service_account_credentials
+                    service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
                 return await google.as_service_account(
@@ -292,7 +291,7 @@ class Directory:
         """
         try:
             async with Aiogoogle(
-                service_account_creds=self.service_account_credentials
+                    service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
                 await google.as_service_account(
@@ -308,7 +307,7 @@ class Directory:
         """
         try:
             async with Aiogoogle(
-                service_account_creds=self.service_account_credentials
+                    service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
                 return cast(
@@ -328,7 +327,7 @@ class Directory:
         """
         try:
             async with Aiogoogle(
-                service_account_creds=self.service_account_credentials
+                    service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
                 return cast(
@@ -348,7 +347,7 @@ class Directory:
         """
         try:
             async with Aiogoogle(
-                service_account_creds=self.service_account_credentials
+                    service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
                 await google.as_service_account(
@@ -374,7 +373,7 @@ class Directory:
 
         try:
             async with Aiogoogle(
-                service_account_creds=self.service_account_credentials
+                    service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
                 await google.as_service_account(directory.groups.insert(body=body))
@@ -382,11 +381,11 @@ class Directory:
             raise Exception("Aiogoogle error") from error
 
     async def update_group(
-        self,
-        group_id: str,
-        email: str = None,
-        name: str = None,
-        description: str = None,
+            self,
+            group_id: str,
+            email: str = None,
+            name: str = None,
+            description: str = None,
     ):
         """
         Updates the group in the directory
@@ -419,9 +418,9 @@ class Directory:
 
         # Check that it's not a needless update
         if (
-            email == currentEmail
-            and name == currentName
-            and description == currentDescription
+                email == currentEmail
+                and name == currentName
+                and description == currentDescription
         ):
             raise Exception("User already has these values")
 
@@ -429,7 +428,7 @@ class Directory:
 
         try:
             async with Aiogoogle(
-                service_account_creds=self.service_account_credentials
+                    service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
                 await google.as_service_account(
@@ -446,7 +445,7 @@ class Directory:
         """
         try:
             async with Aiogoogle(
-                service_account_creds=self.service_account_credentials
+                    service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
                 return cast(
@@ -468,7 +467,7 @@ class Directory:
         user = await self.get_user(user_id)
         try:
             async with Aiogoogle(
-                service_account_creds=self.service_account_credentials
+                    service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
                 await google.as_service_account(
@@ -486,7 +485,7 @@ class Directory:
         """
         try:
             async with Aiogoogle(
-                service_account_creds=self.service_account_credentials
+                    service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
                 await google.as_service_account(
@@ -504,7 +503,7 @@ class Directory:
         for user in users:
             try:
                 async with Aiogoogle(
-                    service_account_creds=self.service_account_credentials
+                        service_account_creds=self.service_account_credentials
                 ) as google:
                     directory = await google.discover("admin", "directory_v1")
                     await google.as_service_account(
