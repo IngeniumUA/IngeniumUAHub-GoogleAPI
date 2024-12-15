@@ -5,6 +5,7 @@ from typing import List, cast
 import aiogoogle.excs
 from aiogoogle import Aiogoogle
 from aiogoogle.auth.creds import ServiceAccountCreds
+from typing_extensions import Callable
 
 from googleapi.TypedDicts.Drive import DriveModel, DrivesModel
 
@@ -39,21 +40,21 @@ class Drive:
         )
         return credentials
 
+    async def _execute_aiogoogle(self, function: Callable, **kwargs):
+        try:
+            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                calendar = await google.discover("drive", "v3")
+                return await google.as_service_account(function(calendar, **kwargs))
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
+
     async def get_drives(self) -> List[DriveModel]:
         """
         Gets the drives of the user
         @return: Drives of the user
         """
-        try:
-            async with Aiogoogle(
-                service_account_creds=self.service_account_credentials
-            ) as google:
-                drive = await google.discover("drive", "v3")
-                return cast(
-                    DrivesModel, await google.as_service_account(drive.drives.list())
-                ).get("drives", [])
-        except aiogoogle.excs.HTTPError as error:
-            raise Exception("Aiogoogle error") from error
+        function = lambda drive: drive.drives.list()
+        return cast(DrivesModel, await self._execute_aiogoogle(function)).get("drives", [])
 
     async def get_drive(self, drive_id: str) -> DriveModel:
         """
@@ -61,17 +62,9 @@ class Drive:
         @param drive_id: ID of the drive
         @return: Drive of the user
         """
-        try:
-            async with Aiogoogle(
-                service_account_creds=self.service_account_credentials
-            ) as google:
-                drive = await google.discover("drive", "v3")
-                return cast(
-                    DriveModel,
-                    await google.as_service_account(drive.drives.get(driveId=drive_id)),
-                )
-        except aiogoogle.excs.HTTPError as error:
-            raise Exception("Aiogoogle error") from error
+        function = lambda drive, **kwargs: drive.drives.get(**kwargs)
+        kwargs = {"driveId": drive_id}
+        return cast(DriveModel, await self._execute_aiogoogle(function, **kwargs))
 
     async def delete_drive(self, drive_id) -> None:
         """
@@ -79,11 +72,6 @@ class Drive:
         @param drive_id: ID of the drive
         @return: Nothing
         """
-        try:
-            async with Aiogoogle(
-                service_account_creds=self.service_account_credentials
-            ) as google:
-                drive = await google.discover("drive", "v3")
-                await google.as_service_account(drive.drives.delete(driveId=drive_id))
-        except aiogoogle.excs.HTTPError as error:
-            raise Exception("Aiogoogle error") from error
+        function = lambda drive, **kwargs: drive.drives.delete(**kwargs)
+        kwargs = {"driveId": drive_id}
+        await self._execute_aiogoogle(function, **kwargs)
