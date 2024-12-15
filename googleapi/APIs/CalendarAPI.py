@@ -42,7 +42,9 @@ class Calendar:
         @return: Returns ServiceAccountCreds from aiogoogle
         """
         service_account_key = json.load(open(self.serviceFilePath))
-        credentials = ServiceAccountCreds(scopes=self.scopes, **service_account_key, subject=self.subject)
+        credentials = ServiceAccountCreds(
+            scopes=self.scopes, **service_account_key, subject=self.subject
+        )
         return credentials
 
     def _build_event_body(
