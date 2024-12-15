@@ -55,8 +55,13 @@ class Drive:
         Gets the drives of the user
         @return: Drives of the user
         """
-        def function(drive): return drive.drives.list()
-        return cast(DrivesModel, await self._execute_aiogoogle(function)).get("drives", [])
+
+        def function(drive):
+            return drive.drives.list()
+
+        return cast(DrivesModel, await self._execute_aiogoogle(function)).get(
+            "drives", []
+        )
 
     async def get_drive(self, drive_id: str) -> DriveModel:
         """
@@ -64,7 +69,10 @@ class Drive:
         @param drive_id: ID of the drive
         @return: Drive of the user
         """
-        def function(drive, **kwargs): return drive.drives.get(**kwargs)
+
+        def function(drive, **kwargs):
+            return drive.drives.get(**kwargs)
+
         kwargs = {"driveId": drive_id}
         return cast(DriveModel, await self._execute_aiogoogle(function, **kwargs))
 
@@ -74,6 +82,9 @@ class Drive:
         @param drive_id: ID of the drive
         @return: Nothing
         """
-        def function(drive, **kwargs): drive.drives.delete(**kwargs)
+
+        def function(drive, **kwargs):
+            drive.drives.delete(**kwargs)
+
         kwargs = {"driveId": drive_id}
         await self._execute_aiogoogle(function, **kwargs)

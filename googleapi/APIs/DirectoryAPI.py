@@ -72,7 +72,10 @@ class Directory:
         Returns all users of the directory
         @return: Returns all users
         """
-        def function(directory, **kwargs): return directory.users.list(**kwargs)
+
+        def function(directory, **kwargs):
+            return directory.users.list(**kwargs)
+
         kwargs = {"orderBy": "email", "domain": self.domain}
         return cast(
             UserListModel, await self._execute_aiogoogle(function, **kwargs)
@@ -84,7 +87,10 @@ class Directory:
         @param user_id: User's primary email address, alias email address, or unique user ID.
         @return: The user
         """
-        def function(directory, **kwargs): return directory.users.get(**kwargs)
+
+        def function(directory, **kwargs):
+            return directory.users.get(**kwargs)
+
         kwargs = {"userKey": user_id, "viewType": "admin_view", "projection": "full"}
         return cast(UserModel, await self._execute_aiogoogle(function, **kwargs))
 
@@ -94,7 +100,10 @@ class Directory:
         @param user_id: User's primary email address, alias email address, or unique user ID.
         @return: None
         """
-        def function(directory, **kwargs): return directory.users.delete(**kwargs)
+
+        def function(directory, **kwargs):
+            return directory.users.delete(**kwargs)
+
         kwargs = {"userKey": user_id}
         await self._execute_aiogoogle(function, **kwargs)
 
@@ -140,7 +149,9 @@ class Directory:
             "changePasswordAtNextLogin": False,
         }
 
-        def function(directory, **kwargs): return directory.users.insert(**kwargs)
+        def function(directory, **kwargs):
+            return directory.users.insert(**kwargs)
+
         kwargs = {"body": body}
         return cast(UserModel, await self._execute_aiogoogle(function, **kwargs))
 
@@ -175,7 +186,9 @@ class Directory:
 
         body = {"name": {"givenName": first_name, "familyName": last_name}}
 
-        def function(directory, **kwargs): return directory.users.update(**kwargs)
+        def function(directory, **kwargs):
+            return directory.users.update(**kwargs)
+
         kwargs = {"userKey": user_id, "body": body}
         return cast(UserModel, await self._execute_aiogoogle(function, **kwargs))
 
@@ -199,7 +212,10 @@ class Directory:
             "hashFunction": "crypt",
             "changePasswordAtNextLogin": False,
         }
-        def function(directory, **kwargs): return directory.users.update(**kwargs)
+
+        def function(directory, **kwargs):
+            return directory.users.update(**kwargs)
+
         kwargs = {"userKey": user_id, "body": body}
         return cast(UserModel, await self._execute_aiogoogle(function, **kwargs))
 
@@ -225,7 +241,9 @@ class Directory:
 
         body = {"photoData": photoDataBase64, "mimeType": fileType}
 
-        def function(directory, **kwargs): return directory.users.photos.update(**kwargs)
+        def function(directory, **kwargs):
+            return directory.users.photos.update(**kwargs)
+
         kwargs = {"userKey": user_id, "body": body}
         return cast(UserPhotoModel, await self._execute_aiogoogle(function, **kwargs))
 
@@ -235,7 +253,10 @@ class Directory:
         @param user_id: User's primary email address, alias email address, or unique user ID.
         @return: User Photo
         """
-        def function(directory, **kwargs): return directory.users.photos.get(**kwargs)
+
+        def function(directory, **kwargs):
+            return directory.users.photos.get(**kwargs)
+
         kwargs = {"userKey": user_id}
         return cast(UserPhotoModel, await self._execute_aiogoogle(function, **kwargs))
 
@@ -245,7 +266,10 @@ class Directory:
         @param user_id: User's primary email address, alias email address, or unique user ID.
         @return: Nothing
         """
-        def function(directory, **kwargs): return directory.users.photos.delete(**kwargs)
+
+        def function(directory, **kwargs):
+            return directory.users.photos.delete(**kwargs)
+
         kwargs = {"userKey": user_id}
         await self._execute_aiogoogle(function, **kwargs)
 
@@ -254,7 +278,10 @@ class Directory:
         Returns the groups of the directory
         @return: All the groups
         """
-        def function(directory, **kwargs): return directory.groups.list(**kwargs)
+
+        def function(directory, **kwargs):
+            return directory.groups.list(**kwargs)
+
         kwargs = {"domain": self.domain, "orderBy": "email"}
         return cast(
             GroupListModel, await self._execute_aiogoogle(function, **kwargs)
@@ -266,7 +293,10 @@ class Directory:
         @param group_id: Group's email address, group alias, or the unique group ID.
         @return: The group
         """
-        def function(directory, **kwargs): return directory.groups.get(**kwargs)
+
+        def function(directory, **kwargs):
+            return directory.groups.get(**kwargs)
+
         kwargs = {"groupKey": group_id}
         return cast(GroupModel, await self._execute_aiogoogle(function, **kwargs))
 
@@ -276,8 +306,13 @@ class Directory:
         @param group_id: Group's email address, group alias, or the unique group ID.
         @return: Nothing
         """
-        def function(directory, **kwargs): return directory.groups.delete(**kwargs)
-        kwargs = {"groupKey": group_id, }
+
+        def function(directory, **kwargs):
+            return directory.groups.delete(**kwargs)
+
+        kwargs = {
+            "groupKey": group_id,
+        }
         await self._execute_aiogoogle(function, **kwargs)
 
     async def create_group(
@@ -296,7 +331,9 @@ class Directory:
 
         body = {"email": email, "name": name, "description": description}
 
-        def function(directory, **kwargs): return directory.groups.insert(**kwargs)
+        def function(directory, **kwargs):
+            return directory.groups.insert(**kwargs)
+
         kwargs = {"body": body}
         return cast(GroupModel, await self._execute_aiogoogle(function, **kwargs))
 
@@ -346,7 +383,9 @@ class Directory:
 
         body = {"email": email, "name": name, "description": description}
 
-        def function(directory, **kwargs): return directory.groups.update(**kwargs)
+        def function(directory, **kwargs):
+            return directory.groups.update(**kwargs)
+
         kwargs = {"groupKey": group_id, "body": body}
         return cast(GroupModel, await self._execute_aiogoogle(function, **kwargs))
 
@@ -356,7 +395,10 @@ class Directory:
         @param group_id: Group's email address, group alias, or the unique group ID.
         @return: The members of the group
         """
-        def function(directory, **kwargs): return directory.members.list(**kwargs)
+
+        def function(directory, **kwargs):
+            return directory.members.list(**kwargs)
+
         kwargs = {"groupKey": group_id}
         return cast(
             MemberListModel, await self._execute_aiogoogle(function, **kwargs)
@@ -370,7 +412,10 @@ class Directory:
         @return: The added member
         """
         user = await self.get_user(user_id)
-        def function(directory, **kwargs): return directory.members.insert(**kwargs)
+
+        def function(directory, **kwargs):
+            return directory.members.insert(**kwargs)
+
         kwargs = {"groupKey": group_id, "body": user}
         return cast(MemberModel, await self._execute_aiogoogle(function, **kwargs))
 
@@ -381,7 +426,10 @@ class Directory:
         @param group_id: Group's email address, group alias, or the unique group ID.
         @return: Nothing
         """
-        def function(directory, **kwargs): return directory.members.delete(**kwargs)
+
+        def function(directory, **kwargs):
+            return directory.members.delete(**kwargs)
+
         kwargs = {"groupKey": group_id, "memberKey": user_id}
         await self._execute_aiogoogle(function, **kwargs)
 
@@ -392,6 +440,9 @@ class Directory:
         """
         users = await self.get_users()
         for user in users:
-            def function(directory, **kwargs): return directory.users.signOut(**kwargs)
+
+            def function(directory, **kwargs):
+                return directory.users.signOut(**kwargs)
+
             kwargs = {"userKey": user.get("id")}
             await self._execute_aiogoogle(function, **kwargs)
