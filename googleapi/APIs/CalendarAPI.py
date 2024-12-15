@@ -133,9 +133,12 @@ class Calendar:
                 service_account_creds=self.service_account_credentials
             ) as google:
                 calendar = await google.discover("calendar", "v3")
-                return cast(EventModel, await google.as_service_account(
-                    calendar.events.insert(calendarId=calendar_id, body=eventBody)
-                ))
+                return cast(
+                    EventModel,
+                    await google.as_service_account(
+                        calendar.events.insert(calendarId=calendar_id, body=eventBody)
+                    ),
+                )
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -280,11 +283,14 @@ class Calendar:
                 service_account_creds=self.service_account_credentials
             ) as google:
                 calendar = await google.discover("calendar", "v3")
-                return cast(EventModel, await google.as_service_account(
-                    calendar.events.update(
-                        calendarId=calendar_id, eventId=event_id, body=newEventBody
-                    )
-                ))
+                return cast(
+                    EventModel,
+                    await google.as_service_account(
+                        calendar.events.update(
+                            calendarId=calendar_id, eventId=event_id, body=newEventBody
+                        )
+                    ),
+                )
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -303,13 +309,16 @@ class Calendar:
                 service_account_creds=self.service_account_credentials
             ) as google:
                 calendar = await google.discover("calendar", "v3")
-                return cast(EventModel, await google.as_service_account(
-                    calendar.events.move(
-                        calendarId=old_calendar_id,
-                        eventId=event_id,
-                        destination=new_calendar_id,
-                    )
-                ))
+                return cast(
+                    EventModel,
+                    await google.as_service_account(
+                        calendar.events.move(
+                            calendarId=old_calendar_id,
+                            eventId=event_id,
+                            destination=new_calendar_id,
+                        )
+                    ),
+                )
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -329,9 +338,12 @@ class Calendar:
             ) as google:
                 calendar = await google.discover("calendar", "v3")
                 calendarBody = self._build_calendar_body(title, location, description)
-                return cast(CalendarModel, await google.as_service_account(
-                    calendar.calendars.insert(body=calendarBody)
-                ))
+                return cast(
+                    CalendarModel,
+                    await google.as_service_account(
+                        calendar.calendars.insert(body=calendarBody)
+                    ),
+                )
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -417,11 +429,14 @@ class Calendar:
                 service_account_creds=self.service_account_credentials
             ) as google:
                 calendar = await google.discover("calendar", "v3")
-                return cast(CalendarModel, await google.as_service_account(
-                    calendar.calendars.update(
-                        calendarId=calendar_id, body=newCalendarBody
-                    )
-                ))
+                return cast(
+                    CalendarModel,
+                    await google.as_service_account(
+                        calendar.calendars.update(
+                            calendarId=calendar_id, body=newCalendarBody
+                        )
+                    ),
+                )
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -482,9 +497,12 @@ class Calendar:
                 service_account_creds=self.service_account_credentials
             ) as google:
                 calendar = await google.discover("calendar", "v3")
-                return cast(AclRuleModel, await google.as_service_account(
-                    calendar.acl.insert(calendarId=calendar_id, body=rule)
-                ))
+                return cast(
+                    AclRuleModel,
+                    await google.as_service_account(
+                        calendar.acl.insert(calendarId=calendar_id, body=rule)
+                    ),
+                )
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -576,11 +594,14 @@ class Calendar:
                 service_account_creds=self.service_account_credentials
             ) as google:
                 calendar = await google.discover("calendar", "v3")
-                return cast(AclRuleModel, await google.as_service_account(
-                    calendar.acl.update(
-                        calendarId=calendar_id, ruleId=rule_id, body=newRule
-                    )
-                ))
+                return cast(
+                    AclRuleModel,
+                    await google.as_service_account(
+                        calendar.acl.update(
+                            calendarId=calendar_id, ruleId=rule_id, body=newRule
+                        )
+                    ),
+                )
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
