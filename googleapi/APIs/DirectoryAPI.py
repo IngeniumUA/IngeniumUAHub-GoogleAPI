@@ -59,7 +59,9 @@ class Directory:
 
     async def _execute_aiogoogle(self, function: Callable, **kwargs):
         try:
-            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+            async with Aiogoogle(
+                service_account_creds=self.service_account_credentials
+            ) as google:
                 calendar = await google.discover("admin", "directory_v1")
                 return await google.as_service_account(function(calendar, **kwargs))
         except aiogoogle.excs.HTTPError as error:
@@ -72,7 +74,9 @@ class Directory:
         """
         function = lambda directory, **kwargs: directory.users.list(**kwargs)
         kwargs = {"orderBy": "email", "domain": self.domain}
-        return cast(UserListModel, await self._execute_aiogoogle(function, **kwargs)).get("users", [])
+        return cast(
+            UserListModel, await self._execute_aiogoogle(function, **kwargs)
+        ).get("users", [])
 
     async def get_user(self, user_id: str) -> UserModel:
         """
@@ -95,7 +99,7 @@ class Directory:
         await self._execute_aiogoogle(function, **kwargs)
 
     async def create_user(
-            self, email: str, password: str, first_name: str, last_name: str
+        self, email: str, password: str, first_name: str, last_name: str
     ) -> UserModel:
         """
         Creates a new user
@@ -141,7 +145,7 @@ class Directory:
         return cast(UserModel, await self._execute_aiogoogle(function, **kwargs))
 
     async def update_user(
-            self, user_id: str, first_name: str = None, last_name: str = None
+        self, user_id: str, first_name: str = None, last_name: str = None
     ) -> UserModel:
         """
         Updates the user of the directory
@@ -206,7 +210,7 @@ class Directory:
         @param photo_path: The path or url to the photo
         @return: User photo
         """
-        if os_path.getsize(photo_path) >= 10 ** 7:
+        if os_path.getsize(photo_path) >= 10**7:
             raise Exception("File size is max 10Mb")
 
         photoName = os_path.basename(photo_path)
@@ -252,7 +256,9 @@ class Directory:
         """
         function = lambda directory, **kwargs: directory.groups.list(**kwargs)
         kwargs = {"domain": self.domain, "orderBy": "email"}
-        return cast(GroupListModel, await self._execute_aiogoogle(function, **kwargs)).get("groups", [])
+        return cast(
+            GroupListModel, await self._execute_aiogoogle(function, **kwargs)
+        ).get("groups", [])
 
     async def get_group(self, group_id: str) -> GroupModel:
         """
@@ -271,11 +277,13 @@ class Directory:
         @return: Nothing
         """
         function = lambda directory, **kwargs: directory.groups.delete(**kwargs)
-        kwargs = {"groupKey": group_id, }
+        kwargs = {
+            "groupKey": group_id,
+        }
         await self._execute_aiogoogle(function, **kwargs)
 
     async def create_group(
-            self, email: str, name: str, description: str = None
+        self, email: str, name: str, description: str = None
     ) -> GroupModel:
         """
         Creates the group in the directory
@@ -295,11 +303,11 @@ class Directory:
         return cast(GroupModel, await self._execute_aiogoogle(function, **kwargs))
 
     async def update_group(
-            self,
-            group_id: str,
-            email: str = None,
-            name: str = None,
-            description: str = None,
+        self,
+        group_id: str,
+        email: str = None,
+        name: str = None,
+        description: str = None,
     ) -> GroupModel:
         """
         Updates the group in the directory
@@ -332,9 +340,9 @@ class Directory:
 
         # Check that it's not a needless update
         if (
-                email == currentEmail
-                and name == currentName
-                and description == currentDescription
+            email == currentEmail
+            and name == currentName
+            and description == currentDescription
         ):
             raise Exception("User already has these values")
 
@@ -352,7 +360,9 @@ class Directory:
         """
         function = lambda directory, **kwargs: directory.members.list(**kwargs)
         kwargs = {"groupKey": group_id}
-        return cast(MemberListModel, await self._execute_aiogoogle(function, **kwargs)).get("members", [])
+        return cast(
+            MemberListModel, await self._execute_aiogoogle(function, **kwargs)
+        ).get("members", [])
 
     async def add_group_member(self, user_id: str, group_id: str) -> MemberModel:
         """
