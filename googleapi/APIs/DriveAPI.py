@@ -42,7 +42,9 @@ class Drive:
 
     async def _execute_aiogoogle(self, function: Callable, **kwargs):
         try:
-            async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+            async with Aiogoogle(
+                service_account_creds=self.service_account_credentials
+            ) as google:
                 calendar = await google.discover("drive", "v3")
                 return await google.as_service_account(function(calendar, **kwargs))
         except aiogoogle.excs.HTTPError as error:
