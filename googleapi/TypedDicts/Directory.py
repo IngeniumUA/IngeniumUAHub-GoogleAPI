@@ -107,3 +107,14 @@ class GroupListModel(TypedDict):
     etag: str
     groups: List[GroupModel]
     nextPageToken: str
+
+
+class UserPhotoModel(TypedDict):
+    id: str
+    primaryEmail: str
+    kind: str
+    etag: str
+    photoData: str
+    mimeType: str
+    width: str
+    height: str

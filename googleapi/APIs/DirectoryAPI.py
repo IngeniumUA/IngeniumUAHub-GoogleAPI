@@ -17,7 +17,7 @@ from googleapi.TypedDicts.Directory import (
     GroupModel,
     GroupListModel,
     MemberModel,
-    MemberListModel,
+    MemberListModel, UserPhotoModel,
 )
 
 
@@ -45,7 +45,7 @@ class Directory:
         self.serviceFilePath = service_file_path
         self.service_account_credentials = self._build_service_account_credentials()
 
-    def _build_service_account_credentials(self):
+    def _build_service_account_credentials(self) -> ServiceAccountCreds:
         """
         @return: Returns ServiceAccountCreds from aiogoogle
         """
@@ -96,7 +96,7 @@ class Directory:
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
-    async def delete_user(self, user_id: str):
+    async def delete_user(self, user_id: str) -> None:
         """
         Deletes the user of the directory
         @param user_id: User's primary email address, alias email address, or unique user ID.
@@ -113,14 +113,14 @@ class Directory:
 
     async def create_user(
         self, email: str, password: str, first_name: str, last_name: str
-    ):
+    ) -> UserModel:
         """
         Creates a new user
         @param email: Email of the user
         @param password: Password of the user
         @param first_name: First name of the user
         @param last_name: Last name of the user
-        @return: None
+        @return: The created user
         """
         # Google only allows passwords between 8-100 in length
         if 100 < len(password) or len(password) < 8:
@@ -158,19 +158,19 @@ class Directory:
                 service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
-                await google.as_service_account(directory.users.insert(body=body))
+                return cast(UserModel, await google.as_service_account(directory.users.insert(body=body)))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
     async def update_user(
         self, user_id: str, first_name: str = None, last_name: str = None
-    ):
+    ) -> UserModel:
         """
         Updates the user of the directory
         @param user_id: User's primary email address, alias email address, or unique user ID.
         @param first_name: Optional first name to be updated
         @param last_name: Optional last name to be updated
-        @return: Nothing
+        @return: The updated user
         """
         # Check if at least one parameter is updated
         if all(x is None for x in [first_name, last_name]):
@@ -198,18 +198,18 @@ class Directory:
                 service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
-                await google.as_service_account(
+                return cast(UserModel, await google.as_service_account(
                     directory.users.update(body=body, userKey=user_id)
-                )
+                ))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
-    async def update_user_password(self, password: str, user_id: int):
+    async def update_user_password(self, password: str, user_id: int) -> UserModel:
         """
         Updates the password of the user of the directory
         @param password: New password
         @param user_id: User's primary email address, alias email address, or unique user ID.
-        @return: Nothing
+        @return: The updated user
         """
         characters = string_ascii_letters + string_digits
         salt = "".join(
@@ -230,18 +230,18 @@ class Directory:
                 service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
-                await google.as_service_account(
+                return cast(UserModel, await google.as_service_account(
                     directory.users.update(body=body, userKey=user_id)
-                )
+                ))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
-    async def update_user_photo(self, user_id: int, photo_path: str):
+    async def update_user_photo(self, user_id: int, photo_path: str) -> UserPhotoModel:
         """
         Updates the photo of the user of the directory
         @param user_id: User's primary email address, alias email address, or unique user ID.
         @param photo_path: The path or url to the photo
-        @return: Nothing
+        @return: User photo
         """
         if os_path.getsize(photo_path) >= 10**7:
             raise Exception("File size is max 10Mb")
@@ -262,30 +262,30 @@ class Directory:
                 service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
-                await google.as_service_account(
+                return cast(UserPhotoModel, await google.as_service_account(
                     directory.users.photos.update(body=body, userKey=user_id)
-                )
+                ))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
-    async def get_user_photo(self, user_id: int):
+    async def get_user_photo(self, user_id: int) -> UserPhotoModel:
         """
         Gets the photo of the user of the directory
         @param user_id: User's primary email address, alias email address, or unique user ID.
-        @return: Photo
+        @return: User Photo
         """
         try:
             async with Aiogoogle(
                 service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
-                return await google.as_service_account(
+                return cast(UserPhotoModel, await google.as_service_account(
                     directory.users.photos.get(userKey=user_id)
-                )
+                ))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
-    async def delete_user_photo(self, user_id: int):
+    async def delete_user_photo(self, user_id: int) -> None:
         """
         Deletes the photo of the user of the directory
         @param user_id: User's primary email address, alias email address, or unique user ID.
@@ -341,7 +341,7 @@ class Directory:
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
-    async def delete_group(self, group_id: str):
+    async def delete_group(self, group_id: str) -> None:
         """
         Deletes the group of the directory
         @param group_id: Group's email address, group alias, or the unique group ID.
@@ -358,13 +358,13 @@ class Directory:
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
-    async def create_group(self, email: str, name: str, description: str = None):
+    async def create_group(self, email: str, name: str, description: str = None) -> GroupModel:
         """
         Creates the group in the directory
         @param email: Email of the group
         @param name: Name of the group
         @param description: Optional description of the group
-        @return: Nothing
+        @return: The created group
         """
 
         # Check if the email domain is correct
@@ -378,7 +378,7 @@ class Directory:
                 service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
-                await google.as_service_account(directory.groups.insert(body=body))
+                return cast(GroupModel, await google.as_service_account(directory.groups.insert(body=body)))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -388,14 +388,14 @@ class Directory:
         email: str = None,
         name: str = None,
         description: str = None,
-    ):
+    ) -> GroupModel:
         """
         Updates the group in the directory
         @param group_id: Group's email address, group alias, or the unique group ID.
         @param email: Email of the group
         @param name: Optional name of the group
         @param description: Optional description of the group
-        @return: Nothing
+        @return: The updated group
         """
         # Check if at least one parameter is updated
         if all(x is None for x in [email, name, description]):
@@ -433,9 +433,9 @@ class Directory:
                 service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
-                await google.as_service_account(
+                return cast(GroupModel, await google.as_service_account(
                     directory.groups.update(groupKey=group_id, body=body)
-                )
+                ))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -459,12 +459,12 @@ class Directory:
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
-    async def add_group_member(self, user_id: str, group_id: str):
+    async def add_group_member(self, user_id: str, group_id: str, role: str, type: str) -> MemberModel:
         """
         Adds the user to the group
         @param user_id: User's primary email address, alias email address, or unique user ID.
         @param group_id: Group's email address, group alias, or the unique group ID.
-        @return: Nothing
+        @return: The added member
         """
         user = await self.get_user(user_id)
         try:
@@ -472,13 +472,13 @@ class Directory:
                 service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
-                await google.as_service_account(
+                return cast(MemberModel, await google.as_service_account(
                     directory.members.insert(groupKey=group_id, body=user)
-                )
+                ))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
-    async def delete_group_member(self, user_id: int, group_id: str):
+    async def delete_group_member(self, user_id: int, group_id: str) -> None:
         """
         Deletes the member from the group
         @param user_id: User's primary email address, alias email address, or unique user ID.
