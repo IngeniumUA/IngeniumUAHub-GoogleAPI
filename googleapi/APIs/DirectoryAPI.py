@@ -17,7 +17,8 @@ from googleapi.TypedDicts.Directory import (
     GroupModel,
     GroupListModel,
     MemberModel,
-    MemberListModel, UserPhotoModel,
+    MemberListModel,
+    UserPhotoModel,
 )
 
 
@@ -158,7 +159,10 @@ class Directory:
                 service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
-                return cast(UserModel, await google.as_service_account(directory.users.insert(body=body)))
+                return cast(
+                    UserModel,
+                    await google.as_service_account(directory.users.insert(body=body)),
+                )
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -198,9 +202,12 @@ class Directory:
                 service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
-                return cast(UserModel, await google.as_service_account(
-                    directory.users.update(body=body, userKey=user_id)
-                ))
+                return cast(
+                    UserModel,
+                    await google.as_service_account(
+                        directory.users.update(body=body, userKey=user_id)
+                    ),
+                )
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -230,9 +237,12 @@ class Directory:
                 service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
-                return cast(UserModel, await google.as_service_account(
-                    directory.users.update(body=body, userKey=user_id)
-                ))
+                return cast(
+                    UserModel,
+                    await google.as_service_account(
+                        directory.users.update(body=body, userKey=user_id)
+                    ),
+                )
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -262,9 +272,12 @@ class Directory:
                 service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
-                return cast(UserPhotoModel, await google.as_service_account(
-                    directory.users.photos.update(body=body, userKey=user_id)
-                ))
+                return cast(
+                    UserPhotoModel,
+                    await google.as_service_account(
+                        directory.users.photos.update(body=body, userKey=user_id)
+                    ),
+                )
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -279,9 +292,12 @@ class Directory:
                 service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
-                return cast(UserPhotoModel, await google.as_service_account(
-                    directory.users.photos.get(userKey=user_id)
-                ))
+                return cast(
+                    UserPhotoModel,
+                    await google.as_service_account(
+                        directory.users.photos.get(userKey=user_id)
+                    ),
+                )
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -358,7 +374,9 @@ class Directory:
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
-    async def create_group(self, email: str, name: str, description: str = None) -> GroupModel:
+    async def create_group(
+        self, email: str, name: str, description: str = None
+    ) -> GroupModel:
         """
         Creates the group in the directory
         @param email: Email of the group
@@ -378,7 +396,10 @@ class Directory:
                 service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
-                return cast(GroupModel, await google.as_service_account(directory.groups.insert(body=body)))
+                return cast(
+                    GroupModel,
+                    await google.as_service_account(directory.groups.insert(body=body)),
+                )
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -433,9 +454,12 @@ class Directory:
                 service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
-                return cast(GroupModel, await google.as_service_account(
-                    directory.groups.update(groupKey=group_id, body=body)
-                ))
+                return cast(
+                    GroupModel,
+                    await google.as_service_account(
+                        directory.groups.update(groupKey=group_id, body=body)
+                    ),
+                )
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -459,7 +483,9 @@ class Directory:
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
-    async def add_group_member(self, user_id: str, group_id: str, role: str, type: str) -> MemberModel:
+    async def add_group_member(
+        self, user_id: str, group_id: str, role: str, type: str
+    ) -> MemberModel:
         """
         Adds the user to the group
         @param user_id: User's primary email address, alias email address, or unique user ID.
@@ -472,9 +498,12 @@ class Directory:
                 service_account_creds=self.service_account_credentials
             ) as google:
                 directory = await google.discover("admin", "directory_v1")
-                return cast(MemberModel, await google.as_service_account(
-                    directory.members.insert(groupKey=group_id, body=user)
-                ))
+                return cast(
+                    MemberModel,
+                    await google.as_service_account(
+                        directory.members.insert(groupKey=group_id, body=user)
+                    ),
+                )
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
