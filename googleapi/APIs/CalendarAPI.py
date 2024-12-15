@@ -113,7 +113,7 @@ class Calendar:
         end_time: datetime_datetime,
         description: str = "",
         location: str = "",
-    ) -> None:
+    ) -> EventModel:
         """
         Adds an event to the calendar
         @param calendar_id: ID of the calendar that the event needs to be added to
@@ -122,7 +122,7 @@ class Calendar:
         @param end_time: End time of the event
         @param description: Optional description of the event
         @param location: Optional location of the event
-        @return: Nothing
+        @return: The created event
         """
         eventBody = self._build_event_body(
             title, description, location, start_time, end_time
@@ -133,9 +133,9 @@ class Calendar:
                 service_account_creds=self.service_account_credentials
             ) as google:
                 calendar = await google.discover("calendar", "v3")
-                await google.as_service_account(
+                return cast(EventModel, await google.as_service_account(
                     calendar.events.insert(calendarId=calendar_id, body=eventBody)
-                )
+                ))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -228,7 +228,7 @@ class Calendar:
         end_time: datetime_datetime = None,
         description: str = None,
         location: str = None,
-    ) -> None:
+    ) -> EventModel:
         """
         Updates an event of the calendar
         @param event_id: ID of the event that needs to be updated
@@ -238,7 +238,7 @@ class Calendar:
         @param end_time: Optional end time of the event in isoformat
         @param description: Optional description of the event
         @param location: Optional location of the event
-        @return: Nothing
+        @return: The updated event
         """
         if all(x is None for x in [title, start_time, end_time, description, location]):
             raise Exception("Update arguments don't have a value")
@@ -280,48 +280,48 @@ class Calendar:
                 service_account_creds=self.service_account_credentials
             ) as google:
                 calendar = await google.discover("calendar", "v3")
-                await google.as_service_account(
+                return cast(EventModel, await google.as_service_account(
                     calendar.events.update(
                         calendarId=calendar_id, eventId=event_id, body=newEventBody
                     )
-                )
+                ))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
     async def move_event(
         self, event_id: str, old_calendar_id: str, new_calendar_id: str
-    ) -> None:
+    ) -> EventModel:
         """
         Moves an event to the new calendar
         @param event_id: ID of the event that needs to be moved
         @param old_calendar_id: ID of the calendar is currently in
         @param new_calendar_id: ID of the calendar the event is moved to
-        @return: Nothing
+        @return: The moved event
         """
         try:
             async with Aiogoogle(
                 service_account_creds=self.service_account_credentials
             ) as google:
                 calendar = await google.discover("calendar", "v3")
-                await google.as_service_account(
+                return cast(EventModel, await google.as_service_account(
                     calendar.events.move(
                         calendarId=old_calendar_id,
                         eventId=event_id,
                         destination=new_calendar_id,
                     )
-                )
+                ))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
     async def add_calendar(
         self, title: str, location: str = "", description: str = ""
-    ) -> None:
+    ) -> CalendarModel:
         """
         Adds a calendar
         @param title: Title of the calendar
         @param location: Optional geographical location of the calendar
         @param description: Optional description of the calendar
-        @return: Nothing
+        @return: The created calendar
         """
         try:
             async with Aiogoogle(
@@ -329,16 +329,16 @@ class Calendar:
             ) as google:
                 calendar = await google.discover("calendar", "v3")
                 calendarBody = self._build_calendar_body(title, location, description)
-                await google.as_service_account(
+                return cast(CalendarModel, await google.as_service_account(
                     calendar.calendars.insert(body=calendarBody)
-                )
+                ))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
     async def get_calendars(self) -> List[CalendarListEntryModel]:
         """
-        Returns all the calendars
-        @return: Returns all the calendars
+        Returns all the calendars of the user
+        @return: All the calendars of the user
         """
         try:
             async with Aiogoogle(
@@ -354,7 +354,7 @@ class Calendar:
 
     async def get_calendar(self, calendar_id: str) -> CalendarModel:
         """
-        Returns the calendar
+        Returns the calendar of the user
         @param calendar_id: ID of the calendar
         @return: Returns the calendar
         """
@@ -378,14 +378,14 @@ class Calendar:
         title: str = None,
         location: str = None,
         description: str = None,
-    ):
+    ) -> CalendarModel:
         """
         Updates the calendar
         @param calendar_id: ID of the calendar that needs to be updated
         @param title: Title of the calendar
         @param location: Optional geographical location of the calendar
         @param description: Optional description of the calendar
-        @return: Nothing
+        @return: The updated calendar
         """
         if all(x is None for x in [title, description, location]):
             raise Exception("Not a single argument is updated")
@@ -417,15 +417,15 @@ class Calendar:
                 service_account_creds=self.service_account_credentials
             ) as google:
                 calendar = await google.discover("calendar", "v3")
-                await google.as_service_account(
+                return cast(CalendarModel, await google.as_service_account(
                     calendar.calendars.update(
                         calendarId=calendar_id, body=newCalendarBody
                     )
-                )
+                ))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
-    async def remove_calendar(self, calendar_id: str):
+    async def remove_calendar(self, calendar_id: str) -> None:
         """
         Removes the calendar
         @param calendar_id: ID of the calendar to be removed
@@ -442,7 +442,7 @@ class Calendar:
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
-    async def clear_calendar(self, calendar_id: str):
+    async def clear_calendar(self, calendar_id: str) -> None:
         """
         Removes all the events in the calendar
         @param calendar_id: ID of the calendar of the events to be removed
@@ -461,7 +461,7 @@ class Calendar:
 
     async def add_share_rule(
         self, calendar_id: str, scope_type: str, user: str, role: str
-    ) -> None:
+    ) -> AclRuleModel:
         """
         Adds a share rule to the calendar
         @param calendar_id: ID of the calendar you want to add a rule to
@@ -482,9 +482,9 @@ class Calendar:
                 service_account_creds=self.service_account_credentials
             ) as google:
                 calendar = await google.discover("calendar", "v3")
-                await google.as_service_account(
+                return cast(AclRuleModel, await google.as_service_account(
                     calendar.acl.insert(calendarId=calendar_id, body=rule)
-                )
+                ))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -536,7 +536,7 @@ class Calendar:
         scope_type: str = None,
         user: str = None,
         role: str = None,
-    ) -> None:
+    ) -> AclRuleModel:
         """
         Updates the share rule of the calendar
         @param calendar_id: ID of the calendar you want to update the rule of
@@ -576,11 +576,11 @@ class Calendar:
                 service_account_creds=self.service_account_credentials
             ) as google:
                 calendar = await google.discover("calendar", "v3")
-                await google.as_service_account(
+                return cast(AclRuleModel, await google.as_service_account(
                     calendar.acl.update(
                         calendarId=calendar_id, ruleId=rule_id, body=newRule
                     )
-                )
+                ))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
