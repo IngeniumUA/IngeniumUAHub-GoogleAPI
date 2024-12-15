@@ -20,10 +20,10 @@ class Mailing:
     """
 
     def __init__(
-            self,
-            mail_sender: str,
-            service_file_path: str,
-            mail_reply_address: str | None = None,
+        self,
+        mail_sender: str,
+        service_file_path: str,
+        mail_reply_address: str | None = None,
     ) -> None:
         """
         @param mail_sender: Sender of the mail
@@ -45,10 +45,18 @@ class Mailing:
         @return: Returns ServiceAccountCreds from aiogoogle
         """
         service_account_key = json.load(open(self.serviceFilePath))
-        credentials = ServiceAccountCreds(scopes=self.scopes, **service_account_key, subject=self.mail_sender)
+        credentials = ServiceAccountCreds(
+            scopes=self.scopes, **service_account_key, subject=self.mail_sender
+        )
         return credentials
 
-    async def _build_message(self, mail_receiver: str, mail_subject: str, mail_content: str, attachments: list[AttachmentsDictionary] = None) -> dict:
+    async def _build_message(
+        self,
+        mail_receiver: str,
+        mail_subject: str,
+        mail_content: str,
+        attachments: list[AttachmentsDictionary] = None,
+    ) -> dict:
         """
         Builds the body of the mail message
         @param mail_receiver: Receiver of the mail
@@ -76,24 +84,38 @@ class Mailing:
             if isinstance(attachmentDictionary["attachment"], str):
                 # Save the path, because this is needed later on
                 attachmentPath = attachmentDictionary["attachment"]
-                fileType, encoding = mimetypes_guess_type(attachmentDictionary["filename"])
+                fileType, encoding = mimetypes_guess_type(
+                    attachmentDictionary["filename"]
+                )
                 mainType, subType = fileType.split("/")
                 attachmentData = MIMEBase(mainType, subType)
 
                 # Open the attachment, read it and write its content into attachmentData
-                with open(attachmentPath, 'rb') as file:  # "rb" = read, binary mode (e.g. images)
+                with open(
+                    attachmentPath, "rb"
+                ) as file:  # "rb" = read, binary mode (e.g. images)
                     attachmentData.set_payload(file.read())
                 # Add header to attachmentData so that the name of the attachment stays
-                attachmentData.add_header("Content-Disposition", "attachment",
-                                          filename=attachmentDictionary["filename"])
+                attachmentData.add_header(
+                    "Content-Disposition",
+                    "attachment",
+                    filename=attachmentDictionary["filename"],
+                )
                 encode_base64(attachmentData)  # Encode the attachmentData
             else:
-                attachmentData = MIMEBase(attachmentDictionary["mime_maintype"], attachmentDictionary["mime_subtype"])
+                attachmentData = MIMEBase(
+                    attachmentDictionary["mime_maintype"],
+                    attachmentDictionary["mime_subtype"],
+                )
                 attachmentData.set_payload(attachmentDictionary["attachment"])
                 encode_base64(attachmentData)
-                attachmentData.add_header("Content-Disposition", "attachment",
-                                          filename=attachmentDictionary["filename"] + "." + attachmentDictionary[
-                                              "mime_subtype"])
+                attachmentData.add_header(
+                    "Content-Disposition",
+                    "attachment",
+                    filename=attachmentDictionary["filename"]
+                    + "."
+                    + attachmentDictionary["mime_subtype"],
+                )
             message.attach(attachmentData)
 
         encoded_message = base64_urlsafe_encode(message.as_bytes()).decode()
@@ -101,11 +123,12 @@ class Mailing:
         return create_message
 
     async def send_message(
-            self,
-            mail_receivers: list[str],
-            mail_subject: str,
-            mail_content: str,
-            attachments: list[AttachmentsDictionary] = None) -> None:
+        self,
+        mail_receivers: list[str],
+        mail_subject: str,
+        mail_content: str,
+        attachments: list[AttachmentsDictionary] = None,
+    ) -> None:
         """
         Sends the mail
         @param mail_receivers: List of receivers of the mail
@@ -118,10 +141,19 @@ class Mailing:
             attachments = []
 
         for mail_receiver in mail_receivers:
-            message = await self._build_message(mail_receiver=mail_receiver, mail_subject=mail_subject, mail_content=mail_content, attachments=attachments)
+            message = await self._build_message(
+                mail_receiver=mail_receiver,
+                mail_subject=mail_subject,
+                mail_content=mail_content,
+                attachments=attachments,
+            )
             try:
-                async with Aiogoogle(service_account_creds=self.service_account_credentials) as google:
+                async with Aiogoogle(
+                    service_account_creds=self.service_account_credentials
+                ) as google:
                     gmail = await google.discover("gmail", "v1")
-                    await google.as_service_account(gmail.users.messages.send(userId="me", json=message))
+                    await google.as_service_account(
+                        gmail.users.messages.send(userId="me", json=message)
+                    )
             except aiogoogle.excs.HTTPError as error:
                 raise Exception("Aiogoogle error") from error
