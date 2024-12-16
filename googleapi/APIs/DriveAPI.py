@@ -40,13 +40,13 @@ class Drive:
         )
         return credentials
 
-    async def _execute_aiogoogle(self, function: Callable, **kwargs):
+    async def _execute_aiogoogle(self, method_callable: Callable, **method_args):
         try:
             async with Aiogoogle(
                 service_account_creds=self.service_account_credentials
             ) as google:
                 calendar = await google.discover("drive", "v3")
-                return await google.as_service_account(function(calendar, **kwargs))
+                return await google.as_service_account(method_callable(calendar, **method_args))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -55,11 +55,8 @@ class Drive:
         Gets the drives of the user
         @return: Drives of the user
         """
-
-        def function(drive):
-            return drive.drives.list()
-
-        return cast(DrivesModel, await self._execute_aiogoogle(function)).get(
+        method_callable = lambda drive, **kwargs: drive.drives.list()
+        return cast(DrivesModel, await self._execute_aiogoogle(method_callable=method_callable)).get(
             "drives", []
         )
 
@@ -69,12 +66,9 @@ class Drive:
         @param drive_id: ID of the drive
         @return: Drive of the user
         """
-
-        def function(drive, **kwargs):
-            return drive.drives.get(**kwargs)
-
-        kwargs = {"driveId": drive_id}
-        return cast(DriveModel, await self._execute_aiogoogle(function, **kwargs))
+        method_callable = lambda drive, **kwargs: drive.drives.get(**kwargs)
+        method_args = {"driveId": drive_id}
+        return cast(DriveModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
 
     async def delete_drive(self, drive_id) -> None:
         """
@@ -82,9 +76,6 @@ class Drive:
         @param drive_id: ID of the drive
         @return: Nothing
         """
-
-        def function(drive, **kwargs):
-            drive.drives.delete(**kwargs)
-
-        kwargs = {"driveId": drive_id}
-        await self._execute_aiogoogle(function, **kwargs)
+        method_callable = lambda drive, **kwargs: drive.drives.delete(**kwargs)
+        method_args = {"driveId": drive_id}
+        await self._execute_aiogoogle(method_callable=method_callable, **method_args)

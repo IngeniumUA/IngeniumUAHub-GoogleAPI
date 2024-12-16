@@ -1,12 +1,12 @@
 import json
 from datetime import datetime as datetime_datetime, timezone
 from os import path as os_path
-from typing import cast, List
+from typing import cast, List, Dict, Any
+from typing_extensions import Callable
 
 import aiogoogle.excs
 from aiogoogle import Aiogoogle
 from aiogoogle.auth.creds import ServiceAccountCreds
-from typing_extensions import Callable
 
 from googleapi.TypedDicts.Calendar import (
     CalendarListModel,
@@ -106,13 +106,13 @@ class Calendar:
         rule = {"scope": {"type": scope_type, "value": scope_value}, "role": role}
         return cast(AclRuleModel, rule)
 
-    async def _execute_aiogoogle(self, function: Callable, **kwargs):
+    async def _execute_aiogoogle(self, method_callable: Callable, **method_args):
         try:
             async with Aiogoogle(
-                service_account_creds=self.service_account_credentials
+                    service_account_creds=self.service_account_credentials
             ) as google:
-                calendar = await google.discover("calendar", "v3")
-                return await google.as_service_account(function(calendar, **kwargs))
+                calendar = await google.discover(api_name="calendar", api_version="v3")
+                return await google.as_service_account(method_callable(calendar, **method_args))
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -138,12 +138,9 @@ class Calendar:
         eventBody = self._build_event_body(
             title, description, location, start_time, end_time
         )
-
-        def function(calendar, **kwargs):
-            return calendar.events.insert(**kwargs)
-
-        kwargs = {"calendarId": calendar_id, "body": eventBody}
-        return cast(EventModel, await self._execute_aiogoogle(function, **kwargs))
+        method_callable = lambda calendar, **kwargs: calendar.events.insert(**kwargs)
+        method_args = {"calendarId": calendar_id, "body": eventBody}
+        return cast(EventModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
 
     async def get_events(
         self, calendar_id: str, get_all_events: bool = False
@@ -154,25 +151,22 @@ class Calendar:
         @param get_all_events: Whether to return all events or only after the current date
         @return: Returns all the events in the calendar
         """
-
-        def function(calendar, **kwargs):
-            return calendar.events.list(**kwargs)
-
+        method_callable = lambda calendar, **kwargs: calendar.events.list(**kwargs)
         if get_all_events:
-            kwargs = {
+            method_args = {
                 "calendarId": calendar_id,
                 "orderBy": "startTime",
                 "singleEvents": True,
             }
         else:
             currentTime = datetime_datetime.now(timezone.utc).isoformat()
-            kwargs = {
+            method_args = {
                 "calendarId": calendar_id,
                 "orderBy": "startTime",
                 "singleEvents": True,
                 "timeMin": currentTime,
             }
-        return cast(EventsModel, await self._execute_aiogoogle(function, **kwargs)).get(
+        return cast(EventsModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args)).get(
             "items", []
         )
 
@@ -183,12 +177,9 @@ class Calendar:
         @param event_id: ID of the event
         @return: The event
         """
-
-        def function(calendar, **kwargs):
-            return calendar.events.get(**kwargs)
-
-        kwargs = {"calendarId": calendar_id, "eventId": event_id}
-        return cast(EventModel, await self._execute_aiogoogle(function, **kwargs))
+        method_callable = lambda calendar, **kwargs: calendar.events.get(**kwargs)
+        method_args = {"calendarId": calendar_id, "eventId": event_id}
+        return cast(EventModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
 
     async def remove_event(self, event_id: str, calendar_id: str) -> None:
         """
@@ -197,12 +188,9 @@ class Calendar:
         @param calendar_id: ID of the calendar the event is in
         @return: Nothing
         """
-
-        def function(calendar, **kwargs):
-            return calendar.events.delete(**kwargs)
-
-        kwargs = {"calendarId": calendar_id, "eventId": event_id}
-        await self._execute_aiogoogle(function, **kwargs)
+        method_callable = lambda calendar, **kwargs: calendar.events.delete(**kwargs)
+        method_args = {"calendarId": calendar_id, "eventId": event_id}
+        await self._execute_aiogoogle(method_callable=method_callable, **method_args)
 
     async def update_event(
         self,
@@ -260,11 +248,9 @@ class Calendar:
             title, description, location, start_time, end_time
         )
 
-        def function(calendar, **kwargs):
-            return calendar.events.update(**kwargs)
-
-        kwargs = {"calendarId": calendar_id, "eventId": event_id, "body": newEventBody}
-        return cast(EventModel, await self._execute_aiogoogle(function, **kwargs))
+        method_callable = lambda calendar, **kwargs: calendar.events.update(**kwargs)
+        method_args = {"calendarId": calendar_id, "eventId": event_id, "body": newEventBody}
+        return cast(EventModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
 
     async def move_event(
         self, event_id: str, old_calendar_id: str, new_calendar_id: str
@@ -276,16 +262,13 @@ class Calendar:
         @param new_calendar_id: ID of the calendar the event is moved to
         @return: The moved event
         """
-
-        def function(calendar, **kwargs):
-            return calendar.events.move(**kwargs)
-
-        kwargs = {
+        method_callable = lambda calendar, **kwargs: calendar.events.move(**kwargs)
+        method_args = {
             "calendarId": old_calendar_id,
             "eventId": event_id,
             "destination": new_calendar_id,
         }
-        return cast(EventModel, await self._execute_aiogoogle(function, **kwargs))
+        return cast(EventModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
 
     async def add_calendar(
         self, title: str, location: str = "", description: str = ""
@@ -298,24 +281,18 @@ class Calendar:
         @return: The created calendar
         """
         calendarBody = self._build_calendar_body(title, location, description)
-
-        def function(calendar, **kwargs):
-            return calendar.calendars.insert(**kwargs)
-
-        kwargs = {"body": calendarBody}
-        return cast(CalendarModel, await self._execute_aiogoogle(function, **kwargs))
+        method_callable = lambda calendar, **kwargs: calendar.calendars.insert(**kwargs)
+        method_args = {"body": calendarBody}
+        return cast(CalendarModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
 
     async def get_calendars(self) -> List[CalendarListEntryModel]:
         """
         Returns all the calendars of the user
         @return: All the calendars of the user
         """
-
-        def function(calendar):
-            return calendar.calendarList.list()
-
+        method_callable = lambda calendar, **kwargs: calendar.calendarList.list()
         return cast(
-            CalendarListModel, await self._execute_aiogoogle(function=function)
+            CalendarListModel, await self._execute_aiogoogle(method_callable=method_callable)
         ).get("items", [])
 
     async def get_calendar(self, calendar_id: str) -> CalendarModel:
@@ -324,12 +301,9 @@ class Calendar:
         @param calendar_id: ID of the calendar
         @return: Returns the calendar
         """
-
-        def function(calendar, **kwargs):
-            return calendar.calendars.get(**kwargs)
-
-        kwargs = {"calendarId": calendar_id}
-        return cast(CalendarModel, await self._execute_aiogoogle(function, **kwargs))
+        method_callable = lambda calendar, **kwargs: calendar.calendars.get(**kwargs)
+        method_args = {"calendarId": calendar_id}
+        return cast(CalendarModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
 
     async def update_calendar(
         self,
@@ -370,12 +344,9 @@ class Calendar:
             raise Exception("Not a single parameter gets a new value")
 
         newCalendarBody = self._build_calendar_body(title, location, description)
-
-        def function(calendar, **kwargs):
-            return calendar.calendars.update(**kwargs)
-
-        kwargs = {"calendarId": calendar_id, "body": newCalendarBody}
-        return cast(CalendarModel, await self._execute_aiogoogle(function, **kwargs))
+        method_callable = lambda calendar, **kwargs: calendar.calendars.update(**kwargs)
+        method_args = {"calendarId": calendar_id, "body": newCalendarBody}
+        return cast(CalendarModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
 
     async def remove_calendar(self, calendar_id: str) -> None:
         """
@@ -383,12 +354,9 @@ class Calendar:
         @param calendar_id: ID of the calendar to be removed
         @return: Nothing
         """
-
-        def function(calendar, **kwargs):
-            return calendar.calendars.delete(**kwargs)
-
-        kwargs = {"calendarId": calendar_id}
-        await self._execute_aiogoogle(function, **kwargs)
+        method_callable = lambda calendar, **kwargs: calendar.calendars.delete(**kwargs)
+        method_args = {"calendarId": calendar_id}
+        await self._execute_aiogoogle(method_callable, **method_args)
 
     async def clear_calendar(self, calendar_id: str) -> None:
         """
@@ -396,12 +364,9 @@ class Calendar:
         @param calendar_id: ID of the calendar of the events to be removed
         @return: Nothing
         """
-
-        def function(calendar, **kwargs):
-            return calendar.calendars.clear(**kwargs)
-
-        kwargs = {"calendarId": calendar_id}
-        await self._execute_aiogoogle(function, **kwargs)
+        method_callable = lambda calendar, **kwargs: calendar.calendars.clear(**kwargs)
+        method_args = {"calendarId": calendar_id}
+        await self._execute_aiogoogle(method_callable=method_callable, **method_args)
 
     async def add_share_rule(
         self, calendar_id: str, scope_type: str, user: str, role: str
@@ -420,12 +385,9 @@ class Calendar:
             raise Exception("Wrong scope type was given")
 
         rule = self._build_scope_body(scope_type, user, role)
-
-        def function(calendar, **kwargs):
-            return calendar.acl.insert(**kwargs)
-
-        kwargs = {"calendarId": calendar_id, "body": rule}
-        return cast(AclRuleModel, await self._execute_aiogoogle(function, **kwargs))
+        method_callable = lambda calendar, **kwargs: calendar.acl.insert(**kwargs)
+        method_args = {"calendarId": calendar_id, "body": rule}
+        return cast(AclRuleModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
 
     async def get_share_rules(self, calendar_id: str) -> List[AclRuleModel]:
         """
@@ -433,12 +395,9 @@ class Calendar:
         @param calendar_id: ID of the calendar
         @return: Returns all the share rules
         """
-
-        def function(calendar, **kwargs):
-            return calendar.acl.list(**kwargs)
-
-        kwargs = {"calendarId": calendar_id}
-        return cast(AclModel, await self._execute_aiogoogle(function, **kwargs)).get(
+        method_callable = lambda calendar, **kwargs: calendar.acl.list(**kwargs)
+        method_args = {"calendarId": calendar_id}
+        return cast(AclModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args)).get(
             "items", []
         )
 
@@ -449,12 +408,9 @@ class Calendar:
         @param rule_id: ID of the rule
         @return: The rule
         """
-
-        def function(calendar, **kwargs):
-            return calendar.acl.get(**kwargs)
-
-        kwargs = {"calendarId": calendar_id, "ruleId": rule_id}
-        return cast(AclRuleModel, await self._execute_aiogoogle(function, **kwargs))
+        method_callable = lambda calendar, **kwargs: calendar.acl.get(**kwargs)
+        method_args = {"calendarId": calendar_id, "ruleId": rule_id}
+        return cast(AclRuleModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
 
     async def update_share_rule(
         self,
@@ -497,12 +453,9 @@ class Calendar:
             raise Exception("Not a single parameter gets a new value")
 
         newRule = self._build_scope_body(scope_type, user, role)
-
-        def function(calendar, **kwargs):
-            return calendar.acl.update(**kwargs)
-
-        kwargs = {"calendarId": calendar_id, "ruleId": rule_id, "body": newRule}
-        return cast(AclRuleModel, await self._execute_aiogoogle(function, **kwargs))
+        method_callable = lambda calendar, **kwargs: calendar.acl.update(**kwargs)
+        method_args = {"calendarId": calendar_id, "ruleId": rule_id, "body": newRule}
+        return cast(AclRuleModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
 
     async def remove_share_rule(self, calendar_id: str, rule_id: str) -> None:
         """
@@ -511,9 +464,6 @@ class Calendar:
         @param rule_id: ID of the rule that needs to be removed
         @return: Nothing
         """
-
-        def function(calendar, **kwargs):
-            return calendar.acl.delete(**kwargs)
-
-        kwargs = {"calendarId": calendar_id, "ruleId": rule_id}
-        await self._execute_aiogoogle(function, **kwargs)
+        method_callable = lambda calendar, **kwargs: calendar.acl.delete(**kwargs)
+        method_args = {"calendarId": calendar_id, "ruleId": rule_id}
+        await self._execute_aiogoogle(method_callable=method_callable, **method_args)

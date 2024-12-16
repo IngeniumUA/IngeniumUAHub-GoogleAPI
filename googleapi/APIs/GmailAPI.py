@@ -6,6 +6,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from mimetypes import guess_type as mimetypes_guess_type
 from os import path as os_path
+from typing import Callable, Dict, Any
 
 import aiogoogle.excs
 from aiogoogle import Aiogoogle
@@ -20,10 +21,10 @@ class Mailing:
     """
 
     def __init__(
-        self,
-        mail_sender: str,
-        service_file_path: str,
-        mail_reply_address: str | None = None,
+            self,
+            mail_sender: str,
+            service_file_path: str,
+            mail_reply_address: str | None = None,
     ) -> None:
         """
         @param mail_sender: Sender of the mail
@@ -51,11 +52,11 @@ class Mailing:
         return credentials
 
     async def _build_message(
-        self,
-        mail_receiver: str,
-        mail_subject: str,
-        mail_content: str,
-        attachments: list[AttachmentsDictionary] = None,
+            self,
+            mail_receiver: str,
+            mail_subject: str,
+            mail_content: str,
+            attachments: list[AttachmentsDictionary] = None,
     ) -> dict:
         """
         Builds the body of the mail message
@@ -92,7 +93,7 @@ class Mailing:
 
                 # Open the attachment, read it and write its content into attachmentData
                 with open(
-                    attachmentPath, "rb"
+                        attachmentPath, "rb"
                 ) as file:  # "rb" = read, binary mode (e.g. images)
                     attachmentData.set_payload(file.read())
                 # Add header to attachmentData so that the name of the attachment stays
@@ -113,8 +114,8 @@ class Mailing:
                     "Content-Disposition",
                     "attachment",
                     filename=attachmentDictionary["filename"]
-                    + "."
-                    + attachmentDictionary["mime_subtype"],
+                             + "."
+                             + attachmentDictionary["mime_subtype"],
                 )
             message.attach(attachmentData)
 
@@ -122,12 +123,22 @@ class Mailing:
         create_message = {"raw": encoded_message}
         return create_message
 
+    async def _execute_aiogoogle(self, method_callable: Callable, **method_args):
+        try:
+            async with Aiogoogle(
+                    service_account_creds=self.service_account_credentials
+            ) as google:
+                calendar = await google.discover(api_name="calendar", api_version="v3")
+                return await google.as_service_account(method_callable(calendar, **method_args))
+        except aiogoogle.excs.HTTPError as error:
+            raise Exception("Aiogoogle error") from error
+
     async def send_message(
-        self,
-        mail_receivers: list[str],
-        mail_subject: str,
-        mail_content: str,
-        attachments: list[AttachmentsDictionary] = None,
+            self,
+            mail_receivers: list[str],
+            mail_subject: str,
+            mail_content: str,
+            attachments: list[AttachmentsDictionary] = None,
     ) -> None:
         """
         Sends the mail
@@ -140,6 +151,8 @@ class Mailing:
         if attachments is None:
             attachments = []
 
+        method_callable = lambda gmail, **kwargs: gmail.users.messages.send(**kwargs)
+
         for mail_receiver in mail_receivers:
             message = await self._build_message(
                 mail_receiver=mail_receiver,
@@ -147,13 +160,5 @@ class Mailing:
                 mail_content=mail_content,
                 attachments=attachments,
             )
-            try:
-                async with Aiogoogle(
-                    service_account_creds=self.service_account_credentials
-                ) as google:
-                    gmail = await google.discover("gmail", "v1")
-                    await google.as_service_account(
-                        gmail.users.messages.send(userId="me", json=message)
-                    )
-            except aiogoogle.excs.HTTPError as error:
-                raise Exception("Aiogoogle error") from error
+            method_args = {"userId": "me", "json": message}
+            await self._execute_aiogoogle(method_callable=method_callable, **method_args)
