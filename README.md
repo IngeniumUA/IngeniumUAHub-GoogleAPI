@@ -22,10 +22,13 @@
 1. [OAuthScopes](https://developers.google.com/identity/protocols/oauth2/scopes)
 2. [Connect to service account](https://developers.google.com/analytics/devguides/config/mgmt/v3/quickstart/service-py)
 
-# Library/commands used for auto creating TypedDicts
+# Auto creating TypedDicts
 1. [GitHub link](https://github.com/koxudaxi/datamodel-code-generator)
 
-```datamodel-codegen --input input_file --output output_file --input-file-type json --output-model-type typing.TypedDict```
+```
+pip install datamodel-code-generator
+datamodel-codegen --input input_file --output output_file --input-file-type json --output-model-type typing.TypedDict
+```
 # Setting up service accounts
 Note: The service accounts don't need roles, you just need to create them and give them the right permissions in the workspace admin panel using the second link.
 1. [Creating service accounts](https://console.cloud.google.com/iam-admin/serviceaccounts?inv=1&invt=AbkM9Q&project=ingeniumuahub)

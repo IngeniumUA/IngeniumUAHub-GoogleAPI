@@ -77,7 +77,7 @@ class Drive:
             ),
         )
 
-    async def delete_drive(self, drive_id) -> None:
+    async def delete_drive(self, drive_id: str) -> None:
         """
         Deletes the drive of the user
         @param drive_id: ID of the drive
