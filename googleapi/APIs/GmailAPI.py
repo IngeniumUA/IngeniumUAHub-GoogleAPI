@@ -6,7 +6,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from mimetypes import guess_type as mimetypes_guess_type
 from os import path as os_path
-from typing import Callable, Dict, Any
+from typing import Callable
 
 import aiogoogle.excs
 from aiogoogle import Aiogoogle
