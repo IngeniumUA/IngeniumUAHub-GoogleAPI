@@ -46,7 +46,9 @@ class Drive:
                 service_account_creds=self.service_account_credentials
             ) as google:
                 calendar = await google.discover("drive", "v3")
-                return await google.as_service_account(method_callable(calendar, **method_args))
+                return await google.as_service_account(
+                    method_callable(calendar, **method_args)
+                )
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -56,9 +58,9 @@ class Drive:
         @return: Drives of the user
         """
         method_callable = lambda drive, **kwargs: drive.drives.list()
-        return cast(DrivesModel, await self._execute_aiogoogle(method_callable=method_callable)).get(
-            "drives", []
-        )
+        return cast(
+            DrivesModel, await self._execute_aiogoogle(method_callable=method_callable)
+        ).get("drives", [])
 
     async def get_drive(self, drive_id: str) -> DriveModel:
         """
@@ -68,7 +70,12 @@ class Drive:
         """
         method_callable = lambda drive, **kwargs: drive.drives.get(**kwargs)
         method_args = {"driveId": drive_id}
-        return cast(DriveModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
+        return cast(
+            DriveModel,
+            await self._execute_aiogoogle(
+                method_callable=method_callable, **method_args
+            ),
+        )
 
     async def delete_drive(self, drive_id) -> None:
         """

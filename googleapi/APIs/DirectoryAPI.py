@@ -60,10 +60,12 @@ class Directory:
     async def _execute_aiogoogle(self, method_callable: Callable, **method_args):
         try:
             async with Aiogoogle(
-                    service_account_creds=self.service_account_credentials
+                service_account_creds=self.service_account_credentials
             ) as google:
                 calendar = await google.discover(api_name="calendar", api_version="v3")
-                return await google.as_service_account(method_callable(calendar, **method_args))
+                return await google.as_service_account(
+                    method_callable(calendar, **method_args)
+                )
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
@@ -75,7 +77,10 @@ class Directory:
         method_callable = lambda directory, **kwargs: directory.users.list(**kwargs)
         method_args = {"orderBy": "email", "domain": self.domain}
         return cast(
-            UserListModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args)
+            UserListModel,
+            await self._execute_aiogoogle(
+                method_callable=method_callable, **method_args
+            ),
         ).get("users", [])
 
     async def get_user(self, user_id: str) -> UserModel:
@@ -86,8 +91,17 @@ class Directory:
         """
 
         method_callable = lambda directory, **kwargs: directory.users.get(**kwargs)
-        method_args = {"userKey": user_id, "viewType": "admin_view", "projection": "full"}
-        return cast(UserModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
+        method_args = {
+            "userKey": user_id,
+            "viewType": "admin_view",
+            "projection": "full",
+        }
+        return cast(
+            UserModel,
+            await self._execute_aiogoogle(
+                method_callable=method_callable, **method_args
+            ),
+        )
 
     async def delete_user(self, user_id: str) -> None:
         """
@@ -143,7 +157,12 @@ class Directory:
 
         method_callable = lambda directory, **kwargs: directory.users.insert(**kwargs)
         method_args = {"body": body}
-        return cast(UserModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
+        return cast(
+            UserModel,
+            await self._execute_aiogoogle(
+                method_callable=method_callable, **method_args
+            ),
+        )
 
     async def update_user(
         self, user_id: str, first_name: str = None, last_name: str = None
@@ -177,7 +196,12 @@ class Directory:
         body = {"name": {"givenName": first_name, "familyName": last_name}}
         method_callable = lambda directory, **kwargs: directory.users.update(**kwargs)
         method_args = {"userKey": user_id, "body": body}
-        return cast(UserModel, await self._execute_aiogoogle(method_callable=method_callable, method_args=method_args))
+        return cast(
+            UserModel,
+            await self._execute_aiogoogle(
+                method_callable=method_callable, method_args=method_args
+            ),
+        )
 
     async def update_user_password(self, password: str, user_id: str) -> UserModel:
         """
@@ -202,7 +226,12 @@ class Directory:
 
         method_callable = lambda directory, **kwargs: directory.users.update(**kwargs)
         method_kwargs = {"userKey": user_id, "body": body}
-        return cast(UserModel, await self._execute_aiogoogle(method_callable=method_callable, **method_kwargs))
+        return cast(
+            UserModel,
+            await self._execute_aiogoogle(
+                method_callable=method_callable, **method_kwargs
+            ),
+        )
 
     async def update_user_photo(self, user_id: int, photo_path: str) -> UserPhotoModel:
         """
@@ -226,9 +255,16 @@ class Directory:
 
         body = {"photoData": photoDataBase64, "mimeType": fileType}
 
-        method_callable = lambda directory, **kwargs: directory.users.photos.update(**kwargs)
+        method_callable = lambda directory, **kwargs: directory.users.photos.update(
+            **kwargs
+        )
         method_args = {"userKey": user_id, "body": body}
-        return cast(UserPhotoModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
+        return cast(
+            UserPhotoModel,
+            await self._execute_aiogoogle(
+                method_callable=method_callable, **method_args
+            ),
+        )
 
     async def get_user_photo(self, user_id: int) -> UserPhotoModel:
         """
@@ -236,9 +272,16 @@ class Directory:
         @param user_id: User's primary email address, alias email address, or unique user ID.
         @return: User Photo
         """
-        method_callable = lambda directory, **kwargs: directory.users.photos.get(**kwargs)
+        method_callable = lambda directory, **kwargs: directory.users.photos.get(
+            **kwargs
+        )
         method_args = {"userKey": user_id}
-        return cast(UserPhotoModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
+        return cast(
+            UserPhotoModel,
+            await self._execute_aiogoogle(
+                method_callable=method_callable, **method_args
+            ),
+        )
 
     async def delete_user_photo(self, user_id: int) -> None:
         """
@@ -246,7 +289,9 @@ class Directory:
         @param user_id: User's primary email address, alias email address, or unique user ID.
         @return: Nothing
         """
-        method_callable = lambda directory, **kwargs: directory.users.photos.delete(**kwargs)
+        method_callable = lambda directory, **kwargs: directory.users.photos.delete(
+            **kwargs
+        )
         method_args = {"userKey": user_id}
         await self._execute_aiogoogle(method_callable=method_callable, **method_args)
 
@@ -258,7 +303,10 @@ class Directory:
         method_callable = lambda directory, **kwargs: directory.groups.list(**kwargs)
         method_args = {"domain": self.domain, "orderBy": "email"}
         return cast(
-            GroupListModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args)
+            GroupListModel,
+            await self._execute_aiogoogle(
+                method_callable=method_callable, **method_args
+            ),
         ).get("groups", [])
 
     async def get_group(self, group_id: str) -> GroupModel:
@@ -269,7 +317,12 @@ class Directory:
         """
         method_callable = lambda directory, **kwargs: directory.groups.get(**kwargs)
         method_args = {"groupKey": group_id}
-        return cast(GroupModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
+        return cast(
+            GroupModel,
+            await self._execute_aiogoogle(
+                method_callable=method_callable, **method_args
+            ),
+        )
 
     async def delete_group(self, group_id: str) -> None:
         """
@@ -278,7 +331,9 @@ class Directory:
         @return: Nothing
         """
         method_callable = lambda directory, **kwargs: directory.groups.delete(**kwargs)
-        method_args = {"groupKey": group_id,}
+        method_args = {
+            "groupKey": group_id,
+        }
         await self._execute_aiogoogle(method_callable=method_callable, **method_args)
 
     async def create_group(
@@ -298,7 +353,12 @@ class Directory:
         body = {"email": email, "name": name, "description": description}
         method_callable = lambda directory, **kwargs: directory.groups.insert(**kwargs)
         method_args = {"body": body}
-        return cast(GroupModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
+        return cast(
+            GroupModel,
+            await self._execute_aiogoogle(
+                method_callable=method_callable, **method_args
+            ),
+        )
 
     async def update_group(
         self,
@@ -348,7 +408,12 @@ class Directory:
 
         method_callable = lambda directory, **kwargs: directory.groups.update(**kwargs)
         method_args = {"groupKey": group_id, "body": body}
-        return cast(GroupModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
+        return cast(
+            GroupModel,
+            await self._execute_aiogoogle(
+                method_callable=method_callable, **method_args
+            ),
+        )
 
     async def get_group_members(self, group_id: str) -> List[MemberModel]:
         """
@@ -360,7 +425,10 @@ class Directory:
         method_callable = lambda directory, **kwargs: directory.members.list(**kwargs)
         method_args = {"groupKey": group_id}
         return cast(
-            MemberListModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args)
+            MemberListModel,
+            await self._execute_aiogoogle(
+                method_callable=method_callable, **method_args
+            ),
         ).get("members", [])
 
     async def add_group_member(self, user_id: str, group_id: str) -> MemberModel:
@@ -373,7 +441,12 @@ class Directory:
         user = await self.get_user(user_id)
         method_callable = lambda directory, **kwargs: directory.members.insert(**kwargs)
         method_args = {"groupKey": group_id, "body": user}
-        return cast(MemberModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
+        return cast(
+            MemberModel,
+            await self._execute_aiogoogle(
+                method_callable=method_callable, **method_args
+            ),
+        )
 
     async def delete_group_member(self, user_id: int, group_id: str) -> None:
         """
@@ -395,4 +468,6 @@ class Directory:
         method_callable = lambda directory, **kwargs: directory.users.signOut(**kwargs)
         for user in users:
             method_args = {"userKey": user.get("id")}
-            await self._execute_aiogoogle(method_callable=method_callable, **method_args)
+            await self._execute_aiogoogle(
+                method_callable=method_callable, **method_args
+            )
