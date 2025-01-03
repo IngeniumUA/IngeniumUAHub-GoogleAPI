@@ -128,9 +128,9 @@ class Mailing:
             async with Aiogoogle(
                 service_account_creds=self.service_account_credentials
             ) as google:
-                calendar = await google.discover(api_name="calendar", api_version="v3")
+                gmail = await google.discover(api_name="gmail", api_version="v1")
                 return await google.as_service_account(
-                    method_callable(calendar, **method_args)
+                    method_callable(gmail, **method_args)
                 )
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
