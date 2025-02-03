@@ -94,5 +94,17 @@ class Drive:
         @return: List of the files of the drive
         """
         method_callable = lambda drive, **kwargs: drive.files.list(**kwargs)
-        method_args = {"driveId": drive_id, "corpora": "drive", "includeItemsFromAllDrives": True, "supportsAllDrives": True, "pageSize": 1000, "q": "mimeType='application/vnd.google-apps.folder' and trashed=false"}
-        return cast(FilesModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args)).get("files", [])
+        method_args = {
+            "driveId": drive_id,
+            "corpora": "drive",
+            "includeItemsFromAllDrives": True,
+            "supportsAllDrives": True,
+            "pageSize": 1000,
+            "q": "mimeType='application/vnd.google-apps.folder' and trashed=false",
+        }
+        return cast(
+            FilesModel,
+            await self._execute_aiogoogle(
+                method_callable=method_callable, **method_args
+            ),
+        ).get("files", [])

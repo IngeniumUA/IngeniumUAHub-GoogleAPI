@@ -129,10 +129,10 @@ class FieldModel(TypedDict):
 
 
 Fields = TypedDict(
-    'Fields',
+    "Fields",
     {
-        'string': FieldModel,
-        '...': None,
+        "string": FieldModel,
+        "...": None,
     },
 )
 
@@ -155,26 +155,26 @@ class ContentHints(TypedDict):
 
 
 ExportLinks = TypedDict(
-    'ExportLinks',
+    "ExportLinks",
     {
-        'string': str,
-        '...': None,
+        "string": str,
+        "...": None,
     },
 )
 
 Properties = TypedDict(
-    'Properties',
+    "Properties",
     {
-        'string': str,
-        '...': None,
+        "string": str,
+        "...": None,
     },
 )
 
 AppProperties = TypedDict(
-    'AppProperties',
+    "AppProperties",
     {
-        'string': str,
-        '...': None,
+        "string": str,
+        "...": None,
     },
 )
 
