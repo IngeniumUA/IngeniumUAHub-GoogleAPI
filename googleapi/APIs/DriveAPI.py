@@ -7,7 +7,7 @@ from aiogoogle import Aiogoogle
 from aiogoogle.auth.creds import ServiceAccountCreds
 from typing_extensions import Callable
 
-from googleapi.TypedDicts.Drive import DriveModel, DrivesModel
+from googleapi.TypedDicts.Drive import DriveModel, DrivesModel, FileModel, FilesModel
 
 
 class Drive:
@@ -86,3 +86,13 @@ class Drive:
         method_callable = lambda drive, **kwargs: drive.drives.delete(**kwargs)
         method_args = {"driveId": drive_id}
         await self._execute_aiogoogle(method_callable=method_callable, **method_args)
+
+    async def get_directories(self, drive_id: str) -> List[FileModel]:
+        """
+        Gets all the files of the drive
+        @param drive_id: ID of the drive
+        @return: List of the files of the drive
+        """
+        method_callable = lambda drive, **kwargs: drive.files.list(**kwargs)
+        method_args = {"driveId": drive_id, "corpora": "drive", "includeItemsFromAllDrives": True, "supportsAllDrives": True, "pageSize": 1000, "q": "mimeType='application/vnd.google-apps.folder' and trashed=false"}
+        return cast(FilesModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args)).get("files", [])
