@@ -347,10 +347,10 @@ class FilesModel(TypedDict):
 
 
 Detail = TypedDict(
-    'Detail',
+    "Detail",
     {
-        '@type': str,
-        'field1': str,
+        "@type": str,
+        "field1": str,
     },
 )
 
@@ -362,10 +362,10 @@ class StatusModel(TypedDict):
 
 
 Response = TypedDict(
-    'Response',
+    "Response",
     {
-        '@type': str,
-        'field1': str,
+        "@type": str,
+        "field1": str,
     },
 )
 

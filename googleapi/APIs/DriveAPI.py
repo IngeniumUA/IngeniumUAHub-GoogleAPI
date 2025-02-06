@@ -45,7 +45,7 @@ class Drive:
     async def _execute_aiogoogle(self, method_callable: Callable, **method_args):
         try:
             async with Aiogoogle(
-                    service_account_creds=self.service_account_credentials
+                service_account_creds=self.service_account_credentials
             ) as google:
                 drive = await google.discover("drive", "v3")
                 return await google.as_service_account(
@@ -90,7 +90,7 @@ class Drive:
         await self._execute_aiogoogle(method_callable=method_callable, **method_args)
 
     async def get_children_from_parent(
-            self, drive_id: str, parent_id: str = None, get_all: bool = False
+        self, drive_id: str, parent_id: str = None, get_all: bool = False
     ) -> List[FileModel]:
         """
         Gets all the files of the drive
@@ -170,7 +170,9 @@ class Drive:
 
         return paths
 
-    async def download_file(self, file_id: str, as_bytes: bool = False, destination: str = None) -> bytes | None:
+    async def download_file(
+        self, file_id: str, as_bytes: bool = False, destination: str = None
+    ) -> bytes | None:
         """
         Downloads a file from the drive
         :param destination: Optional location to download the file to, needs to have the name of the file
@@ -181,7 +183,12 @@ class Drive:
         method_callable = lambda drive, **kwargs: drive.files.get(**kwargs)
         method_args = {"fileId": file_id, "alt": "media"}
 
-        file_content = cast(bytes, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
+        file_content = cast(
+            bytes,
+            await self._execute_aiogoogle(
+                method_callable=method_callable, **method_args
+            ),
+        )
 
         if destination:
             async with aiofiles.open(destination, "wb") as f:
