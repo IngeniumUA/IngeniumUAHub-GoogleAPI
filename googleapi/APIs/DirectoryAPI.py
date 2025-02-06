@@ -62,7 +62,9 @@ class Directory:
             async with Aiogoogle(
                 service_account_creds=self.service_account_credentials
             ) as google:
-                directory = await google.discover(api_name="directory", api_version="v3")
+                directory = await google.discover(
+                    api_name="directory", api_version="v3"
+                )
                 return await google.as_service_account(
                     method_callable(directory, **method_args)
                 )
