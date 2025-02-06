@@ -52,9 +52,6 @@ class Drive:
         except aiogoogle.excs.HTTPError as error:
             raise Exception("Aiogoogle error") from error
 
-
-    #async def _build_path(self):
-
     async def get_drives(self) -> List[DriveModel]:
         """
         Gets the drives of the user
