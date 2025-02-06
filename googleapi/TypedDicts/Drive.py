@@ -344,3 +344,45 @@ class FilesModel(TypedDict):
     kind: str
     incompleteSearch: str
     files: List[FileModel]
+
+
+Detail = TypedDict(
+    'Detail',
+    {
+        '@type': str,
+        'field1': str,
+    },
+)
+
+
+class StatusModel(TypedDict):
+    code: str
+    message: str
+    details: List[Detail]
+
+
+Response = TypedDict(
+    'Response',
+    {
+        '@type': str,
+        'field1': str,
+    },
+)
+
+
+class DownloadMetadata(TypedDict):
+    type: str
+
+
+class DownloadResponse(TypedDict):
+    type: str
+    downloadUri: str
+    partialDownloadAllowed: bool
+
+
+class DownloadOperationModel(TypedDict):
+    name: str
+    metadata: DownloadMetadata
+    done: str
+    error: StatusModel
+    response: DownloadResponse

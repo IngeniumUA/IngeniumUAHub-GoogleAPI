@@ -1,13 +1,17 @@
 import json
+import os
 from os import path as os_path
-from typing import List, cast, Dict
+from typing import List, cast, Dict, Any, Coroutine
 
+import aiofiles
 import aiogoogle.excs
+import aiohttp
 from aiogoogle import Aiogoogle
 from aiogoogle.auth.creds import ServiceAccountCreds
 from typing_extensions import Callable
 
-from googleapi.TypedDicts.Drive import DriveModel, DrivesModel, FileModel, FilesModel
+from googleapi.TypedDicts.Drive import DriveModel, DrivesModel, FileModel, FilesModel, DownloadResponse, \
+    DownloadOperationModel
 
 
 class Drive:
@@ -34,7 +38,8 @@ class Drive:
         """
         @return: Returns ServiceAccountCreds from aiogoogle
         """
-        service_account_key = json.load(open(self.serviceFilePath))
+        with open(self.serviceFilePath, "r") as f:
+            service_account_key = json.load(f)
         credentials = ServiceAccountCreds(
             scopes=self.scopes, **service_account_key, subject=self.subject
         )
@@ -43,14 +48,14 @@ class Drive:
     async def _execute_aiogoogle(self, method_callable: Callable, **method_args):
         try:
             async with Aiogoogle(
-                service_account_creds=self.service_account_credentials
+                    service_account_creds=self.service_account_credentials
             ) as google:
                 drive = await google.discover("drive", "v3")
                 return await google.as_service_account(
                     method_callable(drive, **method_args)
                 )
         except aiogoogle.excs.HTTPError as error:
-            raise Exception("Aiogoogle error") from error
+            raise Exception(f"Aiogoogle error: {error}")
 
     async def get_drives(self) -> List[DriveModel]:
         """
@@ -88,7 +93,7 @@ class Drive:
         await self._execute_aiogoogle(method_callable=method_callable, **method_args)
 
     async def get_children_from_parent(
-        self, drive_id: str, parent_id: str = None, get_all: bool = False
+            self, drive_id: str, parent_id: str = None, get_all: bool = False
     ) -> List[FileModel]:
         """
         Gets all the files of the drive
@@ -132,6 +137,12 @@ class Drive:
         return all_items
 
     async def build_tree(self, items: List[FileModel], root_id: str) -> List[Dict]:
+        """
+        Builds a tree out of given items from the drive
+        :param items: List of the items to make a tree of
+        :param root_id: ID of the root
+        :return: Tree as a list of dictionaries
+        """
         nodes = {item["id"]: {**item, "children": []} for item in items}
         tree = []
 
@@ -145,6 +156,12 @@ class Drive:
         return tree
 
     async def build_paths(self, tree: List[Dict], current_path: str = "") -> List[str]:
+        """
+        Builds paths out of the given tree
+        :param tree: The tree to build the paths of
+        :param current_path: The current path
+        :return: List of paths
+        """
         paths = []
 
         for node in tree:
@@ -155,3 +172,23 @@ class Drive:
                 paths.extend(await self.build_paths(node["children"], node_path))
 
         return paths
+
+    async def download_file(self, file_id: str, as_bytes: bool = False, destination: str = None) -> bytes | None:
+        """
+        Downloads a file from the drive
+        :param destination: Optional location to download the file to, needs to have the name of the file
+        :param as_bytes: Optional, if the file needs to be returned as bytes
+        :param file_id: ID of the file to download
+        :return: File as bytes or None
+        """
+        method_callable = lambda drive, **kwargs: drive.files.get(**kwargs)
+        method_args = {"fileId": file_id, "alt": "media"}
+
+        file_content = cast(bytes, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
+
+        if destination:
+            async with aiofiles.open(destination, "wb") as f:
+                await f.write(file_content)
+
+        if as_bytes:
+            return file_content
