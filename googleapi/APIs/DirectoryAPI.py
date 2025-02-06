@@ -62,9 +62,9 @@ class Directory:
             async with Aiogoogle(
                 service_account_creds=self.service_account_credentials
             ) as google:
-                calendar = await google.discover(api_name="calendar", api_version="v3")
+                directory = await google.discover(api_name="directory", api_version="v3")
                 return await google.as_service_account(
-                    method_callable(calendar, **method_args)
+                    method_callable(directory, **method_args)
                 )
         except aiogoogle.excs.HTTPError as error:
             raise Exception(f"Aiogoogle error: {error}") from error
