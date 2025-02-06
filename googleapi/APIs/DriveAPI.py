@@ -87,7 +87,9 @@ class Drive:
         method_args = {"driveId": drive_id}
         await self._execute_aiogoogle(method_callable=method_callable, **method_args)
 
-    async def get_children_from_parent(self, drive_id: str, parent_id: str = None, get_all: bool = False) -> List[FileModel]:
+    async def get_children_from_parent(
+        self, drive_id: str, parent_id: str = None, get_all: bool = False
+    ) -> List[FileModel]:
         """
         Gets all the files of the drive
         @param drive_id: ID of the drive
@@ -98,18 +100,30 @@ class Drive:
         all_items = []
         page_token = None
 
-        search_query = f"parents in '{parent_id}'" if parent_id and not get_all else None
+        search_query = (
+            f"parents in '{parent_id}'" if parent_id and not get_all else None
+        )
 
         method_callable = lambda drive, **kwargs: drive.files.list(**kwargs)
-        method_args = {"corpora": "drive", "driveId": drive_id, "includeItemsFromAllDrives": True, "orderBy": "folder",
-                       "pageSize": 1000,
-                       "supportsAllDrives": True,
-                       "fields": "nextPageToken, files(id, name, parents)",
-                       "q": search_query}
+        method_args = {
+            "corpora": "drive",
+            "driveId": drive_id,
+            "includeItemsFromAllDrives": True,
+            "orderBy": "folder",
+            "pageSize": 1000,
+            "supportsAllDrives": True,
+            "fields": "nextPageToken, files(id, name, parents)",
+            "q": search_query,
+        }
         while True:
             if page_token:
                 method_args["pageToken"] = page_token
-            response = cast(FilesModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
+            response = cast(
+                FilesModel,
+                await self._execute_aiogoogle(
+                    method_callable=method_callable, **method_args
+                ),
+            )
             all_items.extend(response.get("files", []))
             page_token = response.get("nextPageToken", None)
             if not page_token:
@@ -118,15 +132,15 @@ class Drive:
         return all_items
 
     async def build_tree(self, items: List[FileModel], root_id: str) -> List[Dict]:
-        nodes = {item['id']: {**item, 'children': []} for item in items}
+        nodes = {item["id"]: {**item, "children": []} for item in items}
         tree = []
 
         for item in items:
-            parent_id = item.get('parents', [None])[0]  # Safely get parent or None
+            parent_id = item.get("parents", [None])[0]  # Safely get parent or None
             if parent_id == root_id:
-                tree.append(nodes[item['id']])
+                tree.append(nodes[item["id"]])
             elif parent_id in nodes:  # Ensure parent exists before appending
-                nodes[parent_id]['children'].append(nodes[item['id']])
+                nodes[parent_id]["children"].append(nodes[item["id"]])
 
         return tree
 
