@@ -133,7 +133,7 @@ class Mailing:
                     method_callable(gmail, **method_args)
                 )
         except aiogoogle.excs.HTTPError as error:
-            raise Exception("Aiogoogle error") from error
+            raise Exception(f"Aiogoogle error: {error}") from error
 
     async def send_message(
         self,

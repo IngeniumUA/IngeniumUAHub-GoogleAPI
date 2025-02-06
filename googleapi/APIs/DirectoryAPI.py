@@ -67,7 +67,7 @@ class Directory:
                     method_callable(calendar, **method_args)
                 )
         except aiogoogle.excs.HTTPError as error:
-            raise Exception("Aiogoogle error") from error
+            raise Exception(f"Aiogoogle error: {error}") from error
 
     async def get_users(self) -> List[UserModel]:
         """
