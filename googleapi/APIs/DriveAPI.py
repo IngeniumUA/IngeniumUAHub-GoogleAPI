@@ -1,17 +1,14 @@
 import json
-import os
 from os import path as os_path
-from typing import List, cast, Dict, Any, Coroutine
+from typing import List, cast, Dict
 
 import aiofiles
 import aiogoogle.excs
-import aiohttp
 from aiogoogle import Aiogoogle
 from aiogoogle.auth.creds import ServiceAccountCreds
 from typing_extensions import Callable
 
-from googleapi.TypedDicts.Drive import DriveModel, DrivesModel, FileModel, FilesModel, DownloadResponse, \
-    DownloadOperationModel
+from googleapi.TypedDicts.Drive import DriveModel, DrivesModel, FileModel, FilesModel
 
 
 class Drive:
@@ -55,7 +52,7 @@ class Drive:
                     method_callable(drive, **method_args)
                 )
         except aiogoogle.excs.HTTPError as error:
-            raise Exception(f"Aiogoogle error: {error}")
+            raise Exception(f"Aiogoogle error: {error}") from error
 
     async def get_drives(self) -> List[DriveModel]:
         """
