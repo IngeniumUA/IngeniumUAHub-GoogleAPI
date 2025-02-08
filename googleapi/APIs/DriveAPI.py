@@ -268,7 +268,9 @@ class Drive:
         method_args = {"fileId": file_id, "supportsAllDrives": True}
         await self._execute_aiogoogle(method_callable=method_callable, **method_args)
 
-    async def change_file_name(self, file_id: str, file_name: str, upload_type: str = "multipart") -> FileModel:
+    async def change_file_name(
+        self, file_id: str, file_name: str, upload_type: str = "multipart"
+    ) -> FileModel:
         """
         Changes the file name
         :param file_id: ID of the file to change
