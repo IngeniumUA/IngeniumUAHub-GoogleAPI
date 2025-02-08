@@ -268,7 +268,27 @@ class Drive:
         method_args = {"fileId": file_id, "supportsAllDrives": True}
         await self._execute_aiogoogle(method_callable=method_callable, **method_args)
 
-    # async def update_file(self, file_id: str, ) -> FileModel:
+    async def change_file_name(self, file_id: str, file_name: str, upload_type: str = "multipart") -> FileModel:
+        """
+        Changes the file name
+        :param file_id: ID of the file to change
+        :param file_name: New name of the file, type needs to be specified
+        :param upload_type: Optional (media, multipart, resumable)
+        :return: The file
+        """
+        method_callable = lambda drive, **kwargs: drive.files.update(**kwargs)
+        method_args = {
+            "fileId": file_id,
+            "uploadType": upload_type,
+            "supportsAllDrives": True,
+            "json": {"name": file_name},
+        }
+        return cast(
+            FileModel,
+            await self._execute_aiogoogle(
+                method_callable=method_callable, **method_args
+            ),
+        )
 
     async def move_file(
         self, file_id: str, parent_id: str, upload_type: str = "multipart"
@@ -281,7 +301,6 @@ class Drive:
         :return: The file
         """
         file = await self.get_file(file_id)
-        print(file)
         method_callable = lambda drive, **kwargs: drive.files.update(**kwargs)
 
         method_args = {
