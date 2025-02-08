@@ -96,8 +96,17 @@ class Drive:
         :return: File
         """
         method_callable = lambda drive, **kwargs: drive.files.get(**kwargs)
-        method_args = {"fileId": file_id, "supportsAllDrives": True, "fields": "id, name, parents"}
-        return cast(FileModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
+        method_args = {
+            "fileId": file_id,
+            "supportsAllDrives": True,
+            "fields": "id, name, parents",
+        }
+        return cast(
+            FileModel,
+            await self._execute_aiogoogle(
+                method_callable=method_callable, **method_args
+            ),
+        )
 
     async def get_children_from_parent(
         self, drive_id: str, parent_id: str = None, get_all: bool = False
@@ -207,7 +216,15 @@ class Drive:
         if as_bytes:
             return file_content
 
-    async def upload_file(self, drive_id: str, parent_id: str, mime_type: str, file_content: bytes, file_name: str, upload_type: str = "multipart") -> FileModel:
+    async def upload_file(
+        self,
+        drive_id: str,
+        parent_id: str,
+        mime_type: str,
+        file_content: bytes,
+        file_name: str,
+        upload_type: str = "multipart",
+    ) -> FileModel:
         """
         Uploads a file to the drive
         :param drive_id: ID of the drive
@@ -224,17 +241,22 @@ class Drive:
             "name": file_name,
             "mimeType": mime_type,
             "parents": [parent_id],
-            "driveId": drive_id
+            "driveId": drive_id,
         }
 
         method_args = {
             "uploadType": upload_type,
             "supportsAllDrives": True,
             "json": file_metadata,
-            "upload_file": file_content
+            "upload_file": file_content,
         }
 
-        return cast(FileModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
+        return cast(
+            FileModel,
+            await self._execute_aiogoogle(
+                method_callable=method_callable, **method_args
+            ),
+        )
 
     async def delete_file(self, file_id: str) -> None:
         """
@@ -246,9 +268,11 @@ class Drive:
         method_args = {"fileId": file_id, "supportsAllDrives": True}
         await self._execute_aiogoogle(method_callable=method_callable, **method_args)
 
-    #async def update_file(self, file_id: str, ) -> FileModel:
+    # async def update_file(self, file_id: str, ) -> FileModel:
 
-    async def move_file(self, file_id: str, parent_id: str, upload_type: str = "multipart") -> FileModel:
+    async def move_file(
+        self, file_id: str, parent_id: str, upload_type: str = "multipart"
+    ) -> FileModel:
         """
         Changes parent of the file
         :param file_id: ID of the file to move
@@ -267,6 +291,9 @@ class Drive:
             "addParents": parent_id,
             "removeParents": file["parents"][0],
         }
-        return cast(FileModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
-
-
+        return cast(
+            FileModel,
+            await self._execute_aiogoogle(
+                method_callable=method_callable, **method_args
+            ),
+        )
