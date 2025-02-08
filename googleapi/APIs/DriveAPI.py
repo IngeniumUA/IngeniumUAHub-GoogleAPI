@@ -6,7 +6,6 @@ import aiofiles
 import aiogoogle.excs
 from aiogoogle import Aiogoogle
 from aiogoogle.auth.creds import ServiceAccountCreds
-from aiogoogle.models import MediaUpload
 from typing_extensions import Callable
 
 from googleapi.TypedDicts.Drive import DriveModel, DrivesModel, FileModel, FilesModel
