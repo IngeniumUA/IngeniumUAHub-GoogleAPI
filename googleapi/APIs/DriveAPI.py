@@ -6,6 +6,7 @@ import aiofiles
 import aiogoogle.excs
 from aiogoogle import Aiogoogle
 from aiogoogle.auth.creds import ServiceAccountCreds
+from aiogoogle.models import MediaUpload
 from typing_extensions import Callable
 
 from googleapi.TypedDicts.Drive import DriveModel, DrivesModel, FileModel, FilesModel
@@ -88,6 +89,16 @@ class Drive:
         method_callable = lambda drive, **kwargs: drive.drives.delete(**kwargs)
         method_args = {"driveId": drive_id}
         await self._execute_aiogoogle(method_callable=method_callable, **method_args)
+
+    async def get_file(self, file_id: str) -> FileModel:
+        """
+        Gets the files
+        :param file_id: ID of the file
+        :return: File
+        """
+        method_callable = lambda drive, **kwargs: drive.files.get(**kwargs)
+        method_args = {"fileId": file_id, "supportsAllDrives": True, "fields": "id, name, parents"}
+        return cast(FileModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
 
     async def get_children_from_parent(
         self, drive_id: str, parent_id: str = None, get_all: bool = False
@@ -196,3 +207,67 @@ class Drive:
 
         if as_bytes:
             return file_content
+
+    async def upload_file(self, drive_id: str, parent_id: str, mime_type: str, file_content: bytes, file_name: str, upload_type: str = "multipart") -> FileModel:
+        """
+        Uploads a file to the drive
+        :param drive_id: ID of the drive
+        :param parent_id: ID of the parent
+        :param mime_type: Mime type of the file
+        :param file_content: File content of the file as bytes
+        :param file_name: Name of the file
+        :param upload_type: Optional (media, multipart, resumable), check: https://developers.google.com/drive/api/reference/rest/v3/files/create
+        :return: The file
+        """
+        method_callable = lambda drive, **kwargs: drive.files.create(**kwargs)
+
+        file_metadata = {
+            "name": file_name,
+            "mimeType": mime_type,
+            "parents": [parent_id],
+            "driveId": drive_id
+        }
+
+        method_args = {
+            "uploadType": upload_type,
+            "supportsAllDrives": True,
+            "json": file_metadata,
+            "upload_file": file_content
+        }
+
+        return cast(FileModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
+
+    async def delete_file(self, file_id: str) -> None:
+        """
+        Deletes a file from the drive
+        :param file_id: ID of the file to delete
+        :return: None
+        """
+        method_callable = lambda drive, **kwargs: drive.files.delete(**kwargs)
+        method_args = {"fileId": file_id, "supportsAllDrives": True}
+        await self._execute_aiogoogle(method_callable=method_callable, **method_args)
+
+    #async def update_file(self, file_id: str, ) -> FileModel:
+
+    async def move_file(self, file_id: str, parent_id: str, upload_type: str = "multipart") -> FileModel:
+        """
+        Changes parent of the file
+        :param file_id: ID of the file to move
+        :param parent_id: ID of the new parent
+        :param upload_type: Optional (media, multipart, resumable)
+        :return: The file
+        """
+        file = await self.get_file(file_id)
+        print(file)
+        method_callable = lambda drive, **kwargs: drive.files.update(**kwargs)
+
+        method_args = {
+            "fileId": file_id,
+            "uploadType": upload_type,
+            "supportsAllDrives": True,
+            "addParents": parent_id,
+            "removeParents": file["parents"][0],
+        }
+        return cast(FileModel, await self._execute_aiogoogle(method_callable=method_callable, **method_args))
+
+
