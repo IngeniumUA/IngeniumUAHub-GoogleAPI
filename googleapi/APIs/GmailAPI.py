@@ -13,14 +13,14 @@ from googleapi.Helpers.HelperFunctions import (
 from googleapi.TypedDicts.Gmail import AttachmentsDictionary
 
 
-class Mailing:
+class Gmail:
     """
     Implements the Gmail API to send mails
     """
 
     def __init__(
-        self,
-        mail_reply_address: str | None = None,
+            self,
+            mail_reply_address: str | None = None,
     ) -> None:
         """
         @param mail_reply_address: Address the replies to the mail will be sent to
@@ -43,11 +43,11 @@ class Mailing:
         )
 
     async def _build_message(
-        self,
-        mail_receiver: str,
-        mail_subject: str,
-        mail_content: str,
-        attachments: list[AttachmentsDictionary] = None,
+            self,
+            mail_receiver: str,
+            mail_subject: str,
+            mail_content: str,
+            attachments: list[AttachmentsDictionary] = None,
     ) -> dict:
         """
         Builds the body of the mail message
@@ -84,7 +84,7 @@ class Mailing:
 
                 # Open the attachment, read it and write its content into attachmentData
                 with open(
-                    attachmentPath, "rb"
+                        attachmentPath, "rb"
                 ) as file:  # "rb" = read, binary mode (e.g. images)
                     attachmentData.set_payload(file.read())
                 # Add header to attachmentData so that the name of the attachment stays
@@ -105,8 +105,8 @@ class Mailing:
                     "Content-Disposition",
                     "attachment",
                     filename=attachmentDictionary["filename"]
-                    + "."
-                    + attachmentDictionary["mime_subtype"],
+                             + "."
+                             + attachmentDictionary["mime_subtype"],
                 )
             message.attach(attachmentData)
 
@@ -115,11 +115,11 @@ class Mailing:
         return create_message
 
     async def send_message(
-        self,
-        mail_receivers: list[str],
-        mail_subject: str,
-        mail_content: str,
-        attachments: list[AttachmentsDictionary] = None,
+            self,
+            mail_receivers: list[str],
+            mail_subject: str,
+            mail_content: str,
+            attachments: list[AttachmentsDictionary] = None,
     ) -> None:
         """
         Sends the mail
@@ -149,3 +149,9 @@ class Mailing:
                 api_version=self.api_version,
                 **method_args,
             )
+
+
+async def create_gmail_class(service_file: json, mail_sender: str, mail_reply_address: str | None = None) -> Gmail:
+    gmail = Gmail(mail_reply_address=mail_reply_address)
+    await gmail._async_init(service_file=service_file, mail_sender=mail_sender)
+    return gmail
