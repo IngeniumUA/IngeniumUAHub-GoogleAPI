@@ -5,13 +5,8 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from mimetypes import guess_type as mimetypes_guess_type
-from os import path as os_path
-from typing import Callable
 
-import aiogoogle.excs
-from aiogoogle import Aiogoogle
-from aiogoogle.auth.creds import ServiceAccountCreds
-
+from googleapi.Helpers.HelperFunctions import build_service_account_credentials, execute_aiogoogle
 from googleapi.TypedDicts.Gmail import AttachmentsDictionary
 
 
@@ -23,33 +18,19 @@ class Mailing:
     def __init__(
         self,
         mail_sender: str,
-        service_file_path: str,
+        service_file: json,
         mail_reply_address: str | None = None,
     ) -> None:
         """
         @param mail_sender: Sender of the mail
-        @param service_file_path: Path to the service account credentials file
+        @param service_file: Service account credentials file
         @param mail_reply_address: Address the replies to the mail will be sent to
         """
         self.mail_reply_address = mail_reply_address
-        self.scopes = ["https://www.googleapis.com/auth/gmail.send"]
         self.mail_sender = mail_sender
-
-        if not os_path.exists(service_file_path):
-            raise Exception("Service account json path does not exist")
-
-        self.serviceFilePath = service_file_path
-        self.service_account_credentials = self._build_service_account_credentials()
-
-    def _build_service_account_credentials(self):
-        """
-        @return: Returns ServiceAccountCreds from aiogoogle
-        """
-        service_account_key = json.load(open(self.serviceFilePath))
-        credentials = ServiceAccountCreds(
-            scopes=self.scopes, **service_account_key, subject=self.mail_sender
-        )
-        return credentials
+        self.service_account_credentials = build_service_account_credentials(service_file=service_file, scopes=["https://www.googleapis.com/auth/gmail.send"], subject=mail_sender)
+        self.api_name = "gmail"
+        self.api_version = "v1"
 
     async def _build_message(
         self,
@@ -123,18 +104,6 @@ class Mailing:
         create_message = {"raw": encoded_message}
         return create_message
 
-    async def _execute_aiogoogle(self, method_callable: Callable, **method_args):
-        try:
-            async with Aiogoogle(
-                service_account_creds=self.service_account_credentials
-            ) as google:
-                gmail = await google.discover(api_name="gmail", api_version="v1")
-                return await google.as_service_account(
-                    method_callable(gmail, **method_args)
-                )
-        except aiogoogle.excs.HTTPError as error:
-            raise Exception(f"Aiogoogle error: {error}") from error
-
     async def send_message(
         self,
         mail_receivers: list[str],
@@ -163,6 +132,6 @@ class Mailing:
                 attachments=attachments,
             )
             method_args = {"userId": "me", "json": message}
-            await self._execute_aiogoogle(
-                method_callable=method_callable, **method_args
+            await execute_aiogoogle(
+                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
             )

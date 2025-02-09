@@ -1,5 +1,4 @@
 import json
-from os import path as os_path
 from typing import List, cast, Dict
 
 import aiofiles
@@ -15,7 +14,7 @@ class Drive:
 
     def __init__(self, service_file: json, subject: str) -> None:
         """
-        @param service_file_path: Path to the service account credentials file
+        @param service_file: Service account credentials file
         @param subject: Subject who owns the drive
         """
         self.service_account_credentials = build_service_account_credentials(service_file=service_file, scopes=["https://www.googleapis.com/auth/drive"], subject=subject)
