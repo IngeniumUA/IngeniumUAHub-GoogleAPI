@@ -534,7 +534,10 @@ class Directory:
                 **method_args,
             )
 
-async def create_directory_class(service_file: json, subject: str, domain: str) -> Directory:
+
+async def create_directory_class(
+    service_file: json, subject: str, domain: str
+) -> Directory:
     directory = Directory(domain=domain)
     await directory._async_init(service_file=service_file, subject=subject)
     return directory

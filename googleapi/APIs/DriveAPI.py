@@ -103,7 +103,7 @@ class Drive:
         )
 
     async def get_children_from_parent(
-            self, drive_id: str, parent_id: str = None, get_all: bool = False
+        self, drive_id: str, parent_id: str = None, get_all: bool = False
     ) -> List[FileModel]:
         """
         Gets all the files of the drive
@@ -187,8 +187,7 @@ class Drive:
 
         return paths
 
-    async def download_file(
-            self, file_id: str) -> bytes:
+    async def download_file(self, file_id: str) -> bytes:
         """
         Downloads a file from the drive
         :param file_id: ID of the file to download
@@ -209,13 +208,13 @@ class Drive:
         )
 
     async def upload_file(
-            self,
-            drive_id: str,
-            parent_id: str,
-            mime_type: str,
-            file_content: bytes,
-            file_name: str,
-            upload_type: str = "multipart",
+        self,
+        drive_id: str,
+        parent_id: str,
+        mime_type: str,
+        file_content: bytes,
+        file_name: str,
+        upload_type: str = "multipart",
     ) -> FileModel:
         """
         Uploads a file to the drive
@@ -271,7 +270,7 @@ class Drive:
         )
 
     async def change_file_name(
-            self, file_id: str, file_name: str, upload_type: str = "multipart"
+        self, file_id: str, file_name: str, upload_type: str = "multipart"
     ) -> FileModel:
         """
         Changes the file name
@@ -299,7 +298,7 @@ class Drive:
         )
 
     async def move_file(
-            self, file_id: str, parent_id: str, upload_type: str = "multipart"
+        self, file_id: str, parent_id: str, upload_type: str = "multipart"
     ) -> FileModel:
         """
         Changes parent of the file
