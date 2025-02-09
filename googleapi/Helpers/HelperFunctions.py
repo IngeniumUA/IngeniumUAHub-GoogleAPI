@@ -6,7 +6,9 @@ from aiogoogle import Aiogoogle
 from aiogoogle.auth.creds import ServiceAccountCreds
 
 
-def build_service_account_credentials(service_file: json, scopes: List[str], subject: str) -> ServiceAccountCreds:
+def build_service_account_credentials(
+    service_file: json, scopes: List[str], subject: str
+) -> ServiceAccountCreds:
     """
     @return: Returns ServiceAccountCreds from aiogoogle
     """
@@ -18,14 +20,18 @@ def build_service_account_credentials(service_file: json, scopes: List[str], sub
     return credentials
 
 
-async def execute_aiogoogle(method_callable: Callable, service_account_credentials: ServiceAccountCreds, api_name: str, api_version: str, **method_args: Dict):
+async def execute_aiogoogle(
+    method_callable: Callable,
+    service_account_credentials: ServiceAccountCreds,
+    api_name: str,
+    api_version: str,
+    **method_args: Dict,
+):
     try:
         async with Aiogoogle(
-                service_account_creds=service_account_credentials
+            service_account_creds=service_account_credentials
         ) as google:
             api = await google.discover(api_name, api_version)
-            return await google.as_service_account(
-                method_callable(api, **method_args)
-            )
+            return await google.as_service_account(method_callable(api, **method_args))
     except aiogoogle.excs.HTTPError as error:
         raise Exception(f"Aiogoogle error: {error}") from error

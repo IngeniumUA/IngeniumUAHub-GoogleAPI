@@ -2,7 +2,10 @@ import json
 from datetime import datetime as datetime_datetime, timezone
 from typing import cast, List
 
-from googleapi.Helpers.HelperFunctions import build_service_account_credentials, execute_aiogoogle
+from googleapi.Helpers.HelperFunctions import (
+    build_service_account_credentials,
+    execute_aiogoogle,
+)
 from googleapi.TypedDicts.Calendar import (
     CalendarListModel,
     CalendarListEntryModel,
@@ -26,7 +29,11 @@ class Calendar:
         """
         self.timeZone = "Europe/Brussels"
 
-        self.service_account_credentials = build_service_account_credentials(service_file=service_file, scopes=["https://www.googleapis.com/auth/calendar"], subject=subject)
+        self.service_account_credentials = build_service_account_credentials(
+            service_file=service_file,
+            scopes=["https://www.googleapis.com/auth/calendar"],
+            subject=subject,
+        )
         self.api_name = "calendar"
         self.api_version = "v3"
 
@@ -114,7 +121,11 @@ class Calendar:
         return cast(
             EventModel,
             await execute_aiogoogle(
-                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+                **method_args,
             ),
         )
 
@@ -145,7 +156,11 @@ class Calendar:
         return cast(
             EventsModel,
             await execute_aiogoogle(
-                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+                **method_args,
             ),
         ).get("items", [])
 
@@ -161,7 +176,11 @@ class Calendar:
         return cast(
             EventModel,
             await execute_aiogoogle(
-                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+                **method_args,
             ),
         )
 
@@ -174,7 +193,13 @@ class Calendar:
         """
         method_callable = lambda calendar, **kwargs: calendar.events.delete(**kwargs)
         method_args = {"calendarId": calendar_id, "eventId": event_id}
-        await execute_aiogoogle(method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args)
+        await execute_aiogoogle(
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
 
     async def update_event(
         self,
@@ -241,7 +266,11 @@ class Calendar:
         return cast(
             EventModel,
             await execute_aiogoogle(
-                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+                **method_args,
             ),
         )
 
@@ -264,7 +293,11 @@ class Calendar:
         return cast(
             EventModel,
             await execute_aiogoogle(
-                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+                **method_args,
             ),
         )
 
@@ -284,7 +317,11 @@ class Calendar:
         return cast(
             CalendarModel,
             await execute_aiogoogle(
-                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+                **method_args,
             ),
         )
 
@@ -296,7 +333,12 @@ class Calendar:
         method_callable = lambda calendar, **kwargs: calendar.calendarList.list()
         return cast(
             CalendarListModel,
-            await execute_aiogoogle(method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version),
+            await execute_aiogoogle(
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+            ),
         ).get("items", [])
 
     async def get_calendar(self, calendar_id: str) -> CalendarModel:
@@ -310,7 +352,11 @@ class Calendar:
         return cast(
             CalendarModel,
             await execute_aiogoogle(
-                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+                **method_args,
             ),
         )
 
@@ -358,7 +404,11 @@ class Calendar:
         return cast(
             CalendarModel,
             await execute_aiogoogle(
-                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+                **method_args,
             ),
         )
 
@@ -370,7 +420,13 @@ class Calendar:
         """
         method_callable = lambda calendar, **kwargs: calendar.calendars.delete(**kwargs)
         method_args = {"calendarId": calendar_id}
-        await execute_aiogoogle(method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args)
+        await execute_aiogoogle(
+            method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
 
     async def clear_calendar(self, calendar_id: str) -> None:
         """
@@ -380,7 +436,13 @@ class Calendar:
         """
         method_callable = lambda calendar, **kwargs: calendar.calendars.clear(**kwargs)
         method_args = {"calendarId": calendar_id}
-        await execute_aiogoogle(method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args)
+        await execute_aiogoogle(
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
 
     async def add_share_rule(
         self, calendar_id: str, scope_type: str, user: str, role: str
@@ -404,7 +466,11 @@ class Calendar:
         return cast(
             AclRuleModel,
             await execute_aiogoogle(
-                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+                **method_args,
             ),
         )
 
@@ -419,7 +485,11 @@ class Calendar:
         return cast(
             AclModel,
             await execute_aiogoogle(
-                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+                **method_args,
             ),
         ).get("items", [])
 
@@ -435,7 +505,11 @@ class Calendar:
         return cast(
             AclRuleModel,
             await execute_aiogoogle(
-                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+                **method_args,
             ),
         )
 
@@ -485,7 +559,11 @@ class Calendar:
         return cast(
             AclRuleModel,
             await execute_aiogoogle(
-                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+                **method_args,
             ),
         )
 
@@ -498,4 +576,10 @@ class Calendar:
         """
         method_callable = lambda calendar, **kwargs: calendar.acl.delete(**kwargs)
         method_args = {"calendarId": calendar_id, "ruleId": rule_id}
-        await execute_aiogoogle(method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args)
+        await execute_aiogoogle(
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )

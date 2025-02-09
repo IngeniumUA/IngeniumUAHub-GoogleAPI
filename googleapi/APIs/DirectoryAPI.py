@@ -8,7 +8,10 @@ from typing import List, cast
 
 from passlib.hash import sha256_crypt
 
-from googleapi.Helpers.HelperFunctions import build_service_account_credentials, execute_aiogoogle
+from googleapi.Helpers.HelperFunctions import (
+    build_service_account_credentials,
+    execute_aiogoogle,
+)
 from googleapi.TypedDicts.Directory import (
     UserModel,
     UserListModel,
@@ -30,11 +33,15 @@ class Directory:
         @param service_file: Service account credentials file
         @param subject: Subject who owns the directory
         """
-        self.service_account_credentials = build_service_account_credentials(service_file=service_file, scopes=[
-            "https://www.googleapis.com/auth/admin.directory.user",
-            "https://www.googleapis.com/auth/admin.directory.group",
-            "https://www.googleapis.com/auth/admin.directory.user.security",
-        ], subject=subject)
+        self.service_account_credentials = build_service_account_credentials(
+            service_file=service_file,
+            scopes=[
+                "https://www.googleapis.com/auth/admin.directory.user",
+                "https://www.googleapis.com/auth/admin.directory.group",
+                "https://www.googleapis.com/auth/admin.directory.user.security",
+            ],
+            subject=subject,
+        )
         self.domain = domain
         self.api_name = "directory"
         self.api_version = "v3"
@@ -49,7 +56,11 @@ class Directory:
         return cast(
             UserListModel,
             await execute_aiogoogle(
-                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+                **method_args,
             ),
         ).get("users", [])
 
@@ -69,7 +80,11 @@ class Directory:
         return cast(
             UserModel,
             await execute_aiogoogle(
-                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+                **method_args,
             ),
         )
 
@@ -81,7 +96,13 @@ class Directory:
         """
         method_callable = lambda directory, **kwargs: directory.users.delete(**kwargs)
         method_args = {"userKey": user_id}
-        await execute_aiogoogle(method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args)
+        await execute_aiogoogle(
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
 
     async def create_user(
         self, email: str, password: str, first_name: str, last_name: str
@@ -130,7 +151,11 @@ class Directory:
         return cast(
             UserModel,
             await execute_aiogoogle(
-                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+                **method_args,
             ),
         )
 
@@ -169,7 +194,11 @@ class Directory:
         return cast(
             UserModel,
             await execute_aiogoogle(
-                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, method_args=method_args
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+                method_args=method_args,
             ),
         )
 
@@ -199,7 +228,11 @@ class Directory:
         return cast(
             UserModel,
             await execute_aiogoogle(
-                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_kwargs
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+                **method_kwargs,
             ),
         )
 
@@ -232,7 +265,11 @@ class Directory:
         return cast(
             UserPhotoModel,
             await execute_aiogoogle(
-                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+                **method_args,
             ),
         )
 
@@ -249,7 +286,11 @@ class Directory:
         return cast(
             UserPhotoModel,
             await execute_aiogoogle(
-                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+                **method_args,
             ),
         )
 
@@ -263,7 +304,13 @@ class Directory:
             **kwargs
         )
         method_args = {"userKey": user_id}
-        await execute_aiogoogle(method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args)
+        await execute_aiogoogle(
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
 
     async def get_groups(self) -> List[GroupModel]:
         """
@@ -275,7 +322,11 @@ class Directory:
         return cast(
             GroupListModel,
             await execute_aiogoogle(
-                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+                **method_args,
             ),
         ).get("groups", [])
 
@@ -290,7 +341,11 @@ class Directory:
         return cast(
             GroupModel,
             await execute_aiogoogle(
-                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+                **method_args,
             ),
         )
 
@@ -304,7 +359,13 @@ class Directory:
         method_args = {
             "groupKey": group_id,
         }
-        await execute_aiogoogle(method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args)
+        await execute_aiogoogle(
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
 
     async def create_group(
         self, email: str, name: str, description: str = None
@@ -326,7 +387,11 @@ class Directory:
         return cast(
             GroupModel,
             await execute_aiogoogle(
-                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+                **method_args,
             ),
         )
 
@@ -381,7 +446,11 @@ class Directory:
         return cast(
             GroupModel,
             await execute_aiogoogle(
-                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+                **method_args,
             ),
         )
 
@@ -397,7 +466,11 @@ class Directory:
         return cast(
             MemberListModel,
             await execute_aiogoogle(
-                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+                **method_args,
             ),
         ).get("members", [])
 
@@ -414,7 +487,11 @@ class Directory:
         return cast(
             MemberModel,
             await execute_aiogoogle(
-                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+                **method_args,
             ),
         )
 
@@ -427,7 +504,13 @@ class Directory:
         """
         method_callable = lambda directory, **kwargs: directory.members.delete(**kwargs)
         method_args = {"groupKey": group_id, "memberKey": user_id}
-        await execute_aiogoogle(method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args)
+        await execute_aiogoogle(
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
 
     async def remove_all_sessions(self) -> None:
         """
@@ -439,5 +522,9 @@ class Directory:
         for user in users:
             method_args = {"userKey": user.get("id")}
             await execute_aiogoogle(
-                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+                **method_args,
             )

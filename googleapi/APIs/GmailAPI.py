@@ -6,7 +6,10 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from mimetypes import guess_type as mimetypes_guess_type
 
-from googleapi.Helpers.HelperFunctions import build_service_account_credentials, execute_aiogoogle
+from googleapi.Helpers.HelperFunctions import (
+    build_service_account_credentials,
+    execute_aiogoogle,
+)
 from googleapi.TypedDicts.Gmail import AttachmentsDictionary
 
 
@@ -28,7 +31,11 @@ class Mailing:
         """
         self.mail_reply_address = mail_reply_address
         self.mail_sender = mail_sender
-        self.service_account_credentials = build_service_account_credentials(service_file=service_file, scopes=["https://www.googleapis.com/auth/gmail.send"], subject=mail_sender)
+        self.service_account_credentials = build_service_account_credentials(
+            service_file=service_file,
+            scopes=["https://www.googleapis.com/auth/gmail.send"],
+            subject=mail_sender,
+        )
         self.api_name = "gmail"
         self.api_version = "v1"
 
@@ -133,5 +140,9 @@ class Mailing:
             )
             method_args = {"userId": "me", "json": message}
             await execute_aiogoogle(
-                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
+                method_callable=method_callable,
+                service_account_credentials=self.service_account_credentials,
+                api_name=self.api_name,
+                api_version=self.api_version,
+                **method_args,
             )
