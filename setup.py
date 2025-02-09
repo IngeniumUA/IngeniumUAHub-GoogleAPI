@@ -10,6 +10,7 @@ setup(
     install_requires=[
         "aiogoogle",
         "passlib",
-        "typing-extensions"
+        "typing-extensions",
+        "aiofiles"
     ],  # external packages as dependencies
 )

@@ -3,11 +3,8 @@ from os import path as os_path
 from typing import List, cast, Dict
 
 import aiofiles
-import aiogoogle.excs
-from aiogoogle import Aiogoogle
-from aiogoogle.auth.creds import ServiceAccountCreds
-from typing_extensions import Callable
 
+from googleapi.Helpers.HelperFunctions import build_service_account_credentials, execute_aiogoogle
 from googleapi.TypedDicts.Drive import DriveModel, DrivesModel, FileModel, FilesModel
 
 
@@ -16,43 +13,14 @@ class Drive:
     Implements the Google Drive API to manipulate Google Drive.
     """
 
-    def __init__(self, service_file_path: str, subject: str) -> None:
+    def __init__(self, service_file: json, subject: str) -> None:
         """
         @param service_file_path: Path to the service account credentials file
         @param subject: Subject who owns the drive
         """
-        self.scopes = ["https://www.googleapis.com/auth/drive"]
-        self.timeZone = "Europe/Brussels"
-        self.subject = subject
-
-        if not os_path.exists(service_file_path):
-            raise Exception("Service account json path does not exist")
-
-        self.serviceFilePath = service_file_path
-        self.service_account_credentials = self._build_service_account_credentials()
-
-    def _build_service_account_credentials(self) -> ServiceAccountCreds:
-        """
-        @return: Returns ServiceAccountCreds from aiogoogle
-        """
-        with open(self.serviceFilePath, "r") as f:
-            service_account_key = json.load(f)
-        credentials = ServiceAccountCreds(
-            scopes=self.scopes, **service_account_key, subject=self.subject
-        )
-        return credentials
-
-    async def _execute_aiogoogle(self, method_callable: Callable, **method_args):
-        try:
-            async with Aiogoogle(
-                service_account_creds=self.service_account_credentials
-            ) as google:
-                drive = await google.discover("drive", "v3")
-                return await google.as_service_account(
-                    method_callable(drive, **method_args)
-                )
-        except aiogoogle.excs.HTTPError as error:
-            raise Exception(f"Aiogoogle error: {error}") from error
+        self.service_account_credentials = build_service_account_credentials(service_file=service_file, scopes=["https://www.googleapis.com/auth/drive"], subject=subject)
+        self.api_name = "drive"
+        self.api_version = "v3"
 
     async def get_drives(self) -> List[DriveModel]:
         """
@@ -61,7 +29,7 @@ class Drive:
         """
         method_callable = lambda drive, **kwargs: drive.drives.list()
         return cast(
-            DrivesModel, await self._execute_aiogoogle(method_callable=method_callable)
+            DrivesModel, await execute_aiogoogle(method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version)
         ).get("drives", [])
 
     async def get_drive(self, drive_id: str) -> DriveModel:
@@ -74,8 +42,8 @@ class Drive:
         method_args = {"driveId": drive_id}
         return cast(
             DriveModel,
-            await self._execute_aiogoogle(
-                method_callable=method_callable, **method_args
+            await execute_aiogoogle(
+                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
             ),
         )
 
@@ -87,7 +55,7 @@ class Drive:
         """
         method_callable = lambda drive, **kwargs: drive.drives.delete(**kwargs)
         method_args = {"driveId": drive_id}
-        await self._execute_aiogoogle(method_callable=method_callable, **method_args)
+        await execute_aiogoogle(method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args)
 
     async def get_file(self, file_id: str) -> FileModel:
         """
@@ -103,8 +71,8 @@ class Drive:
         }
         return cast(
             FileModel,
-            await self._execute_aiogoogle(
-                method_callable=method_callable, **method_args
+            await execute_aiogoogle(
+                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
             ),
         )
 
@@ -141,8 +109,8 @@ class Drive:
                 method_args["pageToken"] = page_token
             response = cast(
                 FilesModel,
-                await self._execute_aiogoogle(
-                    method_callable=method_callable, **method_args
+                await execute_aiogoogle(
+                    method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
                 ),
             )
             all_items.extend(response.get("files", []))
@@ -204,8 +172,8 @@ class Drive:
 
         file_content = cast(
             bytes,
-            await self._execute_aiogoogle(
-                method_callable=method_callable, **method_args
+            await execute_aiogoogle(
+                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
             ),
         )
 
@@ -253,8 +221,8 @@ class Drive:
 
         return cast(
             FileModel,
-            await self._execute_aiogoogle(
-                method_callable=method_callable, **method_args
+            await execute_aiogoogle(
+                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
             ),
         )
 
@@ -266,7 +234,7 @@ class Drive:
         """
         method_callable = lambda drive, **kwargs: drive.files.delete(**kwargs)
         method_args = {"fileId": file_id, "supportsAllDrives": True}
-        await self._execute_aiogoogle(method_callable=method_callable, **method_args)
+        await execute_aiogoogle(method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args)
 
     async def change_file_name(
         self, file_id: str, file_name: str, upload_type: str = "multipart"
@@ -287,8 +255,8 @@ class Drive:
         }
         return cast(
             FileModel,
-            await self._execute_aiogoogle(
-                method_callable=method_callable, **method_args
+            await execute_aiogoogle(
+                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
             ),
         )
 
@@ -314,7 +282,7 @@ class Drive:
         }
         return cast(
             FileModel,
-            await self._execute_aiogoogle(
-                method_callable=method_callable, **method_args
+            await execute_aiogoogle(
+                method_callable=method_callable, service_account_credentials=self.service_account_credentials, api_name=self.api_name, api_version=self.api_version, **method_args
             ),
         )
