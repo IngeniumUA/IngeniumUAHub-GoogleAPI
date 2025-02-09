@@ -28,12 +28,20 @@ class Directory:
     Implements the Google directory API to edit users and groups
     """
 
-    def __init__(self, service_file: json, subject: str, domain: str):
+    def __init__(self, domain: str):
+        """
+        @param domain: Domain of the directory
+        """
+        self.domain = domain
+        self.api_name = "directory"
+        self.api_version = "v3"
+
+    async def _async_init(self, service_file: json, subject: str):
         """
         @param service_file: Service account credentials file
         @param subject: Subject who owns the directory
         """
-        self.service_account_credentials = build_service_account_credentials(
+        self.service_account_credentials = await build_service_account_credentials(
             service_file=service_file,
             scopes=[
                 "https://www.googleapis.com/auth/admin.directory.user",
@@ -42,9 +50,6 @@ class Directory:
             ],
             subject=subject,
         )
-        self.domain = domain
-        self.api_name = "directory"
-        self.api_version = "v3"
 
     async def get_users(self) -> List[UserModel]:
         """
@@ -528,3 +533,8 @@ class Directory:
                 api_version=self.api_version,
                 **method_args,
             )
+
+async def create_directory_class(service_file: json, subject: str, domain: str) -> Directory:
+    directory = Directory(domain=domain)
+    await directory._async_init(service_file=service_file, subject=subject)
+    return directory

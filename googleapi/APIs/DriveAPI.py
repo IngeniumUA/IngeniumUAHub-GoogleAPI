@@ -1,8 +1,6 @@
 import json
 from typing import List, cast, Dict
 
-import aiofiles
-
 from googleapi.Helpers.HelperFunctions import (
     build_service_account_credentials,
     execute_aiogoogle,
@@ -15,18 +13,20 @@ class Drive:
     Implements the Google Drive API to manipulate Google Drive.
     """
 
-    def __init__(self, service_file: json, subject: str) -> None:
+    def __init__(self) -> None:
+        self.api_name = "drive"
+        self.api_version = "v3"
+
+    async def _async_init(self, service_file: json, subject: str):
         """
         @param service_file: Service account credentials file
         @param subject: Subject who owns the drive
         """
-        self.service_account_credentials = build_service_account_credentials(
+        self.service_account_credentials = await build_service_account_credentials(
             service_file=service_file,
             scopes=["https://www.googleapis.com/auth/drive"],
             subject=subject,
         )
-        self.api_name = "drive"
-        self.api_version = "v3"
 
     async def get_drives(self) -> List[DriveModel]:
         """
@@ -103,7 +103,7 @@ class Drive:
         )
 
     async def get_children_from_parent(
-        self, drive_id: str, parent_id: str = None, get_all: bool = False
+            self, drive_id: str, parent_id: str = None, get_all: bool = False
     ) -> List[FileModel]:
         """
         Gets all the files of the drive
@@ -188,19 +188,16 @@ class Drive:
         return paths
 
     async def download_file(
-        self, file_id: str, as_bytes: bool = False, destination: str = None
-    ) -> bytes | None:
+            self, file_id: str) -> bytes:
         """
         Downloads a file from the drive
-        :param destination: Optional location to download the file to, needs to have the name of the file
-        :param as_bytes: Optional, if the file needs to be returned as bytes
         :param file_id: ID of the file to download
-        :return: File as bytes or None
+        :return: File as bytes
         """
         method_callable = lambda drive, **kwargs: drive.files.get(**kwargs)
         method_args = {"fileId": file_id, "alt": "media"}
 
-        file_content = cast(
+        return cast(
             bytes,
             await execute_aiogoogle(
                 method_callable=method_callable,
@@ -211,21 +208,14 @@ class Drive:
             ),
         )
 
-        if destination:
-            async with aiofiles.open(destination, "wb") as f:
-                await f.write(file_content)
-
-        if as_bytes:
-            return file_content
-
     async def upload_file(
-        self,
-        drive_id: str,
-        parent_id: str,
-        mime_type: str,
-        file_content: bytes,
-        file_name: str,
-        upload_type: str = "multipart",
+            self,
+            drive_id: str,
+            parent_id: str,
+            mime_type: str,
+            file_content: bytes,
+            file_name: str,
+            upload_type: str = "multipart",
     ) -> FileModel:
         """
         Uploads a file to the drive
@@ -281,7 +271,7 @@ class Drive:
         )
 
     async def change_file_name(
-        self, file_id: str, file_name: str, upload_type: str = "multipart"
+            self, file_id: str, file_name: str, upload_type: str = "multipart"
     ) -> FileModel:
         """
         Changes the file name
@@ -309,7 +299,7 @@ class Drive:
         )
 
     async def move_file(
-        self, file_id: str, parent_id: str, upload_type: str = "multipart"
+            self, file_id: str, parent_id: str, upload_type: str = "multipart"
     ) -> FileModel:
         """
         Changes parent of the file
@@ -338,3 +328,9 @@ class Drive:
                 **method_args,
             ),
         )
+
+
+async def create_drive_class(service_file: json, subject: str) -> Drive:
+    drive = Drive()
+    await drive._async_init(service_file=service_file, subject=subject)
+    return drive

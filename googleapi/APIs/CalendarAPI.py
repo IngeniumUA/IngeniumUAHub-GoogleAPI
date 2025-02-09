@@ -22,22 +22,23 @@ class Calendar:
     Implements the Google Calendar API to add events to calendars
     """
 
-    def __init__(self, service_file: json, subject: str) -> None:
+    def __init__(self) -> None:
+        self.timeZone = "Europe/Brussels"
+        self.api_name = "calendar"
+        self.api_version = "v3"
+
+    async def _async_init(self, service_file: json, subject: str):
         """
         @param service_file: Service account credentials file
         @param subject: Subject who owns the calendar
         """
-        self.timeZone = "Europe/Brussels"
-
-        self.service_account_credentials = build_service_account_credentials(
+        self.service_account_credentials = await build_service_account_credentials(
             service_file=service_file,
             scopes=["https://www.googleapis.com/auth/calendar"],
             subject=subject,
         )
-        self.api_name = "calendar"
-        self.api_version = "v3"
 
-    def _build_event_body(
+    async def _build_event_body(
         self,
         title: str,
         description: str,
@@ -63,7 +64,7 @@ class Calendar:
         }
         return cast(EventModel, eventBody)
 
-    def _build_calendar_body(
+    async def _build_calendar_body(
         self, title: str, location: str, description: str
     ) -> CalendarModel:
         """
@@ -81,7 +82,7 @@ class Calendar:
         }
         return cast(CalendarModel, calendarBody)
 
-    def _build_scope_body(
+    async def _build_scope_body(
         self, scope_type: str, scope_value: str, role: str
     ) -> AclRuleModel:
         """
@@ -113,7 +114,7 @@ class Calendar:
         @param location: Optional location of the event
         @return: The created event
         """
-        eventBody = self._build_event_body(
+        eventBody = await self._build_event_body(
             title, description, location, start_time, end_time
         )
         method_callable = lambda calendar, **kwargs: calendar.events.insert(**kwargs)
@@ -253,7 +254,7 @@ class Calendar:
         ):
             raise Exception("Not a single parameter gets a new value")
 
-        newEventBody = self._build_event_body(
+        newEventBody = await self._build_event_body(
             title, description, location, start_time, end_time
         )
 
@@ -311,7 +312,7 @@ class Calendar:
         @param description: Optional description of the calendar
         @return: The created calendar
         """
-        calendarBody = self._build_calendar_body(title, location, description)
+        calendarBody = await self._build_calendar_body(title, location, description)
         method_callable = lambda calendar, **kwargs: calendar.calendars.insert(**kwargs)
         method_args = {"body": calendarBody}
         return cast(
@@ -398,7 +399,7 @@ class Calendar:
         ):
             raise Exception("Not a single parameter gets a new value")
 
-        newCalendarBody = self._build_calendar_body(title, location, description)
+        newCalendarBody = await self._build_calendar_body(title, location, description)
         method_callable = lambda calendar, **kwargs: calendar.calendars.update(**kwargs)
         method_args = {"calendarId": calendar_id, "body": newCalendarBody}
         return cast(
@@ -460,7 +461,7 @@ class Calendar:
         if scope_type not in ["user", "group", "domain"]:
             raise Exception("Wrong scope type was given")
 
-        rule = self._build_scope_body(scope_type, user, role)
+        rule = await self._build_scope_body(scope_type, user, role)
         method_callable = lambda calendar, **kwargs: calendar.acl.insert(**kwargs)
         method_args = {"calendarId": calendar_id, "body": rule}
         return cast(
@@ -553,7 +554,7 @@ class Calendar:
         if scope_type == currentRole and user == currentUser and role == currentRole:
             raise Exception("Not a single parameter gets a new value")
 
-        newRule = self._build_scope_body(scope_type, user, role)
+        newRule = await self._build_scope_body(scope_type, user, role)
         method_callable = lambda calendar, **kwargs: calendar.acl.update(**kwargs)
         method_args = {"calendarId": calendar_id, "ruleId": rule_id, "body": newRule}
         return cast(
@@ -583,3 +584,9 @@ class Calendar:
             api_version=self.api_version,
             **method_args,
         )
+
+
+async def create_calendar_class(service_file: json, subject: str) -> Calendar:
+    calendar = Calendar()
+    await calendar._async_init(service_file=service_file, subject=subject)
+    return calendar

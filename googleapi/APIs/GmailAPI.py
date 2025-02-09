@@ -19,32 +19,36 @@ class Mailing:
     """
 
     def __init__(
-        self,
-        mail_sender: str,
-        service_file: json,
-        mail_reply_address: str | None = None,
+            self,
+            mail_reply_address: str | None = None,
     ) -> None:
         """
-        @param mail_sender: Sender of the mail
-        @param service_file: Service account credentials file
         @param mail_reply_address: Address the replies to the mail will be sent to
         """
         self.mail_reply_address = mail_reply_address
+
+        self.api_name = "gmail"
+        self.api_version = "v1"
+
+    async def _async_init(self, mail_sender: str,
+                          service_file: json):
+        """
+        @param mail_sender: Sender of the mail
+        @param service_file: Service account credentials file
+        """
         self.mail_sender = mail_sender
-        self.service_account_credentials = build_service_account_credentials(
+        self.service_account_credentials = await build_service_account_credentials(
             service_file=service_file,
             scopes=["https://www.googleapis.com/auth/gmail.send"],
             subject=mail_sender,
         )
-        self.api_name = "gmail"
-        self.api_version = "v1"
 
     async def _build_message(
-        self,
-        mail_receiver: str,
-        mail_subject: str,
-        mail_content: str,
-        attachments: list[AttachmentsDictionary] = None,
+            self,
+            mail_receiver: str,
+            mail_subject: str,
+            mail_content: str,
+            attachments: list[AttachmentsDictionary] = None,
     ) -> dict:
         """
         Builds the body of the mail message
@@ -81,7 +85,7 @@ class Mailing:
 
                 # Open the attachment, read it and write its content into attachmentData
                 with open(
-                    attachmentPath, "rb"
+                        attachmentPath, "rb"
                 ) as file:  # "rb" = read, binary mode (e.g. images)
                     attachmentData.set_payload(file.read())
                 # Add header to attachmentData so that the name of the attachment stays
@@ -102,8 +106,8 @@ class Mailing:
                     "Content-Disposition",
                     "attachment",
                     filename=attachmentDictionary["filename"]
-                    + "."
-                    + attachmentDictionary["mime_subtype"],
+                             + "."
+                             + attachmentDictionary["mime_subtype"],
                 )
             message.attach(attachmentData)
 
@@ -112,11 +116,11 @@ class Mailing:
         return create_message
 
     async def send_message(
-        self,
-        mail_receivers: list[str],
-        mail_subject: str,
-        mail_content: str,
-        attachments: list[AttachmentsDictionary] = None,
+            self,
+            mail_receivers: list[str],
+            mail_subject: str,
+            mail_content: str,
+            attachments: list[AttachmentsDictionary] = None,
     ) -> None:
         """
         Sends the mail
