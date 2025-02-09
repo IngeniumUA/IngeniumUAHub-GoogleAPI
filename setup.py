@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 setup(
     name="googleapi",
-    version="30.0",
+    version="31.0",
     description="A package to integrate Google API functionalities for Calendar, Drive, Gmail, and Directory",
     author="Yorben Joosen",
     author_email="webmaster@ingeniumua.be",
