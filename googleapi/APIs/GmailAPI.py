@@ -8,7 +8,9 @@ from mimetypes import guess_type as mimetypes_guess_type
 
 from googleapi.Helpers.HelperFunctions import (
     build_service_account_credentials,
-    execute_aiogoogle, synchronous_build_service_account_credentials, synchronous_build_service,
+    execute_aiogoogle,
+    synchronous_build_service_account_credentials,
+    synchronous_build_service,
 )
 from googleapi.TypedDicts.Gmail import AttachmentsDictionary
 
@@ -19,8 +21,8 @@ class Gmail:
     """
 
     def __init__(
-            self,
-            mail_reply_address: str | None = None,
+        self,
+        mail_reply_address: str | None = None,
     ) -> None:
         """
         @param mail_reply_address: Address the replies to the mail will be sent to
@@ -43,11 +45,11 @@ class Gmail:
         )
 
     async def _build_message(
-            self,
-            mail_receiver: str,
-            mail_subject: str,
-            mail_content: str,
-            attachments: list[AttachmentsDictionary] = None,
+        self,
+        mail_receiver: str,
+        mail_subject: str,
+        mail_content: str,
+        attachments: list[AttachmentsDictionary] = None,
     ) -> dict:
         """
         Builds the body of the mail message
@@ -84,7 +86,7 @@ class Gmail:
 
                 # Open the attachment, read it and write its content into attachmentData
                 with open(
-                        attachmentPath, "rb"
+                    attachmentPath, "rb"
                 ) as file:  # "rb" = read, binary mode (e.g. images)
                     attachmentData.set_payload(file.read())
                 # Add header to attachmentData so that the name of the attachment stays
@@ -105,8 +107,8 @@ class Gmail:
                     "Content-Disposition",
                     "attachment",
                     filename=attachmentDictionary["filename"]
-                             + "."
-                             + attachmentDictionary["mime_subtype"],
+                    + "."
+                    + attachmentDictionary["mime_subtype"],
                 )
             message.attach(attachmentData)
 
@@ -115,11 +117,11 @@ class Gmail:
         return create_message
 
     async def send_message(
-            self,
-            mail_receivers: list[str],
-            mail_subject: str,
-            mail_content: str,
-            attachments: list[AttachmentsDictionary] = None,
+        self,
+        mail_receivers: list[str],
+        mail_subject: str,
+        mail_content: str,
+        attachments: list[AttachmentsDictionary] = None,
     ) -> None:
         """
         Sends the mail
@@ -152,7 +154,7 @@ class Gmail:
 
 
 async def create_gmail_class(
-        service_file: json, mail_sender: str, mail_reply_address: str | None = None
+    service_file: json, mail_sender: str, mail_reply_address: str | None = None
 ) -> Gmail:
     gmail = Gmail(mail_reply_address=mail_reply_address)
     await gmail._async_init(service_file=service_file, mail_sender=mail_sender)
@@ -165,9 +167,10 @@ class SynchronousGmail:
     """
 
     def __init__(
-            self,
-            mail_sender: str, service_file: json,
-            mail_reply_address: str | None = None,
+        self,
+        mail_sender: str,
+        service_file: json,
+        mail_reply_address: str | None = None,
     ) -> None:
         """
         @param mail_sender: Sender of the mail
@@ -180,19 +183,25 @@ class SynchronousGmail:
         self.api_version = "v1"
 
         self.mail_sender = mail_sender
-        self.service_account_credentials = synchronous_build_service_account_credentials(
-            service_file=service_file,
-            scopes=["https://www.googleapis.com/auth/gmail.send"],
-            subject=mail_sender,
+        self.service_account_credentials = (
+            synchronous_build_service_account_credentials(
+                service_file=service_file,
+                scopes=["https://www.googleapis.com/auth/gmail.send"],
+                subject=mail_sender,
+            )
         )
-        self.service = synchronous_build_service(api_name=self.api_name, api_version=self.api_version, credentials=self.service_account_credentials)
+        self.service = synchronous_build_service(
+            api_name=self.api_name,
+            api_version=self.api_version,
+            credentials=self.service_account_credentials,
+        )
 
     def _build_message(
-            self,
-            mail_receiver: str,
-            mail_subject: str,
-            mail_content: str,
-            attachments: list[AttachmentsDictionary] = None,
+        self,
+        mail_receiver: str,
+        mail_subject: str,
+        mail_content: str,
+        attachments: list[AttachmentsDictionary] = None,
     ) -> dict:
         """
         Builds the body of the mail message
@@ -229,7 +238,7 @@ class SynchronousGmail:
 
                 # Open the attachment, read it and write its content into attachmentData
                 with open(
-                        attachmentPath, "rb"
+                    attachmentPath, "rb"
                 ) as file:  # "rb" = read, binary mode (e.g. images)
                     attachmentData.set_payload(file.read())
                 # Add header to attachmentData so that the name of the attachment stays
@@ -250,8 +259,8 @@ class SynchronousGmail:
                     "Content-Disposition",
                     "attachment",
                     filename=attachmentDictionary["filename"]
-                             + "."
-                             + attachmentDictionary["mime_subtype"],
+                    + "."
+                    + attachmentDictionary["mime_subtype"],
                 )
             message.attach(attachmentData)
 
@@ -260,11 +269,11 @@ class SynchronousGmail:
         return create_message
 
     def send_message(
-            self,
-            mail_receivers: list[str],
-            mail_subject: str,
-            mail_content: str,
-            attachments: list[AttachmentsDictionary] = None,
+        self,
+        mail_receivers: list[str],
+        mail_subject: str,
+        mail_content: str,
+        attachments: list[AttachmentsDictionary] = None,
     ) -> None:
         """
         Sends the mail

@@ -10,7 +10,7 @@ from googleapiclient.discovery import build
 
 
 async def build_service_account_credentials(
-        service_file: json, scopes: List[str], subject: str
+    service_file: json, scopes: List[str], subject: str
 ) -> ServiceAccountCreds:
     """
     @param service_file: Service account credentials json file
@@ -27,11 +27,11 @@ async def build_service_account_credentials(
 
 
 async def execute_aiogoogle(
-        method_callable: Callable,
-        service_account_credentials: ServiceAccountCreds,
-        api_name: str,
-        api_version: str,
-        **method_args: Dict,
+    method_callable: Callable,
+    service_account_credentials: ServiceAccountCreds,
+    api_name: str,
+    api_version: str,
+    **method_args: Dict,
 ):
     """
     @param method_callable: The method called from the API
@@ -43,7 +43,7 @@ async def execute_aiogoogle(
     """
     try:
         async with Aiogoogle(
-                service_account_creds=service_account_credentials
+            service_account_creds=service_account_credentials
         ) as google:
             api = await google.discover(api_name, api_version)
             return await google.as_service_account(method_callable(api, **method_args))
@@ -52,15 +52,17 @@ async def execute_aiogoogle(
 
 
 def synchronous_build_service_account_credentials(
-        service_file: json, scopes: List[str], subject: str):
+    service_file: json, scopes: List[str], subject: str
+):
     """
-        @param service_file: Service account credentials json file
-        @param scopes: Scopes of the API
-        @param subject: Subject of the API
-        @return: Returns credentials from google
-        """
-    credentials = service_account.Credentials.from_service_account_info(info=service_file, scopes=scopes,
-                                                                        subject=subject)
+    @param service_file: Service account credentials json file
+    @param scopes: Scopes of the API
+    @param subject: Subject of the API
+    @return: Returns credentials from google
+    """
+    credentials = service_account.Credentials.from_service_account_info(
+        info=service_file, scopes=scopes, subject=subject
+    )
     return credentials
 
 
