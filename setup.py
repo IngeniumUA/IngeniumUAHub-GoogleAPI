@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 setup(
     name="googleapi",
-    version="32.0",
+    version="33.0",
     description="A package to integrate Google API functionalities for Calendar, Drive, Gmail, and Directory",
     author="Yorben Joosen",
     author_email="webmaster@ingeniumua.be",
@@ -10,6 +10,7 @@ setup(
     install_requires=[
         "aiogoogle",
         "passlib",
-        "aiofiles"
+        "aiofiles",
+        "protobuf"
     ],  # external packages as dependencies
 )
