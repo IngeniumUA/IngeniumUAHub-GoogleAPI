@@ -7,14 +7,13 @@ class Geocoding:
         self.api_key = api_key
 
     async def get_coordinates(self, address):
-        parameters = {
-            "address": address,
-            "key": self.api_key
-        }
+        parameters = {"address": address, "key": self.api_key}
         async with aiohttp.ClientSession() as session:
             async with session.get(self.base_url, params=parameters) as response:
                 if response.status != 200:
-                    raise Exception(f"Request failed with status code {response.status}")
+                    raise Exception(
+                        f"Request failed with status code {response.status}"
+                    )
 
                 data = await response.json()
 
@@ -23,4 +22,3 @@ class Geocoding:
 
                 location = data.get("results")[0].get("geometry").get("location")
                 return location.get("lat"), location.get("lng")
-
