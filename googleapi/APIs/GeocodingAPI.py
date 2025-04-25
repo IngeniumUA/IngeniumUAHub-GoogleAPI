@@ -6,7 +6,7 @@ class Geocoding:
         self.base_url = "https://maps.googleapis.com/maps/api/geocode/json"
         self.api_key = api_key
 
-    async def get_coordinates(self, address):
+    async def get_coordinates(self, address: str) -> (float, float):
         parameters = {"address": address, "key": self.api_key}
         async with aiohttp.ClientSession() as session:
             async with session.get(self.base_url, params=parameters) as response:
