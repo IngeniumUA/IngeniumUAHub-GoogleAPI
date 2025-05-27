@@ -27,7 +27,9 @@ class Geocoding:
                 location = data.get("results")[0].get("geometry").get("location")
                 return location.get("lat"), location.get("lng")
 
-    async def get_address_from_coordinates(self, latitude: float, longitude: float) -> str:
+    async def get_address_from_coordinates(
+        self, latitude: float, longitude: float
+    ) -> str:
         """
         :param latitude: Latitude of the location
         :param longitude: Longitude of the location
