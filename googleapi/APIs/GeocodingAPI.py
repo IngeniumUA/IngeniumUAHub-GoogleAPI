@@ -1,6 +1,5 @@
-from fastapi import HTTPException
-
 import aiohttp
+from fastapi import HTTPException
 
 
 class Geocoding:
@@ -8,8 +7,9 @@ class Geocoding:
         self.base_url = "https://maps.googleapis.com/maps/api/geocode/json"
         self.api_key = api_key
 
-    async def get_coordinates_from_address(self, address: str) -> (float, float):
+    async def get_coordinates_from_address(self, address: str) -> tuple[float, float]:
         """
+        Returns the coordinates of the given address.
         :param address: Address to geocode
         :return: Tuple of latitude and longitude (latitude, longitude)
         """
@@ -40,6 +40,7 @@ class Geocoding:
         self, latitude: float, longitude: float
     ) -> str:
         """
+        Returns the address from the given coordinates.
         :param latitude: Latitude of the location
         :param longitude: Longitude of the location
         :return: The address corresponding to the given coordinates
