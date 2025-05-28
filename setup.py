@@ -14,6 +14,7 @@ setup(
         "google-auth",  # Required for google.oauth2.service_account
         "google-auth-oauthlib",
         "google-auth-httplib2",
-        "google-api-python-client"
+        "google-api-python-client",
+        "fastapi"
     ],  # external packages as dependencies
 )

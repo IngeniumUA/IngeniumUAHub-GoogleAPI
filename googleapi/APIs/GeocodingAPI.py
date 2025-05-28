@@ -1,3 +1,5 @@
+from fastapi import HTTPException
+
 import aiohttp
 
 
@@ -15,14 +17,19 @@ class Geocoding:
         async with aiohttp.ClientSession() as session:
             async with session.get(self.base_url, params=parameters) as response:
                 if response.status != 200:
-                    raise Exception(
-                        f"Request failed with status code {response.status}"
+                    raise HTTPException(
+                        status_code=response.status,
+                        detail=f"Request failed with status code {response.status}",
                     )
 
                 data = await response.json()
 
                 if data["status"] != "OK":
-                    raise Exception(f"Geocoding failed: {data.get('status')}")
+                    error_message = data.get("error_message", "No detailed error message.")
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Geocoding failed: {data['status']}. Reason: {error_message}",
+                    )
 
                 location = data.get("results")[0].get("geometry").get("location")
                 return location.get("lat"), location.get("lng")
@@ -42,14 +49,19 @@ class Geocoding:
         async with aiohttp.ClientSession() as session:
             async with session.get(self.base_url, params=parameters) as response:
                 if response.status != 200:
-                    raise Exception(
-                        f"Request failed with status code {response.status}"
+                    raise HTTPException(
+                        status_code=response.status,
+                        detail=f"Request failed with status code {response.status}",
                     )
 
                 data = await response.json()
 
                 if data["status"] != "OK":
-                    raise Exception(f"Geocoding failed: {data.get('status')}")
+                    error_message = data.get("error_message", "No detailed error message.")
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Geocoding failed: {data['status']}. Reason: {error_message}",
+                    )
 
                 location = data.get("results")[0].get("formatted_address")
                 return location
