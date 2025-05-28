@@ -49,7 +49,13 @@ async def execute_aiogoogle(
             api = await google.discover(api_name, api_version)
             return await google.as_service_account(method_callable(api, **method_args))
     except aiogoogle.excs.HTTPError as error:
-        raise HTTPException(f"Aiogoogle error: {error.res.json}") from error
+        raise HTTPException(
+            status_code=error.res.status_code,
+            detail={
+                "message": "Aiogoogle API request failed.",
+                "error": error.res.json,
+            }
+        ) from error
 
 
 def synchronous_build_service_account_credentials(
