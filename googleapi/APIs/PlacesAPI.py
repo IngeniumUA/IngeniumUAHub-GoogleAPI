@@ -18,15 +18,15 @@ class Places:
         headers = {
             "Content-Type": "application/json",
             "X-Goog-Api-Key": self.api_key,
-            "X-Goog-FieldMask": "places.location"
+            "X-Goog-FieldMask": "places.location",
         }
 
-        json_payload = {
-            "textQuery": place
-        }
+        json_payload = {"textQuery": place}
 
         async with aiohttp.ClientSession() as session:
-            async with session.post(url, headers=headers, json=json_payload) as response:
+            async with session.post(
+                url, headers=headers, json=json_payload
+            ) as response:
                 if response.status != 200:
                     raise HTTPException(
                         status_code=response.status,
