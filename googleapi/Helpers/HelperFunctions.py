@@ -54,7 +54,7 @@ async def execute_aiogoogle(
             detail={
                 "message": "Aiogoogle API request failed.",
                 "error": error.res.json,
-            }
+            },
         ) from error
 
 
