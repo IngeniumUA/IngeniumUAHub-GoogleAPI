@@ -1,0 +1,23 @@
+name: tag-version.yml
+on:
+  push:
+    branches: [main]
+
+jobs:
+  tag_version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get version from setup.py
+        id: get_version
+        run: |
+          VERSION=$(python3 -c "import re; f=open('setup.py').read(); print(re.search(r'version=[\"\\\'](.+?)[\"\\\']', f).group(1))")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Create tag
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git tag -a "v$VERSION" -m "Version $VERSION"
+          git push origin "v$VERSION"
