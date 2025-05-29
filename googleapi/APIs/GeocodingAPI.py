@@ -25,12 +25,9 @@ class Geocoding:
                 data = await response.json()
 
                 if data["status"] != "OK":
-                    error_message = data.get(
-                        "error_message", "No detailed error message."
-                    )
                     raise HTTPException(
                         status_code=400,
-                        detail=f"Geocoding failed: {data['status']}. Reason: {error_message}",
+                        detail=f"Geocoding failed: {data['status']}.",
                     )
 
                 location = data.get("results")[0].get("geometry").get("location")
@@ -60,12 +57,9 @@ class Geocoding:
                 data = await response.json()
 
                 if data["status"] != "OK":
-                    error_message = data.get(
-                        "error_message", "No detailed error message."
-                    )
                     raise HTTPException(
                         status_code=400,
-                        detail=f"Geocoding failed: {data['status']}. Reason: {error_message}",
+                        detail=f"Geocoding failed: {data['status']}.",
                     )
 
                 location = data.get("results")[0].get("formatted_address")
