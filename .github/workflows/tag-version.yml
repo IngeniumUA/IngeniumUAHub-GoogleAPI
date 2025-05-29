@@ -12,8 +12,15 @@ jobs:
       - name: Get version from setup.py
         id: get_version
         run: |
-          VERSION=$(python3 -c "import re; f=open('setup.py').read(); print(re.search(r'version=[\"\\\'](.+?)[\"\\\']', f).group(1))")
+          VERSION=$(python3 -c "import re; f=open('setup.py').read(); print(re.search(r'version\s*=\s*[\"\\\']([^\"\\\']+)[\"\\\']', f).group(1))")
           echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Check if tag already exists
+        run: |
+          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+            echo "Tag v$VERSION already exists. Skipping tag creation."
+            exit 0
+          fi
 
       - name: Create tag
         run: |
