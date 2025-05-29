@@ -19,7 +19,8 @@ jobs:
       - name: Get version from setup.py
         id: get_version
         run: |
-          VERSION=$(python setup.py --version)
+          # More robust version extraction that handles different quote styles and whitespace
+          VERSION=$(python3 -c "from setuptools import setup; __file__='setup.py'; setup = lambda **kwargs: print(kwargs['version']); exec(open(__file__).read())")
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
           echo "Extracted version: ${VERSION}"
 
