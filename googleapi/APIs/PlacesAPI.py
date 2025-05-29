@@ -36,4 +36,9 @@ class Places:
                 data = await response.json()
                 places = data.get("places")
                 location = places[0].get("location")
+                if location is None:
+                    raise HTTPException(
+                        status_code=406,
+                        detail="No location found for the given place.",
+                    )
                 return location.get("latitude"), location.get("longitude")
