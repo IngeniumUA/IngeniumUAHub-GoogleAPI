@@ -1,11 +1,12 @@
 import datetime
 import json
-from io import BytesIO
 
-import requests
 from google.auth import crypt, jwt
 
-from googleapi.Helpers.HelperFunctions import build_service_account_credentials, execute_aiogoogle
+from googleapi.Helpers.HelperFunctions import (
+    build_service_account_credentials,
+    execute_aiogoogle,
+)
 
 
 class Wallet:
@@ -14,21 +15,28 @@ class Wallet:
         self.api_version = "v1"
         self.scopes = ["https://www.googleapis.com/auth/wallet_object.issuer"]
 
-    async def _async_init(self, service_file: json, issuer_id: int, base_url: str, class_url: str, object_url: str):
+    async def _async_init(
+        self,
+        service_file: json,
+        issuer_id: int,
+        base_url: str,
+        class_url: str,
+        object_url: str,
+    ):
         """
         @param service_file: Service account credentials file
         """
         self.service_account_credentials = await build_service_account_credentials(
-            service_file=service_file,
-            scopes=self.scopes,
-            subject=""
+            service_file=service_file, scopes=self.scopes, subject=""
         )
         self.issuer_id = issuer_id
         self.base_url = base_url
         self.class_url = class_url
         self.object_url = object_url
 
-    async def create_class(self, event_name: str, event_date: datetime.datetime, locatie_naam: str) -> dict:
+    async def create_class(
+        self, event_name: str, event_date: datetime.datetime, locatie_naam: str
+    ) -> dict:
         class_suffix = event_name.replace(" ", "_") + "_" + str(event_date.year)
         class_id = f"{self.issuer_id}.{class_suffix}"
         class_url = f"{self.class_url}/{self.issuer_id}.{class_suffix}"
@@ -71,7 +79,9 @@ class Wallet:
             },
         }
 
-        method_callable = lambda wallet, **kwargs: wallet.genericclass().insert(**kwargs)
+        method_callable = lambda wallet, **kwargs: wallet.genericclass().insert(
+            **kwargs
+        )
         method_args = {"json": new_class}
         response = await execute_aiogoogle(
             method_callable=method_callable,
@@ -82,8 +92,16 @@ class Wallet:
         )
         return response.json()
 
-    async def create_object(self, event_name: str, object_suffix: str, qr_code, banner_link: str,
-                            end_date: datetime.datetime, number: int, event_date: datetime.datetime, ) -> dict:
+    async def create_object(
+        self,
+        event_name: str,
+        object_suffix: str,
+        qr_code,
+        banner_link: str,
+        end_date: datetime.datetime,
+        number: int,
+        event_date: datetime.datetime,
+    ) -> dict:
         class_suffix = event_name.replace(" ", "_") + "_" + str(event_date.year)
         object_id = f"{self.issuer_id}.{object_suffix}"
         object_url = f"{self.object_url}/{self.issuer_id}.{object_suffix}"
@@ -129,7 +147,9 @@ class Wallet:
             "ticketNumber": str(number),
         }
 
-        method_callable = lambda wallet, **kwargs: wallet.genericobject().insert(**kwargs)
+        method_callable = lambda wallet, **kwargs: wallet.genericobject().insert(
+            **kwargs
+        )
         method_args = {"json": new_object}
         response = await execute_aiogoogle(
             method_callable=method_callable,
@@ -140,12 +160,28 @@ class Wallet:
         )
         return response.json()
 
-    async def create_link(self, qr_code: str, banner_link: str, event_name: str, end_date: datetime.datetime,
-                          nummer: int, event_date: datetime.datetime, locatie_naam: str) -> str:
-        link_class = await self.create_class(event_name=event_name, event_date=event_date, locatie_naam=locatie_naam)
-        link_object = await self.create_object(event_name=event_name, object_suffix=qr_code, qr_code=qr_code,
-                                               banner_link=banner_link, end_date=end_date, number=nummer,
-                                               event_date=event_date)
+    async def create_link(
+        self,
+        qr_code: str,
+        banner_link: str,
+        event_name: str,
+        end_date: datetime.datetime,
+        nummer: int,
+        event_date: datetime.datetime,
+        locatie_naam: str,
+    ) -> str:
+        link_class = await self.create_class(
+            event_name=event_name, event_date=event_date, locatie_naam=locatie_naam
+        )
+        link_object = await self.create_object(
+            event_name=event_name,
+            object_suffix=qr_code,
+            qr_code=qr_code,
+            banner_link=banner_link,
+            end_date=end_date,
+            number=nummer,
+            event_date=event_date,
+        )
 
         # Create the JWT claims
         claims = {
@@ -161,14 +197,17 @@ class Wallet:
         }
 
         # The service account credentials are used to sign the JWT
-        signer = crypt.RSASigner.from_service_account_info(self.service_account_credentials)
+        signer = crypt.RSASigner.from_service_account_info(
+            self.service_account_credentials
+        )
         token = jwt.encode(signer, claims).decode("utf-8")
 
         return f"https://pay.google.com/gp/v/save/{token}"
 
 
-async def create_google_wallet_class(service_file: json, issuer_id: int, base_url: str, class_url: str,
-                                     object_url: str) -> Wallet:
+async def create_google_wallet_class(
+    service_file: json, issuer_id: int, base_url: str, class_url: str, object_url: str
+) -> Wallet:
     wallet = Wallet()
     await wallet._async_init(service_file, issuer_id, base_url, class_url, object_url)
     return wallet
