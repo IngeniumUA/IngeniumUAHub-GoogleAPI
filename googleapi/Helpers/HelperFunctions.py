@@ -1,4 +1,5 @@
 import json
+import os
 from typing import Callable, Dict, List
 
 import aiofiles
@@ -19,8 +20,16 @@ async def build_service_account_credentials(
     @param subject: Subject of the API
     @return: Returns ServiceAccountCreds from aiogoogle
     """
-    async with aiofiles.open(service_file, "r") as file:
-        service_account_key = json.loads(await file.read())
+    # Check if its the file content or path to the file
+    if isinstance(service_file, dict):
+        service_account_key = service_file
+    elif isinstance(service_file, os.PathLike):
+        async with aiofiles.open(service_file, "r") as file:
+            service_account_key = json.loads(await file.read())
+    else:
+        raise TypeError(
+            f"Expected service_file to be a dict or a file path (str), got {type(service_file).__name__}"
+        )
     credentials = ServiceAccountCreds(
         scopes=scopes, **service_account_key, subject=subject
     )

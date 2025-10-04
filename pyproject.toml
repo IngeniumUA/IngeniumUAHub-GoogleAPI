@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "googleapi"
-version = "40.0"
+version = "41.0"
 description = "A package to integrate Google API functionalities for Calendar, Drive, Gmail, and Directory"
 authors = [
     {name = "Yorben Joosen", email = "webmaster@ingeniumua.be"},
