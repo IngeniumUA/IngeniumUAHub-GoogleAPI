@@ -79,9 +79,7 @@ class Wallet:
             },
         }
 
-        method_callable = lambda wallet, **kwargs: wallet.genericclass.insert(
-            **kwargs
-        )
+        method_callable = lambda wallet, **kwargs: wallet.genericclass.insert(**kwargs)
         method_args = {"json": new_class}
         response = await execute_aiogoogle(
             method_callable=method_callable,
@@ -147,9 +145,7 @@ class Wallet:
             "ticketNumber": str(number),
         }
 
-        method_callable = lambda wallet, **kwargs: wallet.genericobject.insert(
-            **kwargs
-        )
+        method_callable = lambda wallet, **kwargs: wallet.genericobject.insert(**kwargs)
         method_args = {"json": new_object}
         response = await execute_aiogoogle(
             method_callable=method_callable,
