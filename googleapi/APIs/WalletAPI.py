@@ -42,7 +42,7 @@ class Wallet:
         class_url = f"{self.class_url}/{self.issuer_id}.{class_suffix}"
 
         # Check if class exists
-        method_callable = lambda wallet, **kwargs: wallet.genericclass().get(**kwargs)
+        method_callable = lambda wallet, **kwargs: wallet.genericclass.get(**kwargs)
         method_args = {"resourceId": class_url}
         response = await execute_aiogoogle(
             method_callable=method_callable,
@@ -79,7 +79,7 @@ class Wallet:
             },
         }
 
-        method_callable = lambda wallet, **kwargs: wallet.genericclass().insert(
+        method_callable = lambda wallet, **kwargs: wallet.genericclass.insert(
             **kwargs
         )
         method_args = {"json": new_class}
@@ -108,7 +108,7 @@ class Wallet:
         class_id = f"{self.issuer_id}.{class_suffix}"
 
         # Check if object exists
-        method_callable = lambda wallet, **kwargs: wallet.genericobject().get(**kwargs)
+        method_callable = lambda wallet, **kwargs: wallet.genericobject.get(**kwargs)
         method_args = {"resourceId": object_url}
         response = await execute_aiogoogle(
             method_callable=method_callable,
@@ -147,7 +147,7 @@ class Wallet:
             "ticketNumber": str(number),
         }
 
-        method_callable = lambda wallet, **kwargs: wallet.genericobject().insert(
+        method_callable = lambda wallet, **kwargs: wallet.genericobject.insert(
             **kwargs
         )
         method_args = {"json": new_object}
