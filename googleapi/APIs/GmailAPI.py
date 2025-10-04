@@ -134,7 +134,6 @@ class Gmail:
         if attachments is None:
             attachments = []
 
-
         method_callable = lambda gmail, **kwargs: gmail.users.messages.send(**kwargs)
 
         for mail_receiver in mail_receivers:
