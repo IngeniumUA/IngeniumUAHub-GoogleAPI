@@ -55,7 +55,11 @@ async def execute_aiogoogle(
         async with Aiogoogle(
             service_account_creds=service_account_credentials
         ) as google:
+            print("Inside Aiogoogle context")
+
             api = await google.discover(api_name, api_version, disco_doc_ver=2)
+            print("Discovery complete")
+            print(api)
             return await google.as_service_account(method_callable(api, **method_args))
     except aiogoogle.excs.HTTPError as error:
         raise HTTPException(
