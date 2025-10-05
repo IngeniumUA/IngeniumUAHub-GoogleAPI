@@ -90,7 +90,9 @@ class Wallet:
             },
         }
 
-        method_callable = lambda wallet, **kwargs: wallet.eventticketclass.insert(**kwargs)
+        method_callable = lambda wallet, **kwargs: wallet.eventticketclass.insert(
+            **kwargs
+        )
 
         print(new_class)
 
@@ -126,7 +128,9 @@ class Wallet:
         print("In create_object")
 
         # Check if object exists
-        method_callable = lambda wallet, **kwargs: wallet.eventticketobject.get(**kwargs)
+        method_callable = lambda wallet, **kwargs: wallet.eventticketobject.get(
+            **kwargs
+        )
         method_args = {"resourceId": object_url}
         response = await execute_aiogoogle(
             method_callable=method_callable,
@@ -168,7 +172,9 @@ class Wallet:
             "ticketNumber": str(number),
         }
 
-        method_callable = lambda wallet, **kwargs: wallet.eventticketobject.insert(**kwargs)
+        method_callable = lambda wallet, **kwargs: wallet.eventticketobject.insert(
+            **kwargs
+        )
 
         print(new_object)
 
