@@ -203,8 +203,6 @@ class Wallet:
             },
         }
 
-        print(claims)
-
         # The service account credentials are used to sign the JWT
         signer = crypt.RSASigner.from_service_account_info(
             self.service_account_credentials
