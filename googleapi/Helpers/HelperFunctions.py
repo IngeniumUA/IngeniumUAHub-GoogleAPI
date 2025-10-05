@@ -69,7 +69,9 @@ async def execute_aiogoogle(
             return response
 
     except aiogoogle.excs.HTTPError as error:
-        print("Fuck me")
+        if error.res.status_code == 404:
+            print("Yo")
+            return response
         raise HTTPException(
             status_code=error.res.status_code,
             detail={
