@@ -137,9 +137,7 @@ class Wallet:
 
     async def create_object(
         self,
-        event_name: str,
         object_suffix: str,
-        event_date: datetime.datetime,
         new_object: EventObjectModel,
     ) -> dict:
         object_id = f"{self.issuer_id}.{object_suffix}"
@@ -188,9 +186,7 @@ class Wallet:
         )
 
         link_object = await self.create_object(
-            event_name=event_name,
             object_suffix=qr_code,
-            event_date=event_date,
             new_object=new_object,
         )
 
