@@ -7,6 +7,7 @@ from googleapi.Helpers.HelperFunctions import (
     build_service_account_credentials,
     execute_aiogoogle,
 )
+from googleapi.TypedDicts.Wallet import EventClassModel, EventObjectModel
 
 
 class Wallet:
@@ -34,8 +35,58 @@ class Wallet:
         self.class_url = class_url
         self.object_url = object_url
 
+    async def create_class_body(self, class_id: str, event_name: str, issuer_name: str, logo_url: str, content_description: str, event_date: datetime.datetime, location_name: str) -> EventClassModel:
+        class_body: EventClassModel = {
+            "id": class_id,
+            "eventName": {"defaultValue": {"language": "nl-BE", "value": event_name}},
+            "issuerName": issuer_name,
+            "reviewStatus": "underReview",
+            "logo": {
+                "sourceUri": {
+                    "uri": logo_url
+                },
+                "contentDescription": {
+                    "defaultValue": {"language": "nl-BE", "value": content_description}
+                },
+            },
+            "dateTime": {"start": str(event_date).replace(" ", "T").split("+")[0]},
+            "venue": {
+                "name": {"defaultValue": {"language": "nl-BE", "value": location_name}},
+                "address": {
+                    "defaultValue": {"language": "nl-BE", "value": location_name}
+                },
+            },
+        }
+        return class_body
+
+    async def create_object_body(self, object_id: str, class_id: str, banner_link: str, content_description: str, qr_code: str, background_color: str, end_date: datetime.datetime, number: int) -> EventObjectModel:
+        object_body: EventObjectModel = {
+            "id": object_id,
+            "classId": class_id,
+            "state": "ACTIVE",
+            "heroImage": {
+                "sourceUri": {"uri": banner_link},
+                "contentDescription": {
+                    "defaultValue": {
+                        "language": "nl-BE",
+                        "value": content_description,
+                    }
+                },
+            },
+            "barcode": {"type": "QR_CODE", "value": qr_code},
+            "hexBackgroundColor": background_color,
+            "validTimeInterval": {
+                "start": {
+                    "date": str(datetime.datetime.now()).replace(" ", "T").split("+")[0]
+                },
+                "end": {"date": str(end_date).replace(" ", "T").split("+")[0]},
+            },
+            "ticketNumber": str(number),
+        }
+        return object_body
+
     async def create_class(
-        self, event_name: str, event_date: datetime.datetime, locatie_naam: str
+        self, event_name: str, event_date: datetime.datetime, new_class: EventClassModel
     ) -> dict:
         class_suffix = event_name.replace(" ", "_") + "_" + str(event_date.year)
         class_id = f"{self.issuer_id}.{class_suffix}"
@@ -53,28 +104,6 @@ class Wallet:
 
         if response != 404:
             return response
-
-        new_class = {
-            "id": class_id,
-            "eventName": {"defaultValue": {"language": "nl-BE", "value": event_name}},
-            "issuerName": "Ingenium UA",
-            "reviewStatus": "underReview",
-            "logo": {
-                "sourceUri": {
-                    "uri": "https://storage.googleapis.com/ingeniumuahubbucket/hub/items/favicon.png"
-                },
-                "contentDescription": {
-                    "defaultValue": {"language": "nl-BE", "value": "Logo van Ingenium"}
-                },
-            },
-            "dateTime": {"start": str(event_date).replace(" ", "T").split("+")[0]},
-            "venue": {
-                "name": {"defaultValue": {"language": "nl-BE", "value": locatie_naam}},
-                "address": {
-                    "defaultValue": {"language": "nl-BE", "value": locatie_naam}
-                },
-            },
-        }
 
         method_callable = lambda wallet, **kwargs: wallet.eventticketclass.insert(
             **kwargs
@@ -94,15 +123,11 @@ class Wallet:
         self,
         event_name: str,
         object_suffix: str,
-        qr_code,
-        banner_link: str,
-        end_date: datetime.datetime,
-        number: int,
         event_date: datetime.datetime,
+        new_object: EventObjectModel,
     ) -> dict:
         class_suffix = event_name.replace(" ", "_") + "_" + str(event_date.year)
         object_id = f"{self.issuer_id}.{object_suffix}"
-        class_id = f"{self.issuer_id}.{class_suffix}"
 
         # Check if object exists
         method_callable = lambda wallet, **kwargs: wallet.eventticketobject.get(
@@ -119,30 +144,6 @@ class Wallet:
 
         if response != 404:
             return response
-
-        new_object = {
-            "id": object_id,
-            "classId": class_id,
-            "state": "ACTIVE",
-            "heroImage": {
-                "sourceUri": {"uri": banner_link},
-                "contentDescription": {
-                    "defaultValue": {
-                        "language": "nl-BE",
-                        "value": "Banner van het event",
-                    }
-                },
-            },
-            "barcode": {"type": "QR_CODE", "value": qr_code},
-            "hexBackgroundColor": "#1F2980",
-            "validTimeInterval": {
-                "start": {
-                    "date": str(datetime.datetime.now()).replace(" ", "T").split("+")[0]
-                },
-                "end": {"date": str(end_date).replace(" ", "T").split("+")[0]},
-            },
-            "ticketNumber": str(number),
-        }
 
         method_callable = lambda wallet, **kwargs: wallet.eventticketobject.insert(
             **kwargs
@@ -162,25 +163,20 @@ class Wallet:
     async def create_link(
         self,
         qr_code: str,
-        banner_link: str,
         event_name: str,
-        end_date: datetime.datetime,
-        nummer: int,
         event_date: datetime.datetime,
-        locatie_naam: str,
+        new_class: EventClassModel,
+        new_object: EventObjectModel,
     ) -> str:
         link_class = await self.create_class(
-            event_name=event_name, event_date=event_date, locatie_naam=locatie_naam
+            event_name=event_name, event_date=event_date, new_class=new_class
         )
 
         link_object = await self.create_object(
             event_name=event_name,
             object_suffix=qr_code,
-            qr_code=qr_code,
-            banner_link=banner_link,
-            end_date=end_date,
-            number=nummer,
             event_date=event_date,
+            new_object=new_object,
         )
 
         # Create the JWT claims
