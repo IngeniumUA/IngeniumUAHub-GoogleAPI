@@ -35,7 +35,9 @@ class Wallet:
         self.class_url = class_url
         self.object_url = object_url
 
-    async def create_class_body(self, class_id: str, event_name: str, issuer_name: str, logo_url: str, content_description: str, event_date: datetime.datetime, location_name: str) -> EventClassModel:
+    async def create_class_body(self, class_suffix: str, event_name: str, issuer_name: str, logo_url: str, content_description: str, event_date: datetime.datetime, location_name: str) -> EventClassModel:
+        class_id = f"{self.issuer_id}.{class_suffix}"
+
         class_body: EventClassModel = {
             "id": class_id,
             "eventName": {"defaultValue": {"language": "nl-BE", "value": event_name}},
@@ -59,7 +61,10 @@ class Wallet:
         }
         return class_body
 
-    async def create_object_body(self, object_id: str, class_id: str, banner_link: str, content_description: str, qr_code: str, background_color: str, end_date: datetime.datetime, number: int) -> EventObjectModel:
+    async def create_object_body(self, object_suffix: str, class_suffix: str, banner_link: str, content_description: str, qr_code: str, background_color: str, end_date: datetime.datetime, number: int) -> EventObjectModel:
+        class_id = f"{self.issuer_id}.{class_suffix}"
+        object_id = f"{self.issuer_id}.{object_suffix}"
+
         object_body: EventObjectModel = {
             "id": object_id,
             "classId": class_id,
@@ -126,7 +131,6 @@ class Wallet:
         event_date: datetime.datetime,
         new_object: EventObjectModel,
     ) -> dict:
-        class_suffix = event_name.replace(" ", "_") + "_" + str(event_date.year)
         object_id = f"{self.issuer_id}.{object_suffix}"
 
         # Check if object exists
