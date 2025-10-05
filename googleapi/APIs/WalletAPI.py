@@ -52,7 +52,7 @@ class Wallet:
         )
 
         if response != 404:
-            return response.json()
+            return response
 
         new_class = {
             "id": class_id,
@@ -119,7 +119,7 @@ class Wallet:
         )
 
         if response != 404:
-            return response.json()
+            return response
 
         new_object = {
             "id": object_id,
