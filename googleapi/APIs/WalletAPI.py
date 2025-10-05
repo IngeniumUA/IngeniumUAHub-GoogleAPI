@@ -14,7 +14,9 @@ class Wallet:
         self.api_name = "walletobjects"
         self.api_version = "v1"
         self.scopes = ["https://www.googleapis.com/auth/wallet_object.issuer"]
-        self.discovery_url = "https://walletobjects.googleapis.com/$discovery/rest?version=v1"
+        self.discovery_url = (
+            "https://walletobjects.googleapis.com/$discovery/rest?version=v1"
+        )
 
     async def _async_init(
         self,
