@@ -57,8 +57,6 @@ async def execute_aiogoogle(
         async with Aiogoogle(
             service_account_creds=service_account_credentials
         ) as google:
-            print("Inside Aiogoogle context")
-
             if discovery_url:
                 api = aiogoogle.resource.GoogleAPI(
                     discovery_document=requests.get(discovery_url).json()

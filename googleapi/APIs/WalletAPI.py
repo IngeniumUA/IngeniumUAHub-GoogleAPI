@@ -51,7 +51,7 @@ class Wallet:
 
         # Check if class exists
         method_callable = lambda wallet, **kwargs: wallet.eventticketclass.get(**kwargs)
-        method_args = {"resourceId": class_url}
+        method_args = {"resourceId": class_id}
         response = await execute_aiogoogle(
             method_callable=method_callable,
             service_account_credentials=self.service_account_credentials,
@@ -62,11 +62,6 @@ class Wallet:
         )
         print(1)
         print(response.json())
-
-        if response.status == 200:
-            return response.json()
-        elif response.status != 404:
-            return response.json()
 
         new_class = {
             "id": class_id,
@@ -131,7 +126,7 @@ class Wallet:
         method_callable = lambda wallet, **kwargs: wallet.eventticketobject.get(
             **kwargs
         )
-        method_args = {"resourceId": object_url}
+        method_args = {"resourceId": object_id}
         response = await execute_aiogoogle(
             method_callable=method_callable,
             service_account_credentials=self.service_account_credentials,
@@ -142,11 +137,6 @@ class Wallet:
         )
 
         print(response.json())
-
-        if response.status == 200:
-            return response.json()
-        elif response.status != 404:
-            return response.json()
 
         new_object = {
             "id": object_id,
