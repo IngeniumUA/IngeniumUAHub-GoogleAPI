@@ -61,7 +61,7 @@ class Wallet:
             "reviewStatus": "underReview",
             "logo": {
                 "sourceUri": {
-                    "uri": "https://www.ingeniumua.be/assets/Ingenium-schild.png"
+                    "uri": "https://storage.googleapis.com/ingeniumuahubbucket/hub/items/favicon.png"
                 },
                 "contentDescription": {
                     "defaultValue": {"language": "nl-BE", "value": "Logo van Ingenium"}
@@ -120,7 +120,6 @@ class Wallet:
             service_account_credentials=self.service_account_credentials,
             api_name=self.api_name,
             api_version=self.api_version,
-            discovery_url=self.discovery_url,
             **method_args,
         )
 
@@ -164,7 +163,6 @@ class Wallet:
             service_account_credentials=self.service_account_credentials,
             api_name=self.api_name,
             api_version=self.api_version,
-            discovery_url=self.discovery_url,
             **method_args,
         )
 
@@ -182,8 +180,6 @@ class Wallet:
         event_date: datetime.datetime,
         locatie_naam: str,
     ) -> str:
-        print("In create_link")
-
         link_class = await self.create_class(
             event_name=event_name, event_date=event_date, locatie_naam=locatie_naam
         )
