@@ -56,7 +56,7 @@ class Wallet:
             api_version=self.api_version,
             **method_args,
         )
-
+        print(1)
         print(response.json())
 
         if response.status == 200:
