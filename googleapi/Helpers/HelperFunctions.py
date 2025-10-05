@@ -64,7 +64,10 @@ async def execute_aiogoogle(
             else:
                 api = await google.discover(api_name, api_version, disco_doc_ver=2)
 
-            response = await google.as_service_account(method_callable(api, **method_args))
+            request = method_callable(api, **method_args)
+            print(request)
+
+            response = await google.as_service_account(request)
             print(response)
 
             """try:
