@@ -60,8 +60,16 @@ class Wallet:
             #discovery_url=self.discovery_url,
             **method_args,
         )
+
+
         print(1)
-        print(response.json())
+        print(response)
+
+        if response.status_code == 200:
+            return response.json()
+        elif response.status_code != 404:
+            # Something else went wrong...
+            return response.json()
 
         new_class = {
             "id": class_id,
