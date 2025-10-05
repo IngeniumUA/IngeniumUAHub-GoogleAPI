@@ -56,15 +56,10 @@ class Wallet:
             **method_args,
         )
 
-
+        if response:
+            return response.json()
         print(1)
         print(response)
-
-        if response.status_code == 200:
-            return response.json()
-        elif response.status_code != 404:
-            # Something else went wrong...
-            return response.json()
 
         new_class = {
             "id": class_id,
@@ -139,6 +134,8 @@ class Wallet:
             **method_args,
         )
 
+        if response:
+            return response.json()
         print(response.json())
 
         new_object = {
