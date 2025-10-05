@@ -35,7 +35,16 @@ class Wallet:
         self.class_url = class_url
         self.object_url = object_url
 
-    async def create_class_body(self, class_suffix: str, event_name: str, issuer_name: str, logo_url: str, content_description: str, event_date: datetime.datetime, location_name: str) -> EventClassModel:
+    async def create_class_body(
+        self,
+        class_suffix: str,
+        event_name: str,
+        issuer_name: str,
+        logo_url: str,
+        content_description: str,
+        event_date: datetime.datetime,
+        location_name: str,
+    ) -> EventClassModel:
         class_id = f"{self.issuer_id}.{class_suffix}"
 
         class_body: EventClassModel = {
@@ -44,9 +53,7 @@ class Wallet:
             "issuerName": issuer_name,
             "reviewStatus": "underReview",
             "logo": {
-                "sourceUri": {
-                    "uri": logo_url
-                },
+                "sourceUri": {"uri": logo_url},
                 "contentDescription": {
                     "defaultValue": {"language": "nl-BE", "value": content_description}
                 },
@@ -61,7 +68,17 @@ class Wallet:
         }
         return class_body
 
-    async def create_object_body(self, object_suffix: str, class_suffix: str, banner_link: str, content_description: str, qr_code: str, background_color: str, end_date: datetime.datetime, number: int) -> EventObjectModel:
+    async def create_object_body(
+        self,
+        object_suffix: str,
+        class_suffix: str,
+        banner_link: str,
+        content_description: str,
+        qr_code: str,
+        background_color: str,
+        end_date: datetime.datetime,
+        number: int,
+    ) -> EventObjectModel:
         class_id = f"{self.issuer_id}.{class_suffix}"
         object_id = f"{self.issuer_id}.{object_suffix}"
 
