@@ -16,12 +16,12 @@ class Wallet:
         self.scopes = ["https://www.googleapis.com/auth/wallet_object.issuer"]
 
     async def _async_init(
-        self,
-        service_file: json,
-        issuer_id: int,
-        base_url: str,
-        class_url: str,
-        object_url: str,
+            self,
+            service_file: json,
+            issuer_id: int,
+            base_url: str,
+            class_url: str,
+            object_url: str,
     ):
         """
         @param service_file: Service account credentials file
@@ -35,7 +35,7 @@ class Wallet:
         self.object_url = object_url
 
     async def create_class(
-        self, event_name: str, event_date: datetime.datetime, locatie_naam: str
+            self, event_name: str, event_date: datetime.datetime, locatie_naam: str
     ) -> dict:
         class_suffix = event_name.replace(" ", "_") + "_" + str(event_date.year)
         class_id = f"{self.issuer_id}.{class_suffix}"
@@ -88,27 +88,22 @@ class Wallet:
             api_version=self.api_version,
             **method_args,
         )
-
-        print(response.json())
-
-        return response.json()
+        print(response)
+        return response
 
     async def create_object(
-        self,
-        event_name: str,
-        object_suffix: str,
-        qr_code,
-        banner_link: str,
-        end_date: datetime.datetime,
-        number: int,
-        event_date: datetime.datetime,
+            self,
+            event_name: str,
+            object_suffix: str,
+            qr_code,
+            banner_link: str,
+            end_date: datetime.datetime,
+            number: int,
+            event_date: datetime.datetime,
     ) -> dict:
         class_suffix = event_name.replace(" ", "_") + "_" + str(event_date.year)
         object_id = f"{self.issuer_id}.{object_suffix}"
-        object_url = f"{self.object_url}/{self.issuer_id}.{object_suffix}"
         class_id = f"{self.issuer_id}.{class_suffix}"
-
-        print("In create_object")
 
         # Check if object exists
         method_callable = lambda wallet, **kwargs: wallet.eventticketobject.get(
@@ -125,7 +120,6 @@ class Wallet:
 
         if response != 404:
             return response.json()
-        print(response)
 
         new_object = {
             "id": object_id,
@@ -155,8 +149,6 @@ class Wallet:
             **kwargs
         )
 
-        print(new_object)
-
         method_args = {"json": new_object}
         response = await execute_aiogoogle(
             method_callable=method_callable,
@@ -166,25 +158,23 @@ class Wallet:
             **method_args,
         )
 
-        print(response.json())
+        print(response)
 
-        return response.json()
+        return response
 
     async def create_link(
-        self,
-        qr_code: str,
-        banner_link: str,
-        event_name: str,
-        end_date: datetime.datetime,
-        nummer: int,
-        event_date: datetime.datetime,
-        locatie_naam: str,
+            self,
+            qr_code: str,
+            banner_link: str,
+            event_name: str,
+            end_date: datetime.datetime,
+            nummer: int,
+            event_date: datetime.datetime,
+            locatie_naam: str,
     ) -> str:
         link_class = await self.create_class(
             event_name=event_name, event_date=event_date, locatie_naam=locatie_naam
         )
-
-        print(link_class)
 
         link_object = await self.create_object(
             event_name=event_name,
@@ -195,8 +185,6 @@ class Wallet:
             number=nummer,
             event_date=event_date,
         )
-
-        print(link_object)
 
         # Create the JWT claims
         claims = {
@@ -228,7 +216,7 @@ class Wallet:
 
 
 async def create_google_wallet_class(
-    service_file: json, issuer_id: int, base_url: str, class_name: str, object_name: str
+        service_file: json, issuer_id: int, base_url: str, class_name: str, object_name: str
 ) -> Wallet:
     wallet = Wallet()
     await wallet._async_init(
