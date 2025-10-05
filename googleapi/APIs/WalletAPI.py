@@ -218,9 +218,7 @@ class Wallet:
         return f"https://pay.google.com/gp/v/save/{token}"
 
 
-async def create_google_wallet_class(
-    service_file: json, issuer_id: int
-) -> Wallet:
+async def create_google_wallet_class(service_file: json, issuer_id: int) -> Wallet:
     wallet = Wallet()
     await wallet._async_init(
         service_file,
