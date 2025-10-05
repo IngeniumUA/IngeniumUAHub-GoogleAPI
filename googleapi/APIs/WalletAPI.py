@@ -219,14 +219,11 @@ class Wallet:
 
 
 async def create_google_wallet_class(
-    service_file: json, issuer_id: int, base_url: str, class_name: str, object_name: str
+    service_file: json, issuer_id: int
 ) -> Wallet:
     wallet = Wallet()
     await wallet._async_init(
         service_file,
         issuer_id,
-        base_url,
-        f"{base_url}/{class_name}",
-        f"{base_url}/objects/{object_name}",
     )
     return wallet
