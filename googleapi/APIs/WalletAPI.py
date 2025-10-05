@@ -186,7 +186,6 @@ class Wallet:
         event_date: datetime.datetime,
         locatie_naam: str,
     ) -> str:
-
         print("In create_link")
 
         link_class = await self.create_class(
