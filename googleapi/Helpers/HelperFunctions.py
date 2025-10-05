@@ -70,7 +70,7 @@ async def execute_aiogoogle(
 
     except aiogoogle.excs.HTTPError as error:
         if error.res.status_code == 404:
-            return None
+            return error.res.status_code
         raise HTTPException(
             status_code=error.res.status_code,
             detail={

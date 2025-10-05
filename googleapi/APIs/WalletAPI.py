@@ -56,7 +56,7 @@ class Wallet:
             **method_args,
         )
 
-        if response:
+        if response != 404:
             return response.json()
         print(1)
         print(response)
@@ -134,9 +134,9 @@ class Wallet:
             **method_args,
         )
 
-        if response:
+        if response != 404:
             return response.json()
-        print(response.json())
+        print(response)
 
         new_object = {
             "id": object_id,
