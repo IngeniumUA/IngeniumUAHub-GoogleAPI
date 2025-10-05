@@ -4,6 +4,7 @@ from typing import Callable, Dict, List
 
 import aiofiles
 import aiogoogle
+import requests
 from aiogoogle import Aiogoogle
 from aiogoogle.auth.creds import ServiceAccountCreds
 from fastapi import HTTPException
@@ -41,6 +42,7 @@ async def execute_aiogoogle(
     service_account_credentials: ServiceAccountCreds,
     api_name: str,
     api_version: str,
+    discovery_url: str | None = None,
     **method_args: Dict,
 ):
     """
@@ -57,7 +59,11 @@ async def execute_aiogoogle(
         ) as google:
             print("Inside Aiogoogle context")
 
-            api = await google.discover(api_name, api_version, disco_doc_ver=2)
+            if discovery_url:
+                api = aiogoogle.resource.GoogleAPI(discovery_document=requests.get(discovery_url).json())
+            else:
+                api = await google.discover(api_name, api_version, disco_doc_ver=2)
+
             print("Discovery complete")
             print(api)
             print("Available attributes:", dir(api))

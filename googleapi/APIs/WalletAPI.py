@@ -14,6 +14,7 @@ class Wallet:
         self.api_name = "walletobjects"
         self.api_version = "v1"
         self.scopes = ["https://www.googleapis.com/auth/wallet_object.issuer"]
+        self.discovery_url = "https://walletobjects.googleapis.com/$discovery/rest?version=v1"
 
     async def _async_init(
         self,
@@ -54,6 +55,7 @@ class Wallet:
             service_account_credentials=self.service_account_credentials,
             api_name=self.api_name,
             api_version=self.api_version,
+            discovery_url=self.discovery_url,
             **method_args,
         )
         print(1)
@@ -96,6 +98,7 @@ class Wallet:
             service_account_credentials=self.service_account_credentials,
             api_name=self.api_name,
             api_version=self.api_version,
+            discovery_url=self.discovery_url,
             **method_args,
         )
 
@@ -128,6 +131,7 @@ class Wallet:
             service_account_credentials=self.service_account_credentials,
             api_name=self.api_name,
             api_version=self.api_version,
+            discovery_url=self.discovery_url,
             **method_args,
         )
 
@@ -172,6 +176,7 @@ class Wallet:
             service_account_credentials=self.service_account_credentials,
             api_name=self.api_name,
             api_version=self.api_version,
+            discovery_url=self.discovery_url,
             **method_args,
         )
 
