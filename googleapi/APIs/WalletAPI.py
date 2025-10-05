@@ -14,9 +14,6 @@ class Wallet:
         self.api_name = "walletobjects"
         self.api_version = "v1"
         self.scopes = ["https://www.googleapis.com/auth/wallet_object.issuer"]
-        self.discovery_url = (
-            "https://walletobjects.googleapis.com/$discovery/rest?version=v1"
-        )
 
     async def _async_init(
         self,
@@ -42,7 +39,6 @@ class Wallet:
     ) -> dict:
         class_suffix = event_name.replace(" ", "_") + "_" + str(event_date.year)
         class_id = f"{self.issuer_id}.{class_suffix}"
-        class_url = f"{self.class_url}/{self.issuer_id}.{class_suffix}"
 
         # Check if class exists
         method_callable = lambda wallet, **kwargs: wallet.eventticketclass.get(**kwargs)
@@ -52,14 +48,11 @@ class Wallet:
             service_account_credentials=self.service_account_credentials,
             api_name=self.api_name,
             api_version=self.api_version,
-            #discovery_url=self.discovery_url,
             **method_args,
         )
 
         if response != 404:
             return response.json()
-        print(1)
-        print(response)
 
         new_class = {
             "id": class_id,
@@ -87,15 +80,12 @@ class Wallet:
             **kwargs
         )
 
-        print(new_class)
-
         method_args = {"json": new_class}
         response = await execute_aiogoogle(
             method_callable=method_callable,
             service_account_credentials=self.service_account_credentials,
             api_name=self.api_name,
             api_version=self.api_version,
-            discovery_url=self.discovery_url,
             **method_args,
         )
 
