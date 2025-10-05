@@ -88,7 +88,6 @@ class Wallet:
             api_version=self.api_version,
             **method_args,
         )
-        print(response)
         return response
 
     async def create_object(
@@ -158,8 +157,6 @@ class Wallet:
             **method_args,
         )
 
-        print(response)
-
         return response
 
     async def create_link(
@@ -199,18 +196,11 @@ class Wallet:
             },
         }
 
-        print(claims)
-
         # The service account credentials are used to sign the JWT
         signer = crypt.RSASigner.from_service_account_info(
             self.service_account_credentials
         )
-
-        print(signer)
-
         token = jwt.encode(signer, claims).decode("utf-8")
-
-        print(token)
 
         return f"https://pay.google.com/gp/v/save/{token}"
 

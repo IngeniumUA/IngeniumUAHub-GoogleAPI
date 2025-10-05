@@ -21,6 +21,9 @@
 # Geocoding API links
 1. [Geocoding API documentation](https://developers.google.com/maps/documentation/geocoding/overview)
 
+# Wallet API links
+1. [Wallet API documentation](https://developers.google.com/wallet/generic)
+
 # General links
 1. [OAuthScopes](https://developers.google.com/identity/protocols/oauth2/scopes)
 2. [Connect to service account](https://developers.google.com/analytics/devguides/config/mgmt/v3/quickstart/service-py)
