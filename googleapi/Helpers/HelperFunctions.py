@@ -60,15 +60,11 @@ async def execute_aiogoogle(
             print("Inside Aiogoogle context")
 
             if discovery_url:
-                print(requests.get(discovery_url).json())
                 api = aiogoogle.resource.GoogleAPI(discovery_document=requests.get(discovery_url).json())
-                print("Here")
             else:
                 api = await google.discover(api_name, api_version, disco_doc_ver=2)
 
-            print("Discovery complete")
-            print(api)
-            print("Available attributes:", dir(api))
+            print(json.dumps(api.discovery_document.keys(), indent=4))
             return await google.as_service_account(method_callable(api, **method_args))
     except aiogoogle.excs.HTTPError as error:
         raise HTTPException(
