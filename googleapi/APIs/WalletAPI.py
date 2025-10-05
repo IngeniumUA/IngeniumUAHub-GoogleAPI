@@ -50,7 +50,7 @@ class Wallet:
         print(class_url)
 
         # Check if class exists
-        method_callable = lambda wallet, **kwargs: wallet.genericclass.get(**kwargs)
+        method_callable = lambda wallet, **kwargs: wallet.eventticketclass.get(**kwargs)
         method_args = {"resourceId": class_url}
         response = await execute_aiogoogle(
             method_callable=method_callable,
@@ -90,7 +90,7 @@ class Wallet:
             },
         }
 
-        method_callable = lambda wallet, **kwargs: wallet.genericclass.insert(**kwargs)
+        method_callable = lambda wallet, **kwargs: wallet.eventticketclass.insert(**kwargs)
 
         print(new_class)
 
@@ -126,7 +126,7 @@ class Wallet:
         print("In create_object")
 
         # Check if object exists
-        method_callable = lambda wallet, **kwargs: wallet.genericobject.get(**kwargs)
+        method_callable = lambda wallet, **kwargs: wallet.eventticketobject.get(**kwargs)
         method_args = {"resourceId": object_url}
         response = await execute_aiogoogle(
             method_callable=method_callable,
@@ -168,7 +168,7 @@ class Wallet:
             "ticketNumber": str(number),
         }
 
-        method_callable = lambda wallet, **kwargs: wallet.genericobject.insert(**kwargs)
+        method_callable = lambda wallet, **kwargs: wallet.eventticketobject.insert(**kwargs)
 
         print(new_object)
 
