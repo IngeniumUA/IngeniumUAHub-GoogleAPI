@@ -41,6 +41,8 @@ class Wallet:
         class_id = f"{self.issuer_id}.{class_suffix}"
         class_url = f"{self.class_url}/{self.issuer_id}.{class_suffix}"
 
+        print("In create_class")
+
         # Check if class exists
         method_callable = lambda wallet, **kwargs: wallet.genericclass.get(**kwargs)
         method_args = {"resourceId": class_url}
@@ -51,6 +53,8 @@ class Wallet:
             api_version=self.api_version,
             **method_args,
         )
+
+        print(response.json())
 
         if response.status == 200:
             return response.json()
@@ -79,6 +83,8 @@ class Wallet:
             },
         }
 
+        print(new_class)
+
         method_callable = lambda wallet, **kwargs: wallet.genericclass.insert(
             **kwargs
         )
@@ -90,6 +96,9 @@ class Wallet:
             api_version=self.api_version,
             **method_args,
         )
+
+        print(response.json())
+
         return response.json()
 
     async def create_object(
@@ -107,6 +116,8 @@ class Wallet:
         object_url = f"{self.object_url}/{self.issuer_id}.{object_suffix}"
         class_id = f"{self.issuer_id}.{class_suffix}"
 
+        print("In create_object")
+
         # Check if object exists
         method_callable = lambda wallet, **kwargs: wallet.genericobject.get(**kwargs)
         method_args = {"resourceId": object_url}
@@ -117,6 +128,8 @@ class Wallet:
             api_version=self.api_version,
             **method_args,
         )
+
+        print(response.json())
 
         if response.status == 200:
             return response.json()
@@ -147,6 +160,8 @@ class Wallet:
             "ticketNumber": str(number),
         }
 
+        print(new_object)
+
         method_callable = lambda wallet, **kwargs: wallet.genericobject.insert(
             **kwargs
         )
@@ -158,6 +173,9 @@ class Wallet:
             api_version=self.api_version,
             **method_args,
         )
+
+        print(response.json())
+
         return response.json()
 
     async def create_link(
@@ -170,9 +188,15 @@ class Wallet:
         event_date: datetime.datetime,
         locatie_naam: str,
     ) -> str:
+
+        print("In create_link")
+
         link_class = await self.create_class(
             event_name=event_name, event_date=event_date, locatie_naam=locatie_naam
         )
+
+        print(link_class)
+
         link_object = await self.create_object(
             event_name=event_name,
             object_suffix=qr_code,
@@ -182,6 +206,8 @@ class Wallet:
             number=nummer,
             event_date=event_date,
         )
+
+        print(link_object)
 
         # Create the JWT claims
         claims = {
@@ -196,11 +222,18 @@ class Wallet:
             },
         }
 
+        print(claims)
+
         # The service account credentials are used to sign the JWT
         signer = crypt.RSASigner.from_service_account_info(
             self.service_account_credentials
         )
+
+        print(signer)
+
         token = jwt.encode(signer, claims).decode("utf-8")
+
+        print(token)
 
         return f"https://pay.google.com/gp/v/save/{token}"
 
