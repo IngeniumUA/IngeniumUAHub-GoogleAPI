@@ -20,9 +20,6 @@ class Wallet:
         self,
         service_file: json,
         issuer_id: int,
-        base_url: str,
-        class_url: str,
-        object_url: str,
     ):
         """
         @param service_file: Service account credentials file
@@ -31,9 +28,6 @@ class Wallet:
             service_file=service_file, scopes=self.scopes, subject=""
         )
         self.issuer_id = issuer_id
-        self.base_url = base_url
-        self.class_url = class_url
-        self.object_url = object_url
 
     async def create_class_body(
         self,
@@ -202,7 +196,7 @@ class Wallet:
 
         # Create the JWT claims
         claims = {
-            "iss": self.service_account_credentials.service_account_email,
+            "iss": self.service_account_credentials.client_email,
             "aud": "google",
             "origins": ["www.ingeniumua.be"],
             "typ": "savetowallet",
