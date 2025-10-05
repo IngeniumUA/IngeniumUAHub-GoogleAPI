@@ -65,24 +65,11 @@ async def execute_aiogoogle(
                 api = await google.discover(api_name, api_version, disco_doc_ver=2)
 
             request = method_callable(api, **method_args)
-            print("AAAAAAAAAAAAAAAA")
             response = await google.as_service_account(request)
-            print("BBBBBBBBBBBBB")
-            print(response)
-            return response
-            print(request)
-
-            #response = await google.as_service_account(request)
-            #print(response)
-
-            try:
-                response = await google.as_service_account(request)
-                return response
-            except Exception as e:
-                print(e)
             return response
 
     except aiogoogle.excs.HTTPError as error:
+        print("Fuck me")
         raise HTTPException(
             status_code=error.res.status_code,
             detail={

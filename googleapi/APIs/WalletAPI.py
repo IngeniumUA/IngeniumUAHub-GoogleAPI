@@ -44,11 +44,6 @@ class Wallet:
         class_id = f"{self.issuer_id}.{class_suffix}"
         class_url = f"{self.class_url}/{self.issuer_id}.{class_suffix}"
 
-        print("In create_class")
-        print(class_url)
-        print(class_id)
-        print(class_url)
-
         # Check if class exists
         method_callable = lambda wallet, **kwargs: wallet.eventticketclass.get(**kwargs)
         method_args = {"resourceId": class_id}
