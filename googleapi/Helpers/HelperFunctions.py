@@ -60,7 +60,9 @@ async def execute_aiogoogle(
             print("Inside Aiogoogle context")
 
             if discovery_url:
+                print(requests.get(discovery_url).json())
                 api = aiogoogle.resource.GoogleAPI(discovery_document=requests.get(discovery_url).json())
+                print("Here")
             else:
                 api = await google.discover(api_name, api_version, disco_doc_ver=2)
 
