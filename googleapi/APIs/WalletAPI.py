@@ -57,7 +57,7 @@ class Wallet:
             service_account_credentials=self.service_account_credentials,
             api_name=self.api_name,
             api_version=self.api_version,
-            discovery_url=self.discovery_url,
+            #discovery_url=self.discovery_url,
             **method_args,
         )
         print(1)
