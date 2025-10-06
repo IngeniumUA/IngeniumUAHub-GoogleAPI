@@ -103,10 +103,7 @@ class Wallet:
         }
         return object_body
 
-    async def create_class(
-        self, new_class: EventClassModel
-    ) -> dict:
-
+    async def create_class(self, new_class: EventClassModel) -> dict:
         method_callable = lambda wallet, **kwargs: wallet.eventticketclass.insert(
             **kwargs
         )
