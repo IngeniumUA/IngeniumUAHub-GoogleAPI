@@ -1,4 +1,3 @@
-import json
 from typing import List, cast, Dict
 
 from googleapi.Helpers.HelperFunctions import (
@@ -332,7 +331,9 @@ class Drive:
         )
 
 
-async def create_drive_class(service_file: ServiceAccountFileModel, subject: str) -> Drive:
+async def create_drive_class(
+    service_file: ServiceAccountFileModel, subject: str
+) -> Drive:
     drive = Drive()
     await drive.async_init(service_file=service_file, subject=subject)
     return drive

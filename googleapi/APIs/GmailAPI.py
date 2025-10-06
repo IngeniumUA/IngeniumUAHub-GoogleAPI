@@ -1,4 +1,3 @@
-import json
 from base64 import urlsafe_b64encode as base64_urlsafe_encode
 from email.encoders import encode_base64
 from email.mime.base import MIMEBase
@@ -157,7 +156,9 @@ class Gmail:
 
 
 async def create_gmail_class(
-    service_file: ServiceAccountFileModel, mail_sender: str, mail_reply_address: str | None = None
+    service_file: ServiceAccountFileModel,
+    mail_sender: str,
+    mail_reply_address: str | None = None,
 ) -> Gmail:
     gmail = Gmail(mail_reply_address=mail_reply_address)
     await gmail.async_init(service_file=service_file, mail_sender=mail_sender)

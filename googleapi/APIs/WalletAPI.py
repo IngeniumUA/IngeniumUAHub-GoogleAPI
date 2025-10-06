@@ -1,5 +1,4 @@
 import datetime
-import json
 
 from google.auth import crypt, jwt
 
@@ -215,7 +214,9 @@ class Wallet:
         return f"https://pay.google.com/gp/v/save/{token}"
 
 
-async def create_google_wallet_class(service_file: ServiceAccountFileModel, issuer_id: int) -> Wallet:
+async def create_google_wallet_class(
+    service_file: ServiceAccountFileModel, issuer_id: int
+) -> Wallet:
     wallet = Wallet()
     await wallet.async_init(
         service_file,

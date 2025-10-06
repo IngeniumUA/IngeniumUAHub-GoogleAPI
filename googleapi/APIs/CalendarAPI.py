@@ -1,4 +1,3 @@
-import json
 from datetime import datetime as datetime_datetime, timezone
 from typing import cast, List
 
@@ -589,7 +588,9 @@ class Calendar:
         )
 
 
-async def create_calendar_class(service_file: ServiceAccountFileModel, subject: str) -> Calendar:
+async def create_calendar_class(
+    service_file: ServiceAccountFileModel, subject: str
+) -> Calendar:
     calendar = Calendar()
     await calendar.async_init(service_file=service_file, subject=subject)
     return calendar

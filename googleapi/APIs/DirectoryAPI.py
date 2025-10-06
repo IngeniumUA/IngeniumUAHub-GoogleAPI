@@ -1,4 +1,3 @@
-import json
 from base64 import urlsafe_b64encode as base64_urlsafe_encode
 from os import path as os_path
 from random import choice as random_choice
