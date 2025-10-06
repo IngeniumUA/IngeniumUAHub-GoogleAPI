@@ -140,9 +140,6 @@ class Wallet:
 
     async def create_link(
         self,
-        qr_code: str,
-        event_name: str,
-        event_date: datetime.datetime,
         new_class: EventClassModel,
         new_object: EventObjectModel,
     ) -> str:
