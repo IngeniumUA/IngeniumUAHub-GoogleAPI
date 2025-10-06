@@ -60,12 +60,12 @@ class Directory:
         method_callable = lambda directory, **kwargs: directory.users.list(**kwargs)
         method_args = {"orderBy": "email", "domain": self.domain}
         response: UserListModel = await execute_aiogoogle(
-                method_callable=method_callable,
-                service_account_credentials=self.service_account_credentials,
-                api_name=self.api_name,
-                api_version=self.api_version,
-                **method_args,
-            )
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
         return response.get("users", [])
 
     async def get_user(self, user_id: str) -> UserModel:
@@ -82,12 +82,12 @@ class Directory:
             "projection": "full",
         }
         response: UserModel = await execute_aiogoogle(
-                method_callable=method_callable,
-                service_account_credentials=self.service_account_credentials,
-                api_name=self.api_name,
-                api_version=self.api_version,
-                **method_args,
-            )
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
         return response
 
     async def delete_user(self, user_id: str) -> None:
@@ -151,12 +151,12 @@ class Directory:
         method_callable = lambda directory, **kwargs: directory.users.insert(**kwargs)
         method_args = {"body": body}
         response: UserModel = await execute_aiogoogle(
-                method_callable=method_callable,
-                service_account_credentials=self.service_account_credentials,
-                api_name=self.api_name,
-                api_version=self.api_version,
-                **method_args,
-            )
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
         return response
 
     async def update_user(
@@ -192,12 +192,12 @@ class Directory:
         method_callable = lambda directory, **kwargs: directory.users.update(**kwargs)
         method_args = {"userKey": user_id, "body": body}
         response: UserModel = await execute_aiogoogle(
-                method_callable=method_callable,
-                service_account_credentials=self.service_account_credentials,
-                api_name=self.api_name,
-                api_version=self.api_version,
-                method_args=method_args,
-            )
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            method_args=method_args,
+        )
         return response
 
     async def update_user_password(self, password: str, user_id: str) -> UserModel:
@@ -224,12 +224,12 @@ class Directory:
         method_callable = lambda directory, **kwargs: directory.users.update(**kwargs)
         method_kwargs = {"userKey": user_id, "body": body}
         response: UserModel = await execute_aiogoogle(
-                method_callable=method_callable,
-                service_account_credentials=self.service_account_credentials,
-                api_name=self.api_name,
-                api_version=self.api_version,
-                **method_kwargs,
-            )
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_kwargs,
+        )
         return response
 
     async def update_user_photo(self, user_id: int, photo_path: str) -> UserPhotoModel:
@@ -259,12 +259,12 @@ class Directory:
         )
         method_args = {"userKey": user_id, "body": body}
         response: UserPhotoModel = await execute_aiogoogle(
-                method_callable=method_callable,
-                service_account_credentials=self.service_account_credentials,
-                api_name=self.api_name,
-                api_version=self.api_version,
-                **method_args,
-            )
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
         return response
 
     async def get_user_photo(self, user_id: int) -> UserPhotoModel:
@@ -278,12 +278,12 @@ class Directory:
         )
         method_args = {"userKey": user_id}
         response: UserPhotoModel = await execute_aiogoogle(
-                method_callable=method_callable,
-                service_account_credentials=self.service_account_credentials,
-                api_name=self.api_name,
-                api_version=self.api_version,
-                **method_args,
-            )
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
         return response
 
     async def delete_user_photo(self, user_id: int) -> None:
@@ -312,12 +312,12 @@ class Directory:
         method_callable = lambda directory, **kwargs: directory.groups.list(**kwargs)
         method_args = {"domain": self.domain, "orderBy": "email"}
         response: GroupListModel = await execute_aiogoogle(
-                method_callable=method_callable,
-                service_account_credentials=self.service_account_credentials,
-                api_name=self.api_name,
-                api_version=self.api_version,
-                **method_args,
-            )
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
         return response.get("groups", [])
 
     async def get_group(self, group_id: str) -> GroupModel:
@@ -329,12 +329,12 @@ class Directory:
         method_callable = lambda directory, **kwargs: directory.groups.get(**kwargs)
         method_args = {"groupKey": group_id}
         response: GroupModel = await execute_aiogoogle(
-                method_callable=method_callable,
-                service_account_credentials=self.service_account_credentials,
-                api_name=self.api_name,
-                api_version=self.api_version,
-                **method_args,
-            )
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
         return response
 
     async def delete_group(self, group_id: str) -> None:
@@ -373,12 +373,12 @@ class Directory:
         method_callable = lambda directory, **kwargs: directory.groups.insert(**kwargs)
         method_args = {"body": body}
         response: GroupModel = await execute_aiogoogle(
-                method_callable=method_callable,
-                service_account_credentials=self.service_account_credentials,
-                api_name=self.api_name,
-                api_version=self.api_version,
-                **method_args,
-            )
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
         return response
 
     async def update_group(
@@ -430,12 +430,12 @@ class Directory:
         method_callable = lambda directory, **kwargs: directory.groups.update(**kwargs)
         method_args = {"groupKey": group_id, "body": body}
         response: GroupModel = await execute_aiogoogle(
-                method_callable=method_callable,
-                service_account_credentials=self.service_account_credentials,
-                api_name=self.api_name,
-                api_version=self.api_version,
-                **method_args,
-            )
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
         return response
 
     async def get_group_members(self, group_id: str) -> List[MemberModel]:
@@ -447,12 +447,12 @@ class Directory:
         method_callable = lambda directory, **kwargs: directory.members.list(**kwargs)
         method_args = {"groupKey": group_id}
         response: MemberListModel = await execute_aiogoogle(
-                method_callable=method_callable,
-                service_account_credentials=self.service_account_credentials,
-                api_name=self.api_name,
-                api_version=self.api_version,
-                **method_args,
-            )
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
         return response.get("members", [])
 
     async def add_group_member(self, user_id: str, group_id: str) -> MemberModel:
@@ -466,12 +466,12 @@ class Directory:
         method_callable = lambda directory, **kwargs: directory.members.insert(**kwargs)
         method_args = {"groupKey": group_id, "body": user}
         response: MemberModel = await execute_aiogoogle(
-                method_callable=method_callable,
-                service_account_credentials=self.service_account_credentials,
-                api_name=self.api_name,
-                api_version=self.api_version,
-                **method_args,
-            )
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
         return response
 
     async def delete_group_member(self, user_id: int, group_id: str) -> None:

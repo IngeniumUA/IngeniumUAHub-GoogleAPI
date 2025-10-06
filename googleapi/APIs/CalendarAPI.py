@@ -12,7 +12,10 @@ from googleapi.TypedDicts.Calendar import (
     EventsModel,
     EventModel,
     AclRuleModel,
-    AclModel, BaseEventModel, BaseCalendarModel, BaseAclRuleModel,
+    AclModel,
+    BaseEventModel,
+    BaseCalendarModel,
+    BaseAclRuleModel,
 )
 from googleapi.TypedDicts.ServiceAccountFile import ServiceAccountFileModel
 
@@ -40,12 +43,12 @@ class Calendar:
         )
 
     async def _build_event_body(
-            self,
-            title: str,
-            description: str,
-            location: str,
-            start_time: datetime_datetime,
-            end_time: datetime_datetime,
+        self,
+        title: str,
+        description: str,
+        location: str,
+        start_time: datetime_datetime,
+        end_time: datetime_datetime,
     ) -> BaseEventModel:
         """
         Used to build the body of an event in the form that Google Calendar API accepts
@@ -66,7 +69,7 @@ class Calendar:
         return eventBody
 
     async def _build_calendar_body(
-            self, title: str, location: str, description: str
+        self, title: str, location: str, description: str
     ) -> BaseCalendarModel:
         """
         Used to build the body of a calendar in the form that Google Calendar API accepts
@@ -85,7 +88,7 @@ class Calendar:
 
     @staticmethod
     async def build_scope_body(
-            scope_type: str, scope_value: str, role: str
+        scope_type: str, scope_value: str, role: str
     ) -> BaseAclRuleModel:
         """
         Used to build the body of an acl scope in the form that Google Calendar API accepts
@@ -94,17 +97,20 @@ class Calendar:
         @param role: Role of the scope
         @return: Dictionary of type AclRuleModel that Google Calendar API accepts
         """
-        rule: BaseAclRuleModel = {"scope": {"type": scope_type, "value": scope_value}, "role": role}
+        rule: BaseAclRuleModel = {
+            "scope": {"type": scope_type, "value": scope_value},
+            "role": role,
+        }
         return rule
 
     async def add_event(
-            self,
-            calendar_id: str,
-            title: str,
-            start_time: datetime_datetime,
-            end_time: datetime_datetime,
-            description: str = "",
-            location: str = "",
+        self,
+        calendar_id: str,
+        title: str,
+        start_time: datetime_datetime,
+        end_time: datetime_datetime,
+        description: str = "",
+        location: str = "",
     ) -> EventModel:
         """
         Adds an event to the calendar
@@ -131,7 +137,7 @@ class Calendar:
         return response
 
     async def get_events(
-            self, calendar_id: str, get_all_events: bool = False
+        self, calendar_id: str, get_all_events: bool = False
     ) -> List[EventsModel]:
         """
         Get all events in the calendar
@@ -173,12 +179,12 @@ class Calendar:
         method_callable = lambda calendar, **kwargs: calendar.events.get(**kwargs)
         method_args = {"calendarId": calendar_id, "eventId": event_id}
         response: EventModel = await execute_aiogoogle(
-                method_callable=method_callable,
-                service_account_credentials=self.service_account_credentials,
-                api_name=self.api_name,
-                api_version=self.api_version,
-                **method_args,
-            )
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
         return response
 
     async def remove_event(self, event_id: str, calendar_id: str) -> None:
@@ -199,14 +205,14 @@ class Calendar:
         )
 
     async def update_event(
-            self,
-            event_id: str,
-            calendar_id: str,
-            title: str = None,
-            start_time: datetime_datetime = None,
-            end_time: datetime_datetime = None,
-            description: str = None,
-            location: str = None,
+        self,
+        event_id: str,
+        calendar_id: str,
+        title: str = None,
+        start_time: datetime_datetime = None,
+        end_time: datetime_datetime = None,
+        description: str = None,
+        location: str = None,
     ) -> EventModel:
         """
         Updates an event of the calendar
@@ -242,11 +248,11 @@ class Calendar:
             location = currentLocation
 
         if (
-                title == currentTitle
-                and start_time == currentStartTime
-                and end_time == currentEndTime
-                and description == currentDescription
-                and location == currentLocation
+            title == currentTitle
+            and start_time == currentStartTime
+            and end_time == currentEndTime
+            and description == currentDescription
+            and location == currentLocation
         ):
             raise Exception("Not a single parameter gets a new value")
 
@@ -261,16 +267,16 @@ class Calendar:
             "body": newEventBody,
         }
         response: EventModel = await execute_aiogoogle(
-                method_callable=method_callable,
-                service_account_credentials=self.service_account_credentials,
-                api_name=self.api_name,
-                api_version=self.api_version,
-                **method_args,
-            )
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
         return response
 
     async def move_event(
-            self, event_id: str, old_calendar_id: str, new_calendar_id: str
+        self, event_id: str, old_calendar_id: str, new_calendar_id: str
     ) -> EventModel:
         """
         Moves an event to the new calendar
@@ -286,16 +292,16 @@ class Calendar:
             "destination": new_calendar_id,
         }
         response: EventModel = await execute_aiogoogle(
-                method_callable=method_callable,
-                service_account_credentials=self.service_account_credentials,
-                api_name=self.api_name,
-                api_version=self.api_version,
-                **method_args,
-            )
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
         return response
 
     async def add_calendar(
-            self, title: str, location: str = "", description: str = ""
+        self, title: str, location: str = "", description: str = ""
     ) -> CalendarModel:
         """
         Adds a calendar
@@ -308,12 +314,12 @@ class Calendar:
         method_callable = lambda calendar, **kwargs: calendar.calendars.insert(**kwargs)
         method_args = {"body": calendarBody}
         response: CalendarModel = await execute_aiogoogle(
-                method_callable=method_callable,
-                service_account_credentials=self.service_account_credentials,
-                api_name=self.api_name,
-                api_version=self.api_version,
-                **method_args,
-            )
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
         return response
 
     async def get_calendars(self) -> List[CalendarListEntryModel]:
@@ -323,11 +329,11 @@ class Calendar:
         """
         method_callable = lambda calendar, **kwargs: calendar.calendarList.list()
         response: CalendarListModel = await execute_aiogoogle(
-                method_callable=method_callable,
-                service_account_credentials=self.service_account_credentials,
-                api_name=self.api_name,
-                api_version=self.api_version,
-            )
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+        )
         return response.get("items", [])
 
     async def get_calendar(self, calendar_id: str) -> CalendarModel:
@@ -339,20 +345,20 @@ class Calendar:
         method_callable = lambda calendar, **kwargs: calendar.calendars.get(**kwargs)
         method_args = {"calendarId": calendar_id}
         response: CalendarModel = await execute_aiogoogle(
-                method_callable=method_callable,
-                service_account_credentials=self.service_account_credentials,
-                api_name=self.api_name,
-                api_version=self.api_version,
-                **method_args,
-            )
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
         return response
 
     async def update_calendar(
-            self,
-            calendar_id: str,
-            title: str = None,
-            location: str = None,
-            description: str = None,
+        self,
+        calendar_id: str,
+        title: str = None,
+        location: str = None,
+        description: str = None,
     ) -> CalendarModel:
         """
         Updates the calendar
@@ -379,9 +385,9 @@ class Calendar:
             location = currentLocation
 
         if (
-                title == currentTitle
-                and description == currentDescription
-                and location == currentLocation
+            title == currentTitle
+            and description == currentDescription
+            and location == currentLocation
         ):
             raise Exception("Not a single parameter gets a new value")
 
@@ -389,12 +395,12 @@ class Calendar:
         method_callable = lambda calendar, **kwargs: calendar.calendars.update(**kwargs)
         method_args = {"calendarId": calendar_id, "body": newCalendarBody}
         response: CalendarModel = await execute_aiogoogle(
-                method_callable=method_callable,
-                service_account_credentials=self.service_account_credentials,
-                api_name=self.api_name,
-                api_version=self.api_version,
-                **method_args,
-            )
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
         return response
 
     async def remove_calendar(self, calendar_id: str) -> None:
@@ -430,7 +436,7 @@ class Calendar:
         )
 
     async def add_share_rule(
-            self, calendar_id: str, scope_type: str, user: str, role: str
+        self, calendar_id: str, scope_type: str, user: str, role: str
     ) -> AclRuleModel:
         """
         Adds a share rule to the calendar
@@ -449,12 +455,12 @@ class Calendar:
         method_callable = lambda calendar, **kwargs: calendar.acl.insert(**kwargs)
         method_args = {"calendarId": calendar_id, "body": rule}
         response: AclRuleModel = await execute_aiogoogle(
-                method_callable=method_callable,
-                service_account_credentials=self.service_account_credentials,
-                api_name=self.api_name,
-                api_version=self.api_version,
-                **method_args,
-            )
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
         return response
 
     async def get_share_rules(self, calendar_id: str) -> List[AclRuleModel]:
@@ -466,12 +472,12 @@ class Calendar:
         method_callable = lambda calendar, **kwargs: calendar.acl.list(**kwargs)
         method_args = {"calendarId": calendar_id}
         response: AclModel = await execute_aiogoogle(
-                method_callable=method_callable,
-                service_account_credentials=self.service_account_credentials,
-                api_name=self.api_name,
-                api_version=self.api_version,
-                **method_args,
-            )
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
         return response.get("items", [])
 
     async def get_share_rule(self, calendar_id: str, rule_id: str) -> AclRuleModel:
@@ -484,21 +490,21 @@ class Calendar:
         method_callable = lambda calendar, **kwargs: calendar.acl.get(**kwargs)
         method_args = {"calendarId": calendar_id, "ruleId": rule_id}
         response: AclRuleModel = await execute_aiogoogle(
-                method_callable=method_callable,
-                service_account_credentials=self.service_account_credentials,
-                api_name=self.api_name,
-                api_version=self.api_version,
-                **method_args,
-            )
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
         return response
 
     async def update_share_rule(
-            self,
-            calendar_id: str,
-            rule_id: str,
-            scope_type: str = None,
-            user: str = None,
-            role: str = None,
+        self,
+        calendar_id: str,
+        rule_id: str,
+        scope_type: str = None,
+        user: str = None,
+        role: str = None,
     ) -> AclRuleModel:
         """
         Updates the share rule of the calendar
@@ -536,12 +542,12 @@ class Calendar:
         method_callable = lambda calendar, **kwargs: calendar.acl.update(**kwargs)
         method_args = {"calendarId": calendar_id, "ruleId": rule_id, "body": newRule}
         response: AclRuleModel = await execute_aiogoogle(
-                method_callable=method_callable,
-                service_account_credentials=self.service_account_credentials,
-                api_name=self.api_name,
-                api_version=self.api_version,
-                **method_args,
-            )
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
         return response
 
     async def remove_share_rule(self, calendar_id: str, rule_id: str) -> None:
@@ -563,7 +569,7 @@ class Calendar:
 
 
 async def create_calendar_class(
-        service_file: ServiceAccountFileModel, subject: str
+    service_file: ServiceAccountFileModel, subject: str
 ) -> Calendar:
     calendar = Calendar()
     await calendar.async_init(service_file=service_file, subject=subject)
