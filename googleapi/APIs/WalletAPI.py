@@ -7,6 +7,7 @@ from googleapi.Helpers.HelperFunctions import (
     build_service_account_credentials,
     execute_aiogoogle,
 )
+from googleapi.TypedDicts.ServiceAccountFile import ServiceAccountFileModel
 from googleapi.TypedDicts.Wallet import EventClassModel, EventObjectModel
 
 
@@ -15,10 +16,12 @@ class Wallet:
         self.api_name = "walletobjects"
         self.api_version = "v1"
         self.scopes = ["https://www.googleapis.com/auth/wallet_object.issuer"]
+        self.issuer_id = None
+        self.service_account_credentials = None
 
-    async def _async_init(
+    async def async_init(
         self,
-        service_file: json,
+        service_file: ServiceAccountFileModel,
         issuer_id: int,
     ):
         """
@@ -212,9 +215,9 @@ class Wallet:
         return f"https://pay.google.com/gp/v/save/{token}"
 
 
-async def create_google_wallet_class(service_file: json, issuer_id: int) -> Wallet:
+async def create_google_wallet_class(service_file: ServiceAccountFileModel, issuer_id: int) -> Wallet:
     wallet = Wallet()
-    await wallet._async_init(
+    await wallet.async_init(
         service_file,
         issuer_id,
     )

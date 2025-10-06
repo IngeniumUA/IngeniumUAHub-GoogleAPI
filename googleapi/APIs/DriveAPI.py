@@ -6,6 +6,7 @@ from googleapi.Helpers.HelperFunctions import (
     execute_aiogoogle,
 )
 from googleapi.TypedDicts.Drive import DriveModel, DrivesModel, FileModel, FilesModel
+from googleapi.TypedDicts.ServiceAccountFile import ServiceAccountFileModel
 
 
 class Drive:
@@ -16,8 +17,9 @@ class Drive:
     def __init__(self) -> None:
         self.api_name = "drive"
         self.api_version = "v3"
+        self.service_account_credentials = None
 
-    async def _async_init(self, service_file: json, subject: str):
+    async def async_init(self, service_file: ServiceAccountFileModel, subject: str):
         """
         @param service_file: Service account credentials file
         @param subject: Subject who owns the drive
@@ -150,7 +152,8 @@ class Drive:
 
         return all_items
 
-    async def build_tree(self, items: List[FileModel], root_id: str) -> List[Dict]:
+    @staticmethod
+    async def build_tree(items: List[FileModel], root_id: str) -> List[Dict]:
         """
         Builds a tree out of given items from the drive
         :param items: List of the items to make a tree of
@@ -329,7 +332,7 @@ class Drive:
         )
 
 
-async def create_drive_class(service_file: json, subject: str) -> Drive:
+async def create_drive_class(service_file: ServiceAccountFileModel, subject: str) -> Drive:
     drive = Drive()
-    await drive._async_init(service_file=service_file, subject=subject)
+    await drive.async_init(service_file=service_file, subject=subject)
     return drive

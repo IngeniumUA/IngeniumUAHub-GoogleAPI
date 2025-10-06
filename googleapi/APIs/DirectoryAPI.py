@@ -21,6 +21,7 @@ from googleapi.TypedDicts.Directory import (
     MemberListModel,
     UserPhotoModel,
 )
+from googleapi.TypedDicts.ServiceAccountFile import ServiceAccountFileModel
 
 
 class Directory:
@@ -35,8 +36,9 @@ class Directory:
         self.domain = domain
         self.api_name = "directory"
         self.api_version = "v3"
+        self.service_account_credentials = None
 
-    async def _async_init(self, service_file: json, subject: str):
+    async def async_init(self, service_file: ServiceAccountFileModel, subject: str):
         """
         @param service_file: Service account credentials file
         @param subject: Subject who owns the directory
@@ -536,8 +538,8 @@ class Directory:
 
 
 async def create_directory_class(
-    service_file: json, subject: str, domain: str
+    service_file: ServiceAccountFileModel, subject: str, domain: str
 ) -> Directory:
     directory = Directory(domain=domain)
-    await directory._async_init(service_file=service_file, subject=subject)
+    await directory.async_init(service_file=service_file, subject=subject)
     return directory

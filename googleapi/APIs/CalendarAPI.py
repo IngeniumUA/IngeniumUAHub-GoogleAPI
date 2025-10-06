@@ -15,6 +15,7 @@ from googleapi.TypedDicts.Calendar import (
     AclRuleModel,
     AclModel,
 )
+from googleapi.TypedDicts.ServiceAccountFile import ServiceAccountFileModel
 
 
 class Calendar:
@@ -26,8 +27,9 @@ class Calendar:
         self.timeZone = "Europe/Brussels"
         self.api_name = "calendar"
         self.api_version = "v3"
+        self.service_account_credentials = None
 
-    async def _async_init(self, service_file: json, subject: str):
+    async def async_init(self, service_file: ServiceAccountFileModel, subject: str):
         """
         @param service_file: Service account credentials file
         @param subject: Subject who owns the calendar
@@ -82,8 +84,9 @@ class Calendar:
         }
         return cast(CalendarModel, calendarBody)
 
+    @staticmethod
     async def _build_scope_body(
-        self, scope_type: str, scope_value: str, role: str
+        scope_type: str, scope_value: str, role: str
     ) -> AclRuleModel:
         """
         Used to build the body of an acl scope in the form that Google Calendar API accepts
@@ -586,7 +589,7 @@ class Calendar:
         )
 
 
-async def create_calendar_class(service_file: json, subject: str) -> Calendar:
+async def create_calendar_class(service_file: ServiceAccountFileModel, subject: str) -> Calendar:
     calendar = Calendar()
-    await calendar._async_init(service_file=service_file, subject=subject)
+    await calendar.async_init(service_file=service_file, subject=subject)
     return calendar

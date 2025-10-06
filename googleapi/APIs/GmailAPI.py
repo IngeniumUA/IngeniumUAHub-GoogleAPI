@@ -13,6 +13,7 @@ from googleapi.Helpers.HelperFunctions import (
     synchronous_build_service,
 )
 from googleapi.TypedDicts.Gmail import AttachmentsDictionary
+from googleapi.TypedDicts.ServiceAccountFile import ServiceAccountFileModel
 
 
 class Gmail:
@@ -31,8 +32,10 @@ class Gmail:
 
         self.api_name = "gmail"
         self.api_version = "v1"
+        self.mail_sender = ""
+        self.service_account_credentials = None
 
-    async def _async_init(self, mail_sender: str, service_file: json):
+    async def async_init(self, mail_sender: str, service_file: ServiceAccountFileModel):
         """
         @param mail_sender: Sender of the mail
         @param service_file: Service account credentials file
@@ -154,10 +157,10 @@ class Gmail:
 
 
 async def create_gmail_class(
-    service_file: json, mail_sender: str, mail_reply_address: str | None = None
+    service_file: ServiceAccountFileModel, mail_sender: str, mail_reply_address: str | None = None
 ) -> Gmail:
     gmail = Gmail(mail_reply_address=mail_reply_address)
-    await gmail._async_init(service_file=service_file, mail_sender=mail_sender)
+    await gmail.async_init(service_file=service_file, mail_sender=mail_sender)
     return gmail
 
 
@@ -169,7 +172,7 @@ class SynchronousGmail:
     def __init__(
         self,
         mail_sender: str,
-        service_file: json,
+        service_file: ServiceAccountFileModel,
         mail_reply_address: str | None = None,
     ) -> None:
         """
