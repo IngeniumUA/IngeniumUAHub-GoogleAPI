@@ -55,6 +55,13 @@ class CalendarListModel(TypedDict):
     items: List[CalendarListEntryModel]
 
 
+class BaseCalendarModel(TypedDict):
+    summary: str
+    description: str
+    location: str
+    timeZone: str
+
+
 class CalendarModel(TypedDict):
     kind: str
     etag: str
@@ -80,8 +87,18 @@ class Organizer(TypedDict):
     self: str
 
 
+class BaseStart(TypedDict):
+    dateTime: str
+    timeZone: str
+
+
 class Start(TypedDict):
     date: str
+    dateTime: str
+    timeZone: str
+
+
+class BaseEnd(TypedDict):
     dateTime: str
     timeZone: str
 
@@ -214,6 +231,14 @@ class BirthdayProperties(TypedDict):
     customTypeName: str
 
 
+class BaseEventModel(TypedDict):
+    summary: str
+    location: str
+    description: str
+    start: BaseStart
+    end: BaseEnd
+
+
 class EventModel(TypedDict):
     kind: str
     etag: str
@@ -275,6 +300,11 @@ class EventsModel(TypedDict):
 class Scope(TypedDict):
     type: str
     value: str
+
+
+class BaseAclRuleModel(TypedDict):
+    scope: Scope
+    role: str
 
 
 class AclRuleModel(TypedDict):

@@ -1,4 +1,4 @@
-from typing import List, cast, Dict
+from typing import List
 
 from googleapi.Helpers.HelperFunctions import (
     build_service_account_credentials,
@@ -35,15 +35,13 @@ class Drive:
         @return: Drives of the user
         """
         method_callable = lambda drive, **kwargs: drive.drives.list()
-        return cast(
-            DrivesModel,
-            await execute_aiogoogle(
+        response: DrivesModel = await execute_aiogoogle(
                 method_callable=method_callable,
                 service_account_credentials=self.service_account_credentials,
                 api_name=self.api_name,
                 api_version=self.api_version,
-            ),
-        ).get("drives", [])
+            )
+        return response.get("drives", [])
 
     async def get_drive(self, drive_id: str) -> DriveModel:
         """
@@ -53,16 +51,14 @@ class Drive:
         """
         method_callable = lambda drive, **kwargs: drive.drives.get(**kwargs)
         method_args = {"driveId": drive_id}
-        return cast(
-            DriveModel,
-            await execute_aiogoogle(
+        response: DriveModel = await execute_aiogoogle(
                 method_callable=method_callable,
                 service_account_credentials=self.service_account_credentials,
                 api_name=self.api_name,
                 api_version=self.api_version,
                 **method_args,
-            ),
-        )
+            )
+        return response
 
     async def delete_drive(self, drive_id: str) -> None:
         """
@@ -92,16 +88,14 @@ class Drive:
             "supportsAllDrives": True,
             "fields": "id, name, parents",
         }
-        return cast(
-            FileModel,
-            await execute_aiogoogle(
+        response: FileModel = await execute_aiogoogle(
                 method_callable=method_callable,
                 service_account_credentials=self.service_account_credentials,
                 api_name=self.api_name,
                 api_version=self.api_version,
                 **method_args,
-            ),
-        )
+            )
+        return response
 
     async def get_children_from_parent(
         self, drive_id: str, parent_id: str = None, get_all: bool = False
@@ -134,16 +128,13 @@ class Drive:
         while True:
             if page_token:
                 method_args["pageToken"] = page_token
-            response = cast(
-                FilesModel,
-                await execute_aiogoogle(
+            response: FilesModel = await execute_aiogoogle(
                     method_callable=method_callable,
                     service_account_credentials=self.service_account_credentials,
                     api_name=self.api_name,
                     api_version=self.api_version,
                     **method_args,
-                ),
-            )
+                )
             all_items.extend(response.get("files", []))
             page_token = response.get("nextPageToken", None)
             if not page_token:
@@ -152,7 +143,7 @@ class Drive:
         return all_items
 
     @staticmethod
-    async def build_tree(items: List[FileModel], root_id: str) -> List[Dict]:
+    async def build_tree(items: List[FileModel], root_id: str) -> List[dict]:
         """
         Builds a tree out of given items from the drive
         :param items: List of the items to make a tree of
@@ -171,7 +162,7 @@ class Drive:
 
         return tree
 
-    async def build_paths(self, tree: List[Dict], current_path: str = "") -> List[str]:
+    async def build_paths(self, tree: List[dict], current_path: str = "") -> List[str]:
         """
         Builds paths out of the given tree
         :param tree: The tree to build the paths of
@@ -198,16 +189,14 @@ class Drive:
         method_callable = lambda drive, **kwargs: drive.files.get(**kwargs)
         method_args = {"fileId": file_id, "alt": "media"}
 
-        return cast(
-            bytes,
-            await execute_aiogoogle(
+        response: bytes = await execute_aiogoogle(
                 method_callable=method_callable,
                 service_account_credentials=self.service_account_credentials,
                 api_name=self.api_name,
                 api_version=self.api_version,
                 **method_args,
-            ),
-        )
+            )
+        return response
 
     async def upload_file(
         self,
@@ -244,16 +233,14 @@ class Drive:
             "upload_file": file_content,
         }
 
-        return cast(
-            FileModel,
-            await execute_aiogoogle(
+        response: FileModel = await execute_aiogoogle(
                 method_callable=method_callable,
                 service_account_credentials=self.service_account_credentials,
                 api_name=self.api_name,
                 api_version=self.api_version,
                 **method_args,
-            ),
-        )
+            )
+        return response
 
     async def delete_file(self, file_id: str) -> None:
         """
@@ -288,16 +275,14 @@ class Drive:
             "supportsAllDrives": True,
             "json": {"name": file_name},
         }
-        return cast(
-            FileModel,
-            await execute_aiogoogle(
+        response: FileModel = await execute_aiogoogle(
                 method_callable=method_callable,
                 service_account_credentials=self.service_account_credentials,
                 api_name=self.api_name,
                 api_version=self.api_version,
                 **method_args,
-            ),
-        )
+            )
+        return response
 
     async def move_file(
         self, file_id: str, parent_id: str, upload_type: str = "multipart"
@@ -319,16 +304,14 @@ class Drive:
             "addParents": parent_id,
             "removeParents": file["parents"][0],
         }
-        return cast(
-            FileModel,
-            await execute_aiogoogle(
+        response: FileModel = await execute_aiogoogle(
                 method_callable=method_callable,
                 service_account_credentials=self.service_account_credentials,
                 api_name=self.api_name,
                 api_version=self.api_version,
                 **method_args,
-            ),
-        )
+            )
+        return response
 
 
 async def create_drive_class(

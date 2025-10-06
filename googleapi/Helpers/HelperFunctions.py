@@ -11,9 +11,11 @@ from fastapi import HTTPException
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
+from googleapi.TypedDicts.ServiceAccountFile import ServiceAccountFileModel
+
 
 async def build_service_account_credentials(
-    service_file: json, scopes: List[str], subject: str
+    service_file: ServiceAccountFileModel, scopes: List[str], subject: str
 ) -> ServiceAccountCreds:
     """
     @param service_file: Service account credentials json file
@@ -81,7 +83,7 @@ async def execute_aiogoogle(
 
 
 def synchronous_build_service_account_credentials(
-    service_file: json, scopes: List[str], subject: str
+    service_file: ServiceAccountFileModel, scopes: List[str], subject: str
 ):
     """
     @param service_file: Service account credentials json file
