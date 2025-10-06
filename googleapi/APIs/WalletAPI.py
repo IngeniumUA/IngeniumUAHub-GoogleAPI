@@ -20,9 +20,9 @@ class Wallet:
         self.service_account_credentials = None
 
     async def async_init(
-            self,
-            service_file: ServiceAccountFileModel,
-            issuer_id: int,
+        self,
+        service_file: ServiceAccountFileModel,
+        issuer_id: int,
     ):
         """
         @param service_file: Service account credentials file
@@ -33,14 +33,14 @@ class Wallet:
         self.issuer_id = issuer_id
 
     async def create_class_body(
-            self,
-            class_suffix: str,
-            event_name: str,
-            issuer_name: str,
-            logo_url: str,
-            content_description: str,
-            event_date: datetime.datetime,
-            location_name: str,
+        self,
+        class_suffix: str,
+        event_name: str,
+        issuer_name: str,
+        logo_url: str,
+        content_description: str,
+        event_date: datetime.datetime,
+        location_name: str,
     ) -> EventClassModel:
         class_id = f"{self.issuer_id}.{class_suffix}"
 
@@ -66,15 +66,15 @@ class Wallet:
         return class_body
 
     async def create_object_body(
-            self,
-            object_suffix: str,
-            class_suffix: str,
-            banner_link: str,
-            content_description: str,
-            qr_code: str,
-            background_color: str,
-            end_date: datetime.datetime,
-            number: int,
+        self,
+        object_suffix: str,
+        class_suffix: str,
+        banner_link: str,
+        content_description: str,
+        qr_code: str,
+        background_color: str,
+        end_date: datetime.datetime,
+        number: int,
     ) -> EventObjectModel:
         class_id = f"{self.issuer_id}.{class_suffix}"
         object_id = f"{self.issuer_id}.{object_suffix}"
@@ -124,7 +124,9 @@ class Wallet:
         except HTTPException as error:
             # If class already exists, get it
             if error.status_code == 409:
-                method_callable = lambda wallet, **kwargs: wallet.eventticketclass.get(**kwargs)
+                method_callable = lambda wallet, **kwargs: wallet.eventticketclass.get(
+                    **kwargs
+                )
                 method_args = {"resourceId": new_class.get("id")}
                 response = await execute_aiogoogle(
                     method_callable=method_callable,
@@ -137,8 +139,8 @@ class Wallet:
             raise
 
     async def create_object(
-            self,
-            new_object: EventObjectModel,
+        self,
+        new_object: EventObjectModel,
     ) -> dict:
         method_callable = lambda wallet, **kwargs: wallet.eventticketobject.insert(
             **kwargs
@@ -158,7 +160,9 @@ class Wallet:
         except HTTPException as error:
             # If object already exists, get it
             if error.status_code == 409:
-                method_callable = lambda wallet, **kwargs: wallet.eventticketobject.get(**kwargs)
+                method_callable = lambda wallet, **kwargs: wallet.eventticketobject.get(
+                    **kwargs
+                )
                 method_args = {"resourceId": new_object.get("id")}
                 response = await execute_aiogoogle(
                     method_callable=method_callable,
@@ -171,9 +175,9 @@ class Wallet:
             raise
 
     async def create_link(
-            self,
-            new_class: EventClassModel,
-            new_object: EventObjectModel,
+        self,
+        new_class: EventClassModel,
+        new_object: EventObjectModel,
     ) -> str:
         link_class = await self.create_class(new_class=new_class)
 
@@ -202,7 +206,7 @@ class Wallet:
 
 
 async def create_google_wallet_class(
-        service_file: ServiceAccountFileModel, issuer_id: int
+    service_file: ServiceAccountFileModel, issuer_id: int
 ) -> Wallet:
     wallet = Wallet()
     await wallet.async_init(
