@@ -104,29 +104,12 @@ class Wallet:
         return object_body
 
     async def create_class(
-        self, event_name: str, event_date: datetime.datetime, new_class: EventClassModel
+        self, new_class: EventClassModel
     ) -> dict:
-        class_suffix = event_name.replace(" ", "_") + "_" + str(event_date.year)
-        class_id = f"{self.issuer_id}.{class_suffix}"
-
-        # Check if class exists
-        method_callable = lambda wallet, **kwargs: wallet.eventticketclass.get(**kwargs)
-        method_args = {"resourceId": class_id}
-        response = await execute_aiogoogle(
-            method_callable=method_callable,
-            service_account_credentials=self.service_account_credentials,
-            api_name=self.api_name,
-            api_version=self.api_version,
-            **method_args,
-        )
-
-        if response != 404:
-            return response
 
         method_callable = lambda wallet, **kwargs: wallet.eventticketclass.insert(
             **kwargs
         )
-
         method_args = {"json": new_class}
         response = await execute_aiogoogle(
             method_callable=method_callable,
@@ -139,31 +122,11 @@ class Wallet:
 
     async def create_object(
         self,
-        object_suffix: str,
         new_object: EventObjectModel,
     ) -> dict:
-        object_id = f"{self.issuer_id}.{object_suffix}"
-
-        # Check if object exists
-        method_callable = lambda wallet, **kwargs: wallet.eventticketobject.get(
-            **kwargs
-        )
-        method_args = {"resourceId": object_id}
-        response = await execute_aiogoogle(
-            method_callable=method_callable,
-            service_account_credentials=self.service_account_credentials,
-            api_name=self.api_name,
-            api_version=self.api_version,
-            **method_args,
-        )
-
-        if response != 404:
-            return response
-
         method_callable = lambda wallet, **kwargs: wallet.eventticketobject.insert(
             **kwargs
         )
-
         method_args = {"json": new_object}
         response = await execute_aiogoogle(
             method_callable=method_callable,
@@ -183,14 +146,9 @@ class Wallet:
         new_class: EventClassModel,
         new_object: EventObjectModel,
     ) -> str:
-        link_class = await self.create_class(
-            event_name=event_name, event_date=event_date, new_class=new_class
-        )
+        link_class = await self.create_class(new_class=new_class)
 
-        link_object = await self.create_object(
-            object_suffix=qr_code,
-            new_object=new_object,
-        )
+        link_object = await self.create_object(new_object=new_object)
 
         # Create the JWT claims
         claims = {

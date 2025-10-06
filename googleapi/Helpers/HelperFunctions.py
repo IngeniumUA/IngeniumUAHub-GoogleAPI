@@ -71,8 +71,6 @@ async def execute_aiogoogle(
             return response
 
     except aiogoogle.excs.HTTPError as error:
-        if error.res.status_code == 404:
-            return error.res.status_code
         raise HTTPException(
             status_code=error.res.status_code,
             detail={
@@ -89,7 +87,7 @@ def synchronous_build_service_account_credentials(
     @param service_file: Service account credentials json file
     @param scopes: Scopes of the API
     @param subject: Subject of the API
-    @return: Returns credentials from google
+    @return: Returns credentials from Google
     """
     credentials = service_account.Credentials.from_service_account_info(
         info=service_file, scopes=scopes, subject=subject
