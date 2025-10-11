@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from typing import List, TypedDict
+from typing import TypedDict
 
 
 class Name(TypedDict):
@@ -31,7 +31,7 @@ class UserModel(TypedDict):
     emails: str
     externalIds: str
     relations: str
-    aliases: List[str]
+    aliases: list[str]
     isMailboxSetup: str
     customerId: str
     addresses: str
@@ -43,7 +43,7 @@ class UserModel(TypedDict):
     languages: str
     posixAccounts: str
     creationTime: str
-    nonEditableAliases: List[str]
+    nonEditableAliases: list[str]
     sshPublicKeys: str
     notes: str
     websites: str
@@ -67,7 +67,7 @@ class UserListModel(TypedDict):
     kind: str
     trigger_event: str
     etag: str
-    users: List[UserModel]
+    users: list[UserModel]
     nextPageToken: str
 
 
@@ -85,7 +85,7 @@ class MemberModel(TypedDict):
 class MemberListModel(TypedDict):
     kind: str
     etag: str
-    members: List[MemberModel]
+    members: list[MemberModel]
     nextPageToken: str
 
 
@@ -98,14 +98,14 @@ class GroupModel(TypedDict):
     directMembersCount: str
     kind: str
     etag: str
-    aliases: List[str]
-    nonEditableAliases: List[str]
+    aliases: list[str]
+    nonEditableAliases: list[str]
 
 
 class GroupListModel(TypedDict):
     kind: str
     etag: str
-    groups: List[GroupModel]
+    groups: list[GroupModel]
     nextPageToken: str
 
 

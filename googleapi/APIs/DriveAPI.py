@@ -1,5 +1,3 @@
-from typing import List
-
 from googleapi.Helpers.HelperFunctions import (
     build_service_account_credentials,
     execute_aiogoogle,
@@ -29,7 +27,7 @@ class Drive:
             subject=subject,
         )
 
-    async def get_drives(self) -> List[DriveModel]:
+    async def get_drives(self) -> list[DriveModel]:
         """
         Gets the drives of the user
         @return: Drives of the user
@@ -99,7 +97,7 @@ class Drive:
 
     async def get_children_from_parent(
         self, drive_id: str, parent_id: str = None, get_all: bool = False
-    ) -> List[FileModel]:
+    ) -> list[FileModel]:
         """
         Gets all the files of the drive
         @param drive_id: ID of the drive
@@ -143,7 +141,7 @@ class Drive:
         return all_items
 
     @staticmethod
-    async def build_tree(items: List[FileModel], root_id: str) -> List[dict]:
+    async def build_tree(items: list[FileModel], root_id: str) -> list[dict]:
         """
         Builds a tree out of given items from the drive
         :param items: List of the items to make a tree of
@@ -162,7 +160,7 @@ class Drive:
 
         return tree
 
-    async def build_paths(self, tree: List[dict], current_path: str = "") -> List[str]:
+    async def build_paths(self, tree: list[dict], current_path: str = "") -> list[str]:
         """
         Builds paths out of the given tree
         :param tree: The tree to build the paths of

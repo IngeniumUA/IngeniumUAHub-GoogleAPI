@@ -3,7 +3,6 @@ from os import path as os_path
 from random import choice as random_choice
 from string import ascii_letters as string_ascii_letters
 from string import digits as string_digits
-from typing import List
 
 from passlib.hash import sha256_crypt
 
@@ -52,7 +51,7 @@ class Directory:
             subject=subject,
         )
 
-    async def get_users(self) -> List[UserModel]:
+    async def get_users(self) -> list[UserModel]:
         """
         Returns all users of the directory
         @return: Returns all users
@@ -304,7 +303,7 @@ class Directory:
             **method_args,
         )
 
-    async def get_groups(self) -> List[GroupModel]:
+    async def get_groups(self) -> list[GroupModel]:
         """
         Returns the groups of the directory
         @return: All the groups
@@ -438,7 +437,7 @@ class Directory:
         )
         return response
 
-    async def get_group_members(self, group_id: str) -> List[MemberModel]:
+    async def get_group_members(self, group_id: str) -> list[MemberModel]:
         """
         Gets all the members of the group
         @param group_id: Group's email address, group alias, or the unique group ID.

@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from typing import List, TypedDict
+from typing import TypedDict
 
 
 class DefaultReminder(TypedDict):
@@ -18,11 +18,11 @@ class Notification(TypedDict):
 
 
 class NotificationSettings(TypedDict):
-    notifications: List[Notification]
+    notifications: list[Notification]
 
 
 class ConferenceProperties(TypedDict):
-    allowedConferenceSolutionTypes: List[str]
+    allowedConferenceSolutionTypes: list[str]
 
 
 class CalendarListEntryModel(TypedDict):
@@ -40,7 +40,7 @@ class CalendarListEntryModel(TypedDict):
     hidden: str
     selected: str
     accessRole: str
-    defaultReminders: List[DefaultReminder]
+    defaultReminders: list[DefaultReminder]
     notificationSettings: NotificationSettings
     primary: str
     deleted: str
@@ -52,7 +52,7 @@ class CalendarListModel(TypedDict):
     etag: str
     nextPageToken: str
     nextSyncToken: str
-    items: List[CalendarListEntryModel]
+    items: list[CalendarListEntryModel]
 
 
 class BaseCalendarModel(TypedDict):
@@ -165,7 +165,7 @@ class ConferenceSolution(TypedDict):
 
 class ConferenceData(TypedDict):
     createRequest: CreateRequest
-    entryPoints: List[EntryPoint]
+    entryPoints: list[EntryPoint]
     conferenceSolution: ConferenceSolution
     conferenceId: str
     signature: str
@@ -179,7 +179,7 @@ class Override(TypedDict):
 
 class Reminders(TypedDict):
     useDefault: str
-    overrides: List[Override]
+    overrides: list[Override]
 
 
 class Source(TypedDict):
@@ -256,14 +256,14 @@ class EventModel(TypedDict):
     start: Start
     end: End
     endTimeUnspecified: str
-    recurrence: List[str]
+    recurrence: list[str]
     recurringEventId: str
     originalStartTime: OriginalStartTime
     transparency: str
     visibility: str
     iCalUID: str
     sequence: str
-    attendees: List[Attendee]
+    attendees: list[Attendee]
     attendeesOmitted: str
     hangoutLink: str
     conferenceData: ConferenceData
@@ -278,7 +278,7 @@ class EventModel(TypedDict):
     workingLocationProperties: WorkingLocationProperties
     outOfOfficeProperties: OutOfOfficeProperties
     focusTimeProperties: FocusTimeProperties
-    attachments: List[Attachment]
+    attachments: list[Attachment]
     birthdayProperties: BirthdayProperties
     eventType: str
 
@@ -291,10 +291,10 @@ class EventsModel(TypedDict):
     updated: str
     timeZone: str
     accessRole: str
-    defaultReminders: List[DefaultReminder]
+    defaultReminders: list[DefaultReminder]
     nextPageToken: str
     nextSyncToken: str
-    items: List[EventsModel]
+    items: list[EventsModel]
 
 
 class Scope(TypedDict):
@@ -320,4 +320,4 @@ class AclModel(TypedDict):
     etag: str
     nextPageToken: str
     nextSyncToken: str
-    items: List[AclRuleModel]
+    items: list[AclRuleModel]

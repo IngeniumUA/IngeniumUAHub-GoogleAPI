@@ -1,5 +1,4 @@
 from datetime import datetime as datetime_datetime, timezone
-from typing import List
 
 from googleapi.Helpers.HelperFunctions import (
     build_service_account_credentials,
@@ -138,7 +137,7 @@ class Calendar:
 
     async def get_events(
         self, calendar_id: str, get_all_events: bool = False
-    ) -> List[EventsModel]:
+    ) -> list[EventsModel]:
         """
         Get all events in the calendar
         @param calendar_id: ID of the calendar
@@ -322,7 +321,7 @@ class Calendar:
         )
         return response
 
-    async def get_calendars(self) -> List[CalendarListEntryModel]:
+    async def get_calendars(self) -> list[CalendarListEntryModel]:
         """
         Returns all the calendars of the user
         @return: All the calendars of the user
@@ -463,7 +462,7 @@ class Calendar:
         )
         return response
 
-    async def get_share_rules(self, calendar_id: str) -> List[AclRuleModel]:
+    async def get_share_rules(self, calendar_id: str) -> list[AclRuleModel]:
         """
         Returns all the share rules of the calendar
         @param calendar_id: ID of the calendar

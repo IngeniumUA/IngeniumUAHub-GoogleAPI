@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from typing import TypedDict, List
+from typing import TypedDict
 
 
 class CapabilitiesDriveModel(TypedDict):
@@ -63,7 +63,7 @@ class DriveModel(TypedDict):
 class DrivesModel(TypedDict):
     nextPageToken: str
     kind: str
-    drives: List[DriveModel]
+    drives: list[DriveModel]
 
 
 class UserModel(TypedDict):
@@ -94,14 +94,14 @@ class PermissionsModel(TypedDict):
     displayName: str
     type: str
     kind: str
-    permissionDetails: List[PermissionDetail]
+    permissionDetails: list[PermissionDetail]
     photoLink: str
     emailAddress: str
     role: str
     allowFileDiscovery: str
     domain: str
     expirationTime: str
-    teamDrivePermissionDetails: List[TeamDrivePermissionDetail]
+    teamDrivePermissionDetails: list[TeamDrivePermissionDetail]
     deleted: str
     view: str
     pendingOwner: str
@@ -121,11 +121,11 @@ class FieldModel(TypedDict):
     kind: str
     id: str
     valueType: str
-    dateString: List[str]
-    integer: List[str]
-    selection: List[str]
-    text: List[str]
-    user: List[UserModel]
+    dateString: list[str]
+    integer: list[str]
+    selection: list[str]
+    text: list[str]
+    user: list[UserModel]
 
 
 Fields = TypedDict(
@@ -271,7 +271,7 @@ class LinkShareMetadata(TypedDict):
 
 
 class LabelInfo(TypedDict):
-    labels: List[LabelModel]
+    labels: list[LabelModel]
 
 
 class FileModel(TypedDict):
@@ -285,21 +285,21 @@ class FileModel(TypedDict):
     viewedByMe: str
     mimeType: str
     exportLinks: ExportLinks
-    parents: List[str]
+    parents: list[str]
     thumbnailLink: str
     iconLink: str
     shared: str
     lastModifyingUser: UserModel
-    owners: List[UserModel]
+    owners: list[UserModel]
     headRevisionId: str
     sharingUser: UserModel
     webViewLink: str
     webContentLink: str
     size: str
     viewersCanCopyContent: str
-    permissions: List[PermissionsModel]
+    permissions: list[PermissionsModel]
     hasThumbnail: str
-    spaces: List[str]
+    spaces: list[str]
     folderColorRgb: str
     id: str
     name: str
@@ -327,11 +327,11 @@ class FileModel(TypedDict):
     thumbnailVersion: str
     trashedTime: str
     modifiedByMe: str
-    permissionIds: List[str]
+    permissionIds: list[str]
     imageMediaMetadata: ImageMediaMetadata
     videoMediaMetadata: VideoMediaMetadata
     shortcutDetails: ShortcutDetails
-    contentRestrictions: List[ContentRestrictionModel]
+    contentRestrictions: list[ContentRestrictionModel]
     resourceKey: str
     linkShareMetadata: LinkShareMetadata
     labelInfo: LabelInfo
@@ -343,7 +343,7 @@ class FilesModel(TypedDict):
     nextPageToken: str
     kind: str
     incompleteSearch: str
-    files: List[FileModel]
+    files: list[FileModel]
 
 
 Detail = TypedDict(
@@ -358,7 +358,7 @@ Detail = TypedDict(
 class StatusModel(TypedDict):
     code: str
     message: str
-    details: List[Detail]
+    details: list[Detail]
 
 
 Response = TypedDict(
