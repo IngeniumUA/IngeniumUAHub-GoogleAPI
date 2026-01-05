@@ -117,7 +117,7 @@ class Wallet:
                 service_account_credentials=self.service_account_credentials,
                 api_name=self.api_name,
                 api_version=self.api_version,
-                use_new_version = True,
+                use_new_version=True,
                 **method_args,
             )
             return response
