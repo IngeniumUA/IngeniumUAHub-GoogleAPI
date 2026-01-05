@@ -26,7 +26,7 @@ async def build_service_account_credentials(
     # Check if its the file content or path to the file
     if isinstance(service_file, dict):
         service_account_key = service_file
-    elif isinstance(service_file, os.PathLike):
+    elif isinstance(service_file, str) and service_file.endswith(".json"):
         async with aiofiles.open(service_file, "r") as file:
             service_account_key = json.loads(await file.read())
     else:
