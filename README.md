@@ -17,6 +17,7 @@
 
 # Drive API links
 1. [Drive API documentation](https://developers.google.com/drive/api/reference/rest/v3)
+2. [Returning specific fields](https://developers.google.com/workspace/drive/api/guides/fields-parameter)
 
 # Geocoding API links
 1. [Geocoding API documentation](https://developers.google.com/maps/documentation/geocoding/overview)

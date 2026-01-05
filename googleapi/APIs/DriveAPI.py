@@ -101,6 +101,7 @@ class Drive:
         parent_id: str = None,
         max_results: int = 50,
         include_trashed: bool = False,
+        fields: str = None,
     ) -> list[FileModel]:
         """
         Gets all the files of the parent
@@ -108,6 +109,7 @@ class Drive:
         :param parent_id: ID of the parent
         :param max_results: Max amount of results, standard 50
         :param include_trashed: Whether to include trashed items, standard False
+        :param fields: Fields to return
         :return: List of the files
         """
         # If parent is not give, assume drive is the parent
@@ -121,6 +123,7 @@ class Drive:
             search_query = f"parents in '{parent_id}'"
 
         method_callable = lambda drive, **kwargs: drive.files.list(**kwargs)
+
         method_args = {
             "corpora": "drive",
             "driveId": drive_id,
@@ -130,6 +133,9 @@ class Drive:
             "supportsAllDrives": True,
             "q": search_query,
         }
+
+        if fields is not None:
+            method_args["fields"] = fields
 
         response: FilesModel = await execute_aiogoogle(
             method_callable=method_callable,
