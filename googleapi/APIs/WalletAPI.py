@@ -117,6 +117,7 @@ class Wallet:
                 service_account_credentials=self.service_account_credentials,
                 api_name=self.api_name,
                 api_version=self.api_version,
+                use_new_version = True,
                 **method_args,
             )
             return response
@@ -133,6 +134,7 @@ class Wallet:
                     service_account_credentials=self.service_account_credentials,
                     api_name=self.api_name,
                     api_version=self.api_version,
+                    use_new_version=True,
                     **method_args,
                 )
                 return response
@@ -153,6 +155,7 @@ class Wallet:
                 service_account_credentials=self.service_account_credentials,
                 api_name=self.api_name,
                 api_version=self.api_version,
+                use_new_version=True,
                 **method_args,
             )
 
@@ -169,6 +172,7 @@ class Wallet:
                     service_account_credentials=self.service_account_credentials,
                     api_name=self.api_name,
                     api_version=self.api_version,
+                    use_new_version=True,
                     **method_args,
                 )
                 return response
@@ -205,7 +209,7 @@ class Wallet:
         return f"https://pay.google.com/gp/v/save/{token}"
 
 
-async def create_google_wallet_class(
+async def create_wallet_class(
     service_file: ServiceAccountFileModel, issuer_id: int
 ) -> Wallet:
     wallet = Wallet()
