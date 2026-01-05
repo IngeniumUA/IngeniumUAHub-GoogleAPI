@@ -45,15 +45,18 @@ async def execute_aiogoogle(
     api_name: str,
     api_version: str,
     discovery_url: str | None = None,
+    use_new_version: bool = False,
     **method_args: Dict,
 ):
     """
-    @param method_callable: The method called from the API
-    @param service_account_credentials: Service account credentials
-    @param api_name: Name of the API
-    @param api_version: Version of the API
-    @param method_args: Arguments passed to the API
-    @return: Result of the API call
+    :param method_callable: The method called from the API
+    :param service_account_credentials: Service account credentials
+    :param api_name: Name of the API
+    :param api_version: Version of the API
+    :param discovery_url: Discovery URL
+    :param use_new_version: Whether to use the new version of the API or not
+    :param method_args: Arguments passed to the API
+    :return: Result of the API call
     """
     try:
         async with Aiogoogle(
@@ -63,8 +66,10 @@ async def execute_aiogoogle(
                 api = aiogoogle.resource.GoogleAPI(
                     discovery_document=requests.get(discovery_url).json()
                 )
-            else:
+            elif use_new_version:
                 api = await google.discover(api_name, api_version, disco_doc_ver=2)
+            else:
+                api = await google.discover(api_name, api_version)
 
             request = method_callable(api, **method_args)
             response = await google.as_service_account(request)
