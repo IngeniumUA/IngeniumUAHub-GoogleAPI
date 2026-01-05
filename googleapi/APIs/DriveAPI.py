@@ -110,6 +110,9 @@ class Drive:
         :param include_trashed: Whether to include trashed items, standard False
         :return: List of the files
         """
+        # If parent is not give, assume drive is the parent
+        if parent_id is None:
+            parent_id = drive_id
 
         # Need to do this since the API uses lowercase booleans
         if not include_trashed:
