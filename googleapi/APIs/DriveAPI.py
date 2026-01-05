@@ -95,22 +95,23 @@ class Drive:
         )
         return response
 
-    async def get_children_from_parent(
-        self, drive_id: str, parent_id: str = None, get_all: bool = False
+    async def get_files_from_parent(
+        self, drive_id: str, parent_id: str = None, max_results: int = 50, include_trashed: bool = False
     ) -> list[FileModel]:
         """
-        Gets all the files of the drive
-        @param drive_id: ID of the drive
-        @param parent_id: ID of the parent
-        @param get_all: If true, gets all the files of the drive
-        @return: List of the files of the drive
+        Gets all the files of the parent
+        :param drive_id: ID of the parent drive
+        :param parent_id: ID of the parent
+        :param max_results: Max amount of results, standard 50
+        :param include_trashed: Whether to include trashed items, standard False
+        :return: List of the files
         """
-        all_items = []
-        page_token = None
 
-        search_query = (
-            f"parents in '{parent_id}'" if parent_id and not get_all else None
-        )
+        # Need to do this since the API uses lowercase booleans
+        if not include_trashed:
+            search_query = f"parents in '{parent_id}' and trashed = false"
+        else:
+            search_query = f"parents in '{parent_id}'"
 
         method_callable = lambda drive, **kwargs: drive.files.list(**kwargs)
         method_args = {
@@ -118,65 +119,19 @@ class Drive:
             "driveId": drive_id,
             "includeItemsFromAllDrives": True,
             "orderBy": "folder",
-            "pageSize": 1000,
+            "pageSize": max_results,
             "supportsAllDrives": True,
-            "fields": "nextPageToken, files(id, name, parents)",
             "q": search_query,
         }
-        while True:
-            if page_token:
-                method_args["pageToken"] = page_token
-            response: FilesModel = await execute_aiogoogle(
-                method_callable=method_callable,
-                service_account_credentials=self.service_account_credentials,
-                api_name=self.api_name,
-                api_version=self.api_version,
-                **method_args,
-            )
-            all_items.extend(response.get("files", []))
-            page_token = response.get("nextPageToken", None)
-            if not page_token:
-                break
 
-        return all_items
-
-    @staticmethod
-    async def build_tree(items: list[FileModel], root_id: str) -> list[dict]:
-        """
-        Builds a tree out of given items from the drive
-        :param items: List of the items to make a tree of
-        :param root_id: ID of the root
-        :return: Tree as a list of dictionaries
-        """
-        nodes = {item["id"]: {**item, "children": []} for item in items}
-        tree = []
-
-        for item in items:
-            parent_id = item.get("parents", [None])[0]  # Safely get parent or None
-            if parent_id == root_id:
-                tree.append(nodes[item["id"]])
-            elif parent_id in nodes:  # Ensure parent exists before appending
-                nodes[parent_id]["children"].append(nodes[item["id"]])
-
-        return tree
-
-    async def build_paths(self, tree: list[dict], current_path: str = "") -> list[str]:
-        """
-        Builds paths out of the given tree
-        :param tree: The tree to build the paths of
-        :param current_path: The current path
-        :return: List of paths
-        """
-        paths = []
-
-        for node in tree:
-            node_path = f"{current_path}/{node['name']}".strip("/")
-            paths.append(node_path)
-
-            if "children" in node and node["children"]:
-                paths.extend(await self.build_paths(node["children"], node_path))
-
-        return paths
+        response: FilesModel = await execute_aiogoogle(
+            method_callable=method_callable,
+            service_account_credentials=self.service_account_credentials,
+            api_name=self.api_name,
+            api_version=self.api_version,
+            **method_args,
+        )
+        return response.get("files", [])
 
     async def download_file(self, file_id: str) -> bytes:
         """
