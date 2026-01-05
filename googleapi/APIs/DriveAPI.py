@@ -96,7 +96,11 @@ class Drive:
         return response
 
     async def get_files_from_parent(
-        self, drive_id: str, parent_id: str = None, max_results: int = 50, include_trashed: bool = False
+        self,
+        drive_id: str,
+        parent_id: str = None,
+        max_results: int = 50,
+        include_trashed: bool = False,
     ) -> list[FileModel]:
         """
         Gets all the files of the parent
